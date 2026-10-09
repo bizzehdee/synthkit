@@ -181,6 +181,7 @@ private fun Navigation(
         is Route.Project -> ProjectScreen(
             state = looper,
             instrumentName = { instrumentOf(it)?.name.orEmpty() },
+            familyOf = { instrumentOf(it)?.family },
             canAddTrack = looper.project.tracks.size < ProjectValidation.MAX_TRACKS,
             onBack = ::pop,
             onAddTrack = { stack.add(Route.AddTrack(project.id)) },

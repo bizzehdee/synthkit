@@ -149,7 +149,7 @@ Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-1
   - Lit drum, chord and chromatic pads; ivory keyboard on a dark keybed with lit HOLD, octave stepper and range mini-map; strum strip.
   - Diagnostics panel replaces the on-screen readout; the latency warning keeps its banner, restyled.
   - Depends on: TASK-022.
-- [ ] TASK-024: Project screen
+- [x] TASK-024: Project screen
   - LCD with tempo stepper, beat lights and bar; lit Click; Play/Stop; Export.
   - Track rows: family tab and icon tile, name, loop note preview with playhead, square M and S, fader, More; dashed Add track row.
   - Depends on: TASK-022.

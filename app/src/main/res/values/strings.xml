@@ -128,8 +128,6 @@
     <string name="phase_playing">Bar %1$d of %2$d</string>
     <string name="phase_overdubbing">Recording · bar %1$d of %2$d</string>
     <string name="phase_finishing">Saving take</string>
-    <string name="track_mute">Mute</string>
-    <string name="track_solo">Solo</string>
     <string name="track_volume">Volume for %1$s</string>
     <string name="track_actions">Actions for %1$s</string>
     <string name="track_undo">Undo last take</string>
@@ -195,4 +193,11 @@
     <string name="diagnostics_title">Audio diagnostics</string>
     <string name="diagnostics_unavailable">Audio is not running.</string>
     <string name="close">Close</string>
+    <string name="track_mute_named">Mute %1$s</string>
+    <string name="track_solo_named">Solo %1$s</string>
+    <string name="mute_short">M</string>
+    <string name="solo_short">S</string>
+    <string name="project_eyebrow">Project</string>
+    <string name="tempo_edit">Tempo %1$d BPM. Double-tap to set it.</string>
+    <string name="track_recording">Recording</string>
 </resources>
