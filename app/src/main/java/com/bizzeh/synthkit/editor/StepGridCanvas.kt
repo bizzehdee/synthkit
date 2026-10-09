@@ -30,6 +30,8 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.ui.MinTouchTarget
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import androidx.compose.ui.graphics.Color
 
 private val LabelWidth = 96.dp
 private const val STEPS_PER_BEAT = 4
@@ -42,6 +44,7 @@ private const val STEPS_PER_BAR = 16
  */
 @Composable
 fun StepGridCanvas(
+    noteColor: Color,
     rows: List<Int>,
     rowLabel: (Int) -> String,
     columns: Int,
@@ -61,8 +64,8 @@ fun StepGridCanvas(
     val currentNotes by rememberUpdatedState(notes)
     val currentOnTap by rememberUpdatedState(onTap)
     val currentOnMove by rememberUpdatedState(onMove)
-    val colors = MaterialTheme.colorScheme
-    val labelStyle = MaterialTheme.typography.labelMedium.copy(color = colors.onSurfaceVariant)
+    val p = StudioTheme.palette
+    val labelStyle = MaterialTheme.typography.labelMedium.copy(color = p.muted)
     val measurer = rememberTextMeasurer()
 
     Row(modifier = modifier.fillMaxSize()) {
@@ -123,7 +126,7 @@ fun StepGridCanvas(
             for (row in firstRow until rows.size) {
                 val top = row * cellPx - scrollY
                 if (top > size.height) break
-                if (row % 2 == 0) drawRect(colors.surfaceVariant.copy(alpha = 0.4f), Offset(0f, top), Size(size.width, cellPx))
+                if (row % 2 == 0) drawRect(p.panel, Offset(0f, top), Size(size.width, cellPx))
             }
             for (column in firstColumn..columns) {
                 val x = column * cellPx - scrollX
@@ -133,7 +136,7 @@ fun StepGridCanvas(
                     column % STEPS_PER_BEAT == 0 -> 2f
                     else -> 1f
                 }
-                drawLine(colors.outline.copy(alpha = if (width > 1f) 0.9f else 0.3f), Offset(x, 0f), Offset(x, size.height), width)
+                drawLine(p.line.copy(alpha = if (width > 1f) 1f else 0.5f), Offset(x, 0f), Offset(x, size.height), width)
             }
             currentNotes.forEachIndexed { index, note ->
                 val dragging = dragTarget?.takeIf { it.first == index }?.second
@@ -141,7 +144,7 @@ fun StepGridCanvas(
                 val row = rows.indexOf(cell.key)
                 if (row < 0) return@forEachIndexed
                 val origin = Offset(cell.column * cellPx - scrollX + 3f, row * cellPx - scrollY + 3f)
-                val color = if (index == selected || dragging != null) colors.tertiary else colors.primary
+                val color = if (index == selected || dragging != null) p.amber else noteColor
                 drawRoundRect(
                     color.copy(alpha = 0.35f + 0.65f * note.velocity / 127f),
                     origin,

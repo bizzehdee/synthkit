@@ -33,6 +33,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.ui.MinTouchTarget
+import com.bizzeh.synthkit.ui.studio.PanelIconButton
+import com.bizzeh.synthkit.ui.studio.Stepper
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun ExportScreen(
@@ -53,9 +57,7 @@ fun ExportScreen(
     val running = state is ExportState.Running
     Column(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-            }
+            PanelIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), onBack)
             Text(
                 stringResource(R.string.export_title, projectName),
                 style = MaterialTheme.typography.titleLarge,
@@ -74,28 +76,39 @@ fun ExportScreen(
                 ) { Text(stringResource(label(option))) }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onPasses(passes - 1) }, enabled = !running && passes > ExportPlan.MIN_PASSES) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.export_passes_down))
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Stepper(
+                value = passes.toString(),
+                downDescription = stringResource(R.string.export_passes_down),
+                upDescription = stringResource(R.string.export_passes_up),
+                canGoDown = !running && passes > ExportPlan.MIN_PASSES,
+                canGoUp = !running && passes < ExportPlan.MAX_PASSES,
+                onDown = { onPasses(passes - 1) },
+                onUp = { onPasses(passes + 1) },
+            )
             Text(pluralStringResource(R.plurals.export_passes, passes, passes), style = MaterialTheme.typography.titleMedium)
-            IconButton(onClick = { onPasses(passes + 1) }, enabled = !running && passes < ExportPlan.MAX_PASSES) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.export_passes_up))
-            }
         }
         when (state) {
             ExportState.Idle, ExportState.Failed -> {
                 if (state == ExportState.Failed) {
                     Text(stringResource(R.string.export_failed), color = MaterialTheme.colorScheme.error)
                 }
-                Button(onClick = onExport, modifier = Modifier.heightIn(min = MinTouchTarget)) {
+                Button(
+                    onClick = onExport,
+                    colors = ButtonDefaults.buttonColors(containerColor = StudioTheme.palette.amber, contentColor = StudioTheme.palette.onLit),
+                    modifier = Modifier.heightIn(min = MinTouchTarget),
+                ) {
                     Text(stringResource(R.string.export_start))
                 }
             }
             is ExportState.Running -> Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.export_running, state.percent))
-                    LinearProgressIndicator(progress = { state.percent / 100f }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                    LinearProgressIndicator(
+                        progress = { state.percent / 100f },
+                        color = StudioTheme.palette.amber,
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
                 }
                 OutlinedButton(onClick = onCancel, modifier = Modifier.padding(start = 16.dp).heightIn(min = MinTouchTarget)) {
                     Text(stringResource(R.string.cancel))

@@ -6,12 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -46,7 +47,7 @@ class KeysLayoutTest {
     private fun show(holdByDefault: Boolean = false) {
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = 300.dp)) {
-                KeysLayout(player = player, channel = CHANNEL, holdByDefault = holdByDefault)
+                KeysLayout(player = player, channel = CHANNEL, holdByDefault = holdByDefault, color = Color.Magenta)
             }
         }
     }
@@ -144,14 +145,14 @@ class KeysLayoutTest {
     @Test
     fun holdKeepsNotesRingingUntilTurnedOff() {
         show()
-        composeRule.onNodeWithText(context.getString(R.string.hold)).performClick()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.hold)).performClick()
 
         touch {
             down(0, lowerCentre("D 3"))
             up(0)
         }
         val whileHeld = player.offs.toList()
-        composeRule.onNodeWithText(context.getString(R.string.hold)).performClick()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.hold)).performClick()
         composeRule.waitForIdle()
 
         assertEquals(emptyList<Off>(), whileHeld)
@@ -162,7 +163,7 @@ class KeysLayoutTest {
     fun holdStartsOnForInstrumentsThatDefaultToIt() {
         show(holdByDefault = true)
 
-        composeRule.onNodeWithText(context.getString(R.string.hold)).assertIsSelected()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.hold)).assertIsOn()
     }
 
     @Test
@@ -218,7 +219,7 @@ class KeysLayoutTest {
         var shown by mutableStateOf(true)
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = 300.dp)) {
-                if (shown) KeysLayout(player = player, channel = CHANNEL, holdByDefault = true)
+                if (shown) KeysLayout(player = player, channel = CHANNEL, holdByDefault = true, color = Color.Magenta)
             }
         }
         touch {

@@ -134,3 +134,26 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
   - From the project screen: format, loop passes, Export with progress and Cancel, then Save (system file picker) or Share.
   - Export files live in app cache and the previous export is deleted at the next export. No storage permission.
   - Depends on: TASK-018, TASK-019, TASK-020.
+
+## Redesign: studio-hardware look
+
+Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-10-09 (drums, keys, project, project list; light and dark). Every screen keeps its behaviour and tests; only the look changes, except the diagnostics panel.
+
+- [x] TASK-022: Design foundation
+  - Brand light and dark colour schemes, no dynamic colour; instrument family colours; shapes and spacing.
+  - Bundled Archivo (variable) and JetBrains Mono Bold fonts, with origin and licence recorded.
+  - Shared studio components: panel buttons, lit toggle, LCD transport display, round Record and Play/Stop, square M/S toggles, small fader, family chip, page dots.
+  - Depends on: TASK-021. Required by: TASK-023 to TASK-025.
+- [x] TASK-023: Play screens
+  - Top bar: back, family chip that opens the instrument picker, LCD (beat lights, bar, BPM, REC), Record, Play/Stop, More menu (Diagnostics).
+  - Lit drum, chord and chromatic pads; ivory keyboard on a dark keybed with lit HOLD, octave stepper and range mini-map; strum strip.
+  - Diagnostics panel replaces the on-screen readout; the latency warning keeps its banner, restyled.
+  - Depends on: TASK-022.
+- [x] TASK-024: Project screen
+  - LCD with tempo stepper, beat lights and bar; lit Click; Play/Stop; Export.
+  - Track rows: family tab and icon tile, name, loop note preview with playhead, square M and S, fader, More; dashed Add track row.
+  - Depends on: TASK-022.
+- [x] TASK-025: Project list and remaining screens
+  - Project list: brand mark, amber New project, cards with a preview of each project's tracks.
+  - Add track, browser, loop editor, export screen and dialogs in the same look.
+  - Depends on: TASK-022.

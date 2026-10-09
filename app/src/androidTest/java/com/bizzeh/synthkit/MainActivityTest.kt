@@ -2,6 +2,7 @@ package com.bizzeh.synthkit
 
 import android.os.SystemClock
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -32,6 +33,11 @@ class MainActivityTest {
         composeRule.onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty()
     }
 
+    // The transport display shows short codes and gives TalkBack the full status.
+    private fun waitForStatus(text: String, substring: Boolean = false) = composeRule.waitUntil(timeoutMillis = 10_000) {
+        composeRule.onAllNodes(hasContentDescription(text, substring = substring)).fetchSemanticsNodes().isNotEmpty()
+    }
+
     @Test
     fun recordingPadsInANewProjectMakesALoopWithOneTake() {
         waitForText(string(R.string.project_new))
@@ -45,13 +51,13 @@ class MainActivityTest {
         composeRule.onNodeWithContentDescription(string(R.string.record)).performClick()
         SystemClock.sleep(300)
         kick.performClick()
-        waitForText(string(R.string.phase_recording_first, 1))
+        waitForStatus(string(R.string.phase_recording_first, 1))
         SystemClock.sleep(1500)
         kick.performClick()
         composeRule.onNodeWithContentDescription(string(R.string.stop_recording)).performClick()
 
         // The take is about one bar long, so the loop rounds to one bar and plays at once.
-        waitForText(" of 1", substring = true)
+        waitForStatus(" of 1", substring = true)
         composeRule.onNodeWithContentDescription(string(R.string.back)).performClick()
         val oneTake = composeRule.activity.resources.getQuantityString(R.plurals.take_count, 1, 1)
         composeRule.onNodeWithText(oneTake).assertIsDisplayed()

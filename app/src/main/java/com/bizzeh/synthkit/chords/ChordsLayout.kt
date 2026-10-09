@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -45,8 +44,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.NotePlayer
-import com.bizzeh.synthkit.play.OctaveButtons
 import com.bizzeh.synthkit.play.PlayPad
+import com.bizzeh.synthkit.ui.studio.Stepper
+import com.bizzeh.synthkit.ui.studio.glow
+import com.bizzeh.synthkit.ui.studio.raised
+import com.bizzeh.synthkit.ui.theme.Eyebrow
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import com.bizzeh.synthkit.ui.MinPlayableHeight
 import com.bizzeh.synthkit.ui.MinTouchTarget
 import kotlinx.coroutines.delay
@@ -55,10 +66,11 @@ import kotlinx.coroutines.launch
 // TalkBack has no press and release, so a double-tap plays the chord for this long.
 private const val ACCESSIBLE_CHORD_MILLIS = 800L
 private const val MAX_BASS_OCTAVE_SHIFT = 2
+private const val STRING_LIGHT_MILLIS = 150L
 
 /** Chords layout from docs/gm-layouts.md: key, mode, seven triad pads and a strum strip. */
 @Composable
-fun ChordsLayout(player: NotePlayer, channel: Int, bassRoots: Boolean, modifier: Modifier = Modifier) {
+fun ChordsLayout(player: NotePlayer, channel: Int, bassRoots: Boolean, color: Color, modifier: Modifier = Modifier) {
     var key by rememberSaveable { mutableIntStateOf(0) }
     var mode by rememberSaveable { mutableStateOf(Mode.MAJOR) }
     var octaveShift by rememberSaveable { mutableIntStateOf(0) }
@@ -91,8 +103,10 @@ fun ChordsLayout(player: NotePlayer, channel: Int, bassRoots: Boolean, modifier:
                 }
             }
             if (bassRoots) {
-                OctaveButtons(
-                    label = "%+d".format(octaveShift),
+                Stepper(
+                    value = "%+d".format(octaveShift),
+                    downDescription = stringResource(R.string.octave_down),
+                    upDescription = stringResource(R.string.octave_up),
                     canGoDown = octaveShift > 0,
                     canGoUp = octaveShift < MAX_BASS_OCTAVE_SHIFT,
                     onDown = { octaveShift-- },
@@ -109,6 +123,7 @@ fun ChordsLayout(player: NotePlayer, channel: Int, bassRoots: Boolean, modifier:
                 val spoken = chordName(triad, spokenNames[triad.root], spoken = true)
                 PlayPad(
                     description = spoken,
+                    color = color,
                     onPress = { chords.pressPad(triad.degree) },
                     onRelease = { chords.releasePad(triad.degree) },
                     onAccessibleTap = {
@@ -118,20 +133,18 @@ fun ChordsLayout(player: NotePlayer, channel: Int, bassRoots: Boolean, modifier:
                             chords.releasePad(triad.degree)
                         }
                     },
-                    idleColor = MaterialTheme.colorScheme.primaryContainer,
-                    pressedColor = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                ) { pressed ->
-                    val textColor = if (pressed) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimaryContainer
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(label, style = MaterialTheme.typography.titleLarge, color = textColor)
-                        Text(triad.numeral, style = MaterialTheme.typography.labelLarge, color = textColor)
+                ) { lit ->
+                    val p = StudioTheme.palette
+                    Column {
+                        Text(triad.numeral, style = Eyebrow, color = if (lit) color else p.muted)
+                        Text(label, style = MaterialTheme.typography.headlineSmall, color = p.text)
                     }
                 }
             }
         }
         if (!bassRoots) {
-            StrumStrip(onStrike = chords::strikeString, modifier = Modifier.fillMaxWidth().height(MinPlayableHeight))
+            StrumStrip(onStrike = chords::strikeString, color = color, modifier = Modifier.fillMaxWidth().height(MinPlayableHeight))
         }
     }
 }
@@ -153,8 +166,19 @@ private const val KEY_COLUMNS = 6
 private fun KeyPicker(key: Int, names: Array<String>, onKeyChange: (Int) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { open = true }, modifier = Modifier.heightIn(min = MinTouchTarget)) {
-            Text(stringResource(R.string.chord_key, names[key]))
+        val p = StudioTheme.palette
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .heightIn(min = MinTouchTarget)
+                .raised(p, 12.dp, fill = p.panel)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(role = Role.Button) { open = true }
+                .padding(horizontal = 14.dp),
+        ) {
+            Text(stringResource(R.string.chord_key, names[key]), style = MaterialTheme.typography.titleMedium, color = p.text)
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = p.muted)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             names.indices.chunked(KEY_COLUMNS).forEach { row ->
@@ -181,14 +205,27 @@ private fun KeyPicker(key: Int, names: Array<String>, onKeyChange: (Int) -> Unit
  * on, then every lane it crosses, so a swipe plays at the speed of the swipe.
  */
 @Composable
-private fun StrumStrip(onStrike: (Int) -> Unit, modifier: Modifier = Modifier) {
+private fun StrumStrip(onStrike: (Int) -> Unit, color: Color, modifier: Modifier = Modifier) {
     val currentOnStrike by rememberUpdatedState(onStrike)
     val description = stringResource(R.string.strum_strip)
     val lanes = ChordPlayer.STRINGS
+    val p = StudioTheme.palette
+    // The string last struck lights up briefly.
+    var litLane by remember { mutableIntStateOf(-1) }
+    LaunchedEffect(litLane) {
+        if (litLane >= 0) {
+            delay(STRING_LIGHT_MILLIS)
+            litLane = -1
+        }
+    }
+    val strike = { lane: Int ->
+        litLane = lane
+        currentOnStrike(lane)
+    }
     Row(
         modifier = modifier
+            .raised(p, 12.dp, fill = p.panel)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .semantics { contentDescription = description }
             .pointerInput(Unit) {
                 val lastLane = mutableMapOf<PointerId, Int>()
@@ -199,7 +236,7 @@ private fun StrumStrip(onStrike: (Int) -> Unit, modifier: Modifier = Modifier) {
                             when {
                                 change.changedToDownIgnoreConsumed() -> {
                                     lastLane[change.id] = lane
-                                    currentOnStrike(lane)
+                                    strike(lane)
                                 }
                                 change.changedToUpIgnoreConsumed() -> lastLane.remove(change.id)
                                 change.pressed -> {
@@ -208,7 +245,7 @@ private fun StrumStrip(onStrike: (Int) -> Unit, modifier: Modifier = Modifier) {
                                         val step = if (lane > previous) 1 else -1
                                         var crossed = previous + step
                                         while (true) {
-                                            currentOnStrike(crossed)
+                                            strike(crossed)
                                             if (crossed == lane) break
                                             crossed += step
                                         }
@@ -225,11 +262,14 @@ private fun StrumStrip(onStrike: (Int) -> Unit, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         repeat(lanes) { string ->
+            val lit = string == litLane
             Box(
                 modifier = Modifier
-                    .width((1 + (lanes - string) / 2).dp)
+                    .width((1.5f + (lanes - string) / 2f).dp)
                     .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.outline),
+                    .padding(vertical = 8.dp)
+                    .glow(color, 1.dp, enabled = lit, spread = 4.dp)
+                    .background(if (lit) color else p.muted.copy(alpha = 0.6f)),
             )
         }
     }

@@ -1,6 +1,10 @@
 package com.bizzeh.synthkit.project
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -9,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.R
+import com.bizzeh.synthkit.instruments.Family
 import com.bizzeh.synthkit.looper.LooperState
 import com.bizzeh.synthkit.looper.Phase
 import org.junit.Assert.assertEquals
@@ -44,6 +49,7 @@ class ProjectScreenTest {
             ProjectScreen(
                 state = state,
                 instrumentName = { "Standard 1" },
+                familyOf = { Family.DRUMS_PERCUSSION },
                 canAddTrack = canAdd,
                 onBack = { calls += "back" },
                 onAddTrack = { calls += "add" },
@@ -65,10 +71,10 @@ class ProjectScreenTest {
         show()
 
         composeRule.onNodeWithText("Song").assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.tempo_value, 100)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.tempo_edit, 100)).assertIsDisplayed()
         composeRule.onNodeWithText("Standard 1").assertIsDisplayed()
         composeRule.onNodeWithText(context.resources.getQuantityString(R.plurals.take_count, 1, 1)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.phase_stopped)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.phase_stopped)).assertIsDisplayed()
     }
 
     @Test
@@ -76,8 +82,8 @@ class ProjectScreenTest {
         show()
 
         composeRule.onNodeWithText("Standard 1").performClick()
-        composeRule.onNodeWithText(string(R.string.track_mute)).performClick()
-        composeRule.onNodeWithText(string(R.string.track_solo)).performClick()
+        composeRule.onNodeWithContentDescription(string(R.string.track_mute_named, "Standard 1")).performClick()
+        composeRule.onNodeWithContentDescription(string(R.string.track_solo_named, "Standard 1")).performClick()
         menu(R.string.track_undo)
         menu(R.string.track_change_instrument)
         menu(R.string.track_edit)
@@ -104,7 +110,7 @@ class ProjectScreenTest {
 
         composeRule.onNodeWithContentDescription(string(R.string.tempo_up)).performClick()
         composeRule.onNodeWithContentDescription(string(R.string.tempo_down)).performClick()
-        composeRule.onNodeWithText(string(R.string.click_on_playback)).performClick()
+        composeRule.onNodeWithContentDescription(string(R.string.click_on_playback)).performClick()
         composeRule.onNodeWithContentDescription(string(R.string.play)).performClick()
 
         assertEquals(listOf("tempo 101", "tempo 99", "click true", "playstop"), calls)
@@ -122,8 +128,22 @@ class ProjectScreenTest {
     fun playingShowsTheBarAndAStopButton() {
         show(LooperState(project, Phase.PLAYING, bar = 1))
 
-        composeRule.onNodeWithText(string(R.string.phase_playing, 2, 2)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.phase_playing, 2, 2)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(string(R.string.stop)).assertIsDisplayed()
+    }
+
+    @Test
+    fun onlyATrackThatIsRecordingNowIsMarkedRecording() {
+        var state by mutableStateOf(LooperState(project, Phase.OVERDUBBING, recordingTrackId = "t1"))
+        composeRule.setContent {
+            ProjectScreen(state, { "Standard 1" }, { Family.DRUMS_PERCUSSION }, true, {}, {}, {}, {}, {}, actions)
+        }
+        composeRule.onNode(hasStateDescription(string(R.string.track_recording))).assertExists()
+
+        // The take ended: the id stays set while the loop plays on.
+        state = LooperState(project, Phase.PLAYING, recordingTrackId = "t1")
+
+        composeRule.onNode(hasStateDescription(string(R.string.track_recording))).assertDoesNotExist()
     }
 
     @Test

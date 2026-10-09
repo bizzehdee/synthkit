@@ -42,7 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.bizzeh.synthkit.instruments.Instrument
 import com.bizzeh.synthkit.instruments.InstrumentCatalogue
-import com.bizzeh.synthkit.looper.PhaseStatus
+import com.bizzeh.synthkit.looper.TransportLcd
 import com.bizzeh.synthkit.looper.PlayStopButton
 import com.bizzeh.synthkit.looper.RecordButton
 import com.bizzeh.synthkit.looper.SessionHost
@@ -64,6 +64,8 @@ import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
 import com.bizzeh.synthkit.play.PlayScreen
 import com.bizzeh.synthkit.project.Project
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import com.bizzeh.synthkit.ui.theme.familyColor
 import com.bizzeh.synthkit.project.ProjectActions
 import com.bizzeh.synthkit.project.ProjectListScreen
 import com.bizzeh.synthkit.project.StoredProject
@@ -146,6 +148,7 @@ private fun Navigation(
     if (route == Route.Projects) {
         ProjectListScreen(
             projects = projects,
+            familyOf = { track -> engine.catalogue.byId("${track.bank}:${track.program}")?.family },
             onOpen = { stack.add(Route.Project(it)) },
             onCreate = { stack.add(Route.Project(projectActions.create().id)) },
             onRename = projectActions.rename,
@@ -181,6 +184,7 @@ private fun Navigation(
         is Route.Project -> ProjectScreen(
             state = looper,
             instrumentName = { instrumentOf(it)?.name.orEmpty() },
+            familyOf = { instrumentOf(it)?.family },
             canAddTrack = looper.project.tracks.size < ProjectValidation.MAX_TRACKS,
             onBack = ::pop,
             onAddTrack = { stack.add(Route.AddTrack(project.id)) },
@@ -205,6 +209,7 @@ private fun Navigation(
             onOpenFamily = { family -> catalogue.quickEntry(family)?.let(::addTrack) },
             onBrowse = { stack.add(Route.Browser(project.id)) },
             onBack = ::pop,
+            quickName = { catalogue.quickEntry(it)?.name },
         )
         is Route.Browser -> {
             val swapping = looper.project.tracks.firstOrNull { it.id == route.swapTrackId }
@@ -243,10 +248,9 @@ private fun Navigation(
                 onDismissWarning = onDismissWarning,
                 onBack = ::pop,
                 onChangeInstrument = { stack.add(Route.Browser(project.id, route.trackId)) },
-                kits = catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
-                onKitChange = { session.swapInstrument(route.trackId, it.bank, it.program) },
-                status = { PhaseStatus(looper, inTrack = true) },
             ) {
+                // The track view leaves the tempo to the project screen to fit a 640 dp phone.
+                TransportLcd(looper, inTrack = true, showTempo = false)
                 RecordButton(
                     recording = looper.isRecording && looper.recordingTrackId == route.trackId,
                     enabled = !looper.finishing,
@@ -256,7 +260,6 @@ private fun Navigation(
                     playing = looper.isPlaying,
                     enabled = looper.isPlaying || looper.project.loopBars > 0,
                     onClick = session::playStop,
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
         }
@@ -267,6 +270,7 @@ private fun Navigation(
                 return
             }
             LoopEditorScreen(
+                color = instrumentOf(track)?.let { familyColor(it.family) } ?: StudioTheme.palette.muted,
                 project = looper.project,
                 track = track,
                 instrumentName = instrumentOf(track)?.name.orEmpty(),

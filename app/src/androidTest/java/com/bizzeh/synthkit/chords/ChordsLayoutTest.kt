@@ -3,6 +3,7 @@ package com.bizzeh.synthkit.chords
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.TouchInjectionScope
@@ -38,7 +39,7 @@ class ChordsLayoutTest {
     private fun show(bassRoots: Boolean = false) {
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = 300.dp)) {
-                ChordsLayout(player = player, channel = 0, bassRoots = bassRoots)
+                ChordsLayout(player = player, channel = 0, bassRoots = bassRoots, color = Color.Cyan)
             }
         }
     }

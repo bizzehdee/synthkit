@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only. Compose UI tests host their content in this activity
+     (from ui-test-manifest); it is landscape like the app, so tests see the
+     widths players do instead of a narrow portrait window. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:screenOrientation="sensorLandscape"
+            tools:ignore="DiscouragedApi"
+            tools:node="merge" />
+    </application>
+</manifest>

@@ -155,6 +155,20 @@ class LooperSessionTest {
         session.poll()
 
         assertEquals(1, state.bar)
+        assertEquals(0, state.beat)
+        transport.clock = 480.0 + 3840 + 1920 + 3 * 480 + 10
+        session.poll()
+        assertEquals(3, state.beat)
+    }
+
+    @Test
+    fun beatIsClearedWhenStopped() {
+        recordFirstTake()
+        session.poll()
+
+        session.playStop()
+
+        assertEquals(null, state.beat)
     }
 
     @Test

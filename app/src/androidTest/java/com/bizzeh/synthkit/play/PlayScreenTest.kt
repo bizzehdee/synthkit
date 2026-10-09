@@ -33,11 +33,9 @@ class PlayScreenTest {
     private val kit = catalogue.byId("128:0")!!
     private val player = RecordingPlayer()
     private val report = LatencyReport(11.25, "AAudio", "LowLatency", "Exclusive", 48000, 96, 192, 0)
-    private val kits = listOf(catalogue.byId("128:0")!!, catalogue.byId("128:25")!!)
     private var backs = 0
     private var changes = 0
     private var dismissals = 0
-    private val kitChanges = mutableListOf<String>()
 
     private fun show(instrument: Instrument, latency: LatencyReport? = null, warning: LatencyWarning? = null) {
         composeRule.setContent {
@@ -50,8 +48,6 @@ class PlayScreenTest {
                 onDismissWarning = { dismissals++ },
                 onBack = { backs++ },
                 onChangeInstrument = { changes++ },
-                kits = kits,
-                onKitChange = { kitChanges += it.id },
             ) { Text("transport slot") }
         }
         composeRule.waitForIdle()
@@ -78,29 +74,19 @@ class PlayScreenTest {
     @Test
     fun eachLayoutShowsForItsInstrument() {
         var shown by mutableStateOf(catalogue.byId("0:47")!!)
-        composeRule.setContent { PlayScreen(shown, CHANNEL, player, null, null, {}, {}, {}, kits, {}) }
+        composeRule.setContent { PlayScreen(shown, CHANNEL, player, null, null, {}, {}, {}) }
 
         composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
         shown = catalogue.byId("0:24")!!
         composeRule.onNodeWithContentDescription("C major").assertIsDisplayed()
         shown = catalogue.byId("0:0")!!
-        composeRule.onNodeWithText(context.getString(R.string.hold)).assertIsDisplayed()
-    }
-
-    @Test
-    fun kitPickerSwapsTheKit() {
-        show(kit)
-
-        composeRule.onNodeWithText(context.getString(R.string.drum_kit, "Standard 1")).performClick()
-        composeRule.onNodeWithText("808/909").performClick()
-
-        assertEquals(listOf("128:25"), kitChanges)
+        composeRule.onNodeWithContentDescription(context.getString(R.string.hold)).assertIsDisplayed()
     }
 
     @Test
     fun leavingTheScreenSilencesTheTracksChannel() {
         var shown by mutableStateOf(true)
-        composeRule.setContent { if (shown) PlayScreen(kit, CHANNEL, player, null, null, {}, {}, {}, kits, {}) }
+        composeRule.setContent { if (shown) PlayScreen(kit, CHANNEL, player, null, null, {}, {}, {}) }
         composeRule.waitForIdle()
 
         shown = false
@@ -110,14 +96,16 @@ class PlayScreenTest {
     }
 
     @Test
-    fun backAndChangeInstrumentButtonsCallBack() {
+    fun backAndTheInstrumentChipAndMenuCallBack() {
         show(kit)
 
         composeRule.onNodeWithContentDescription(context.getString(R.string.back)).performClick()
-        composeRule.onNodeWithContentDescription(context.getString(R.string.change_instrument)).performClick()
+        composeRule.onNodeWithText("Standard 1").performClick()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.more)).performClick()
+        composeRule.onNodeWithText(context.getString(R.string.change_instrument)).performClick()
 
         assertEquals(1, backs)
-        assertEquals(1, changes)
+        assertEquals(2, changes)
     }
 
     @Test
@@ -130,25 +118,39 @@ class PlayScreenTest {
         assertEquals(1, dismissals)
     }
 
+    private fun openDiagnostics() {
+        composeRule.onNodeWithContentDescription(context.getString(R.string.more)).performClick()
+        composeRule.onNodeWithText(context.getString(R.string.diagnostics)).performClick()
+    }
+
     @Test
-    fun latencyReportIsShownWhenGiven() {
+    fun latencyStaysOffThePlaySurfaceAndShowsInDiagnostics() {
         show(kit, latency = report)
+        composeRule.onNode(hasText("11.3 ms", substring = true)).assertDoesNotExist()
+
+        openDiagnostics()
 
         composeRule.onNode(hasText("11.3 ms", substring = true)).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.close)).performClick()
+        composeRule.onNode(hasText("11.3 ms", substring = true)).assertDoesNotExist()
     }
 
     @Test
     fun unmeasuredLatencySaysMeasuring() {
         show(kit, latency = report.copy(outputLatencyMs = null))
 
+        openDiagnostics()
+
         composeRule.onNode(hasText(context.getString(R.string.latency_measuring), substring = true)).assertIsDisplayed()
     }
 
     @Test
-    fun noReportAndNoWarningShowNeither() {
+    fun diagnosticsWithoutAudioSaySo() {
         show(kit)
 
-        composeRule.onNode(hasText("burst", substring = true)).assertDoesNotExist()
+        openDiagnostics()
+
+        composeRule.onNodeWithText(context.getString(R.string.diagnostics_unavailable)).assertIsDisplayed()
         composeRule.onNodeWithText(context.getString(R.string.dismiss)).assertDoesNotExist()
     }
 

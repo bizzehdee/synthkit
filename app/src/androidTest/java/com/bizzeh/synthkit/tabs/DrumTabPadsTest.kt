@@ -3,6 +3,7 @@ package com.bizzeh.synthkit.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -45,7 +46,7 @@ class DrumTabPadsTest {
         // Tall enough for the 4 x 4 first page, which holds every note the tabs use.
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = DrumKitPadsTest.TALL_HEIGHT)) {
-                DrumKitPads(player = player, channel = 0)
+                DrumKitPads(player = player, channel = 0, color = Color.Cyan)
             }
         }
         val steps = Tab.drums(fixture(name), Tab::gmDrum).groupBy({ it.step }, { it.note })

@@ -3,6 +3,7 @@ package com.bizzeh.synthkit.pads
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
@@ -37,7 +38,7 @@ class ChromaticPadsLayoutTest {
     private fun show(root: Int = 60) {
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = 300.dp)) {
-                ChromaticPadsLayout(player = player, channel = 0, defaultRoot = root)
+                ChromaticPadsLayout(player = player, channel = 0, defaultRoot = root, color = Color.Cyan)
             }
         }
     }
