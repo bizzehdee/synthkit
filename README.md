@@ -23,7 +23,19 @@ You can use several fingers at the same time on every instrument. A browser
 lists every instrument by family, with search, favourites and recent
 instruments. A banner warns you when Bluetooth audio or the device adds delay.
 
-Recording, loops and export are planned.
+**Projects and loops.** The app opens on your projects. Each project saves
+itself after every change. Inside a project:
+
+1. Tap **Add track** and pick an instrument.
+2. Tap **Record**. A click counts the beat. Recording starts on your first note.
+3. Tap **Record** again. The take becomes a loop of whole bars (1 to 8) and
+   plays at once.
+4. Add more tracks and record over the loop. Each track can be muted, soloed,
+   set louder or quieter, undone take by take, or cleared.
+5. Use **Edit loop** to tidy a track: quantise it, add, move or delete notes on
+   a grid, change how hard a note is played, or double the loop.
+
+A project holds up to 8 tracks. Export to audio and MIDI is planned.
 See [plan.md](plan.md) for the full plan.
 
 ## Requirements
