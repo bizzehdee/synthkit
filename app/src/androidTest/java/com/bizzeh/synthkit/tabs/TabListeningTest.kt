@@ -41,24 +41,24 @@ class TabListeningTest {
     fun drumTab2() = playDrums("drum-tab-2.txt")
 
     @Test
-    fun guitarTab1() = playStrings("guitar-tab-1.txt", program = OVERDRIVEN_GUITAR, stepMillis = 150)
+    fun guitarTab1() = playStrings("guitar-tab-1.txt", program = OVERDRIVEN_GUITAR)
 
     @Test
-    fun bassTab1() = playStrings("bass-tab-1.txt", program = FINGER_BASS, stepMillis = 110)
+    fun bassTab1() = playStrings("bass-tab-1.txt", program = FINGER_BASS)
 
     private fun playDrums(name: String) {
         engine.selectInstrument(CHANNEL, 128, 0)
-        play(Tab.drums(fixture(name), Tab::gmDrum), SIXTEENTH_AT_100_BPM, oneShot = true)
+        play(Tab.drums(fixture(name), Tab::gmDrum), oneShot = true)
     }
 
-    private fun playStrings(name: String, program: Int, stepMillis: Long) {
+    private fun playStrings(name: String, program: Int) {
         engine.selectInstrument(CHANNEL, 0, program)
-        play(Tab.strings(fixture(name)), stepMillis, oneShot = false)
+        play(Tab.strings(fixture(name)), oneShot = false)
     }
 
     // Sends each note shortly before it is due, with the remaining time as its
     // delay, so the engine places it on the exact frame.
-    private fun play(notes: List<TabNote>, stepMillis: Long, oneShot: Boolean) {
+    private fun play(notes: List<TabNote>, oneShot: Boolean, stepMillis: Long = SIXTEENTH_AT_120_BPM) {
         val start = SystemClock.uptimeMillis() + LEAD_MILLIS
         notes.forEach { note ->
             val due = start + note.step * stepMillis
@@ -76,7 +76,8 @@ class TabListeningTest {
         const val CHANNEL = 0
         const val OVERDRIVEN_GUITAR = 29
         const val FINGER_BASS = 33
-        const val SIXTEENTH_AT_100_BPM = 150L
+        // The tabs are written for 120 BPM; each column is one 16th note.
+        const val SIXTEENTH_AT_120_BPM = 125L
         const val LEAD_MILLIS = 300L
         const val LOOKAHEAD_MILLIS = 40L
         const val TAIL_MILLIS = 1500L
