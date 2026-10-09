@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -81,6 +82,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.oboe)
+    implementation(libs.kotlinx.serialization.json)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
@@ -102,6 +104,8 @@ val configureNativeHostTest by tasks.registering(Exec::class) {
     commandLine(
         "cmake", "-S", nativeHostTestSource.asFile.absolutePath,
         "-B", nativeHostTestDir.get().asFile.absolutePath, "-G", "Ninja",
+        // Clang ships its sanitizer runtime; GCC needs separate libasan packages.
+        "-DCMAKE_CXX_COMPILER=clang++",
     )
 }
 

@@ -1,5 +1,7 @@
 #include "AudioEngine.h"
 
+#include <chrono>
+
 #include "Log.h"
 
 namespace synthkit {
@@ -77,6 +79,9 @@ LatencyReport AudioEngine::latencyReport() {
     report.framesPerBurst = stream_->getFramesPerBurst();
     report.bufferFrames = stream_->getBufferSizeInFrames();
     report.deviceId = stream_->getDeviceId();
+    report.loadAverage = loadAverage_.load(std::memory_order_relaxed);
+    report.loadPeak = loadPeak_.exchange(0.0f, std::memory_order_relaxed);
+    report.voices = synth_->activeVoices();
     const auto underruns = stream_->getXRunCount();
     if (underruns) {
         report.underruns = underruns.value();
@@ -92,9 +97,18 @@ void AudioEngine::closeLocked() {
     }
 }
 
-oboe::DataCallbackResult AudioEngine::onAudioReady(oboe::AudioStream* /*stream*/, void* audioData,
+oboe::DataCallbackResult AudioEngine::onAudioReady(oboe::AudioStream* stream, void* audioData,
                                                    int32_t numFrames) {
+    const auto started = std::chrono::steady_clock::now();
     synth_->render(static_cast<float*>(audioData), numFrames);
+    const double spent = std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+    const double budget = static_cast<double>(numFrames) / stream->getSampleRate();
+    const auto load = static_cast<float>(spent / budget);
+    // Smoothed over roughly the last hundred callbacks.
+    loadAverage_.store(loadAverage_.load(std::memory_order_relaxed) * 0.99f + load * 0.01f, std::memory_order_relaxed);
+    if (load > loadPeak_.load(std::memory_order_relaxed)) {
+        loadPeak_.store(load, std::memory_order_relaxed);
+    }
     return oboe::DataCallbackResult::Continue;
 }
 

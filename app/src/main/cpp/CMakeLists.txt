@@ -9,6 +9,7 @@ find_package(oboe REQUIRED CONFIG)
 add_library(synthkit SHARED
         audio/AssetSoundFont.cpp
         audio/AudioEngine.cpp
+        audio/Sequencer.cpp
         audio/SoundFontSynth.cpp
         audio/TinySoundFont.cpp
         jni/NativeAudioEngine.cpp)

@@ -6,7 +6,7 @@ import org.junit.Test
 
 class LatencyReportTest {
     private fun fields(running: String = "1", latency: String = "11.250000") = arrayOf(
-        running, latency, "AAudio", "LowLatency", "Exclusive", "48000", "96", "192", "3", "7",
+        running, latency, "AAudio", "LowLatency", "Exclusive", "48000", "96", "192", "3", "7", "0.250000", "0.500000", "12",
     )
 
     @Test
@@ -24,6 +24,9 @@ class LatencyReportTest {
                 bufferFrames = 192,
                 underruns = 3,
                 deviceId = 7,
+                loadAverage = 0.25f,
+                loadPeak = 0.5f,
+                voices = 12,
             ),
             report,
         )

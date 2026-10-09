@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -14,18 +15,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
+import kotlin.math.roundToInt
 import com.bizzeh.synthkit.audio.InstrumentPlayer
 import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.audio.LatencyWarning
@@ -36,35 +35,32 @@ import com.bizzeh.synthkit.keys.KeysLayout
 import com.bizzeh.synthkit.pads.ChromaticPadsLayout
 import com.bizzeh.synthkit.instruments.PlayLayout
 
-/** The live instrument plays on one channel; recorded tracks will use the others. */
-const val LIVE_CHANNEL = 0
-
 private const val TAG = "SynthKit"
 
-/** [latency] is shown under the top bar when it is not null. */
+/**
+ * A track's instrument, playable on [channel], with [transport] controls in the
+ * top bar. [latency] is shown under the bar when it is not null.
+ */
 @Composable
 fun PlayScreen(
     instrument: Instrument,
+    channel: Int,
     player: InstrumentPlayer,
     latency: LatencyReport?,
-    onBack: () -> Unit,
-    onChangeInstrument: () -> Unit,
-    onOpened: (Instrument) -> Unit,
-    kits: List<Instrument>,
-    onOpenInstrument: (Instrument) -> Unit,
     warning: LatencyWarning?,
     onDismissWarning: () -> Unit,
+    onBack: () -> Unit,
+    onChangeInstrument: () -> Unit,
+    kits: List<Instrument>,
+    onKitChange: (Instrument) -> Unit,
     modifier: Modifier = Modifier,
+    status: @Composable () -> Unit = {},
+    transport: @Composable RowScope.() -> Unit = {},
 ) {
-    val currentOnOpened by rememberUpdatedState(onOpened)
-    LaunchedEffect(instrument.id) {
-        if (!player.selectInstrument(LIVE_CHANNEL, instrument.bank, instrument.program)) {
-            Log.e(TAG, "event=instrument_select_failed instrument=${instrument.id}")
+    DisposableEffect(player, channel) {
+        onDispose {
+            if (!player.allNotesOff(channel)) Log.w(TAG, "event=all_notes_off_failed channel=$channel")
         }
-        currentOnOpened(instrument)
-    }
-    DisposableEffect(player) {
-        onDispose { player.allNotesOff(LIVE_CHANNEL) }
     }
 
     Column(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -72,14 +68,19 @@ fun PlayScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
             }
-            Text(
-                text = instrument.name,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f),
-            )
-            TextButton(onClick = onChangeInstrument) {
-                Icon(Icons.Filled.Menu, contentDescription = null)
-                Text(stringResource(R.string.change_instrument))
+            // Name and status share the space left over, so the buttons never shrink.
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = instrument.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                status()
+            }
+            transport()
+            IconButton(onClick = onChangeInstrument) {
+                Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.change_instrument))
             }
         }
         warning?.let { LatencyWarningBanner(it, onDismissWarning) }
@@ -88,10 +89,10 @@ fun PlayScreen(
             // Keyed by instrument so hold, octave and other layout state start fresh.
             key(instrument.id) {
                 when (val layout = instrument.layout) {
-                    PlayLayout.DrumKit -> DrumKitLayout(player, LIVE_CHANNEL, instrument, kits, onOpenInstrument)
-                    is PlayLayout.Keys -> KeysLayout(player, LIVE_CHANNEL, layout.holdByDefault)
-                    is PlayLayout.Chords -> ChordsLayout(player, LIVE_CHANNEL, layout.bassRoots)
-                    is PlayLayout.ChromaticPads -> ChromaticPadsLayout(player, LIVE_CHANNEL, layout.root)
+                    PlayLayout.DrumKit -> DrumKitLayout(player, channel, instrument, kits, onKitChange)
+                    is PlayLayout.Keys -> KeysLayout(player, channel, layout.holdByDefault)
+                    is PlayLayout.Chords -> ChordsLayout(player, channel, layout.bassRoots)
+                    is PlayLayout.ChromaticPads -> ChromaticPadsLayout(player, channel, layout.root)
                 }
             }
         }
@@ -114,6 +115,9 @@ private fun LatencyReadout(report: LatencyReport) {
             report.framesPerBurst,
             report.bufferFrames,
             report.underruns,
+            (report.loadAverage * 100).roundToInt(),
+            (report.loadPeak * 100).roundToInt(),
+            report.voices,
         ),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

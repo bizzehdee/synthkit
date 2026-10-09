@@ -1,14 +1,23 @@
 package com.bizzeh.synthkit.ui
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class RouteTest {
+    private val routes = listOf(
+        Route.Projects,
+        Route.Project("p-1"),
+        Route.AddTrack("p-1"),
+        Route.Browser("p-1"),
+        Route.Browser("p-1", "t-2"),
+        Route.Track("p-1", "t-2"),
+        Route.Editor("p-1", "t-2"),
+    )
+
     @Test
     fun everyRouteSurvivesEncoding() {
-        listOf(Route.Home, Route.Browser, Route.Play("128:25")).forEach { route ->
-            assertEquals(route, Route.decode(route.encode()))
-        }
+        routes.forEach { assertEquals(it, Route.decode(it.encode())) }
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -16,8 +25,14 @@ class RouteTest {
         Route.decode("settings")
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun malformedRouteIsRejected() {
+        Route.decode("track/only-one-id")
+    }
+
     @Test
-    fun openingAnInstrumentLeavesHomeUnderneath() {
-        assertEquals(listOf(Route.Home, Route.Play("0:24")), Route.openInstrument("0:24"))
+    fun everyScreenButTheListBelongsToAProject() {
+        assertNull(Route.Projects.projectId)
+        routes.drop(1).forEach { assertEquals("p-1", it.projectId) }
     }
 }

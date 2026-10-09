@@ -52,6 +52,8 @@ fun BrowserScreen(
     onToggleFavourite: (String) -> Unit,
     modifier: Modifier = Modifier,
     initialFamily: Family = Family.KEYS,
+    /** Only instruments that pass are listed, for example kits when swapping a drum track. */
+    filter: (Instrument) -> Boolean = { true },
 ) {
     var section by rememberSaveable { mutableStateOf(initialFamily.name) }
     var query by rememberSaveable { mutableStateOf("") }
@@ -87,7 +89,7 @@ fun BrowserScreen(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 modifier = Modifier.fillMaxWidth(),
             )
-            val (shown, emptyMessage) = when {
+            val (unfiltered, emptyMessage) = when {
                 query.isNotBlank() -> catalogue.search(query) to R.string.browser_no_results
                 section == RECENTS_SECTION ->
                     library.recents.mapNotNull(catalogue::byId) to R.string.browser_no_recents
@@ -95,6 +97,7 @@ fun BrowserScreen(
                     catalogue.instruments.filter { it.id in library.favourites } to R.string.browser_no_favourites
                 else -> catalogue.inFamily(Family.valueOf(section)) to R.string.browser_no_results
             }
+            val shown = unfiltered.filter(filter)
             if (shown.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopStart) {
                     Text(stringResource(emptyMessage), style = MaterialTheme.typography.bodyLarge)

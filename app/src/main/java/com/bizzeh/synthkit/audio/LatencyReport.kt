@@ -13,9 +13,14 @@ data class LatencyReport(
     val underruns: Int,
     /** 0 when the platform does not report the output device. */
     val deviceId: Int = 0,
+    /** Share of each buffer's time spent rendering, smoothed; above 1 the deadline is missed. */
+    val loadAverage: Float = 0f,
+    /** Highest load since the previous report. */
+    val loadPeak: Float = 0f,
+    val voices: Int = 0,
 ) {
     companion object {
-        private const val FIELD_COUNT = 10
+        private const val FIELD_COUNT = 13
 
         /** Parses the fields from the native engine. Returns null when no stream is running. */
         fun fromNative(fields: Array<String>): LatencyReport? {
@@ -31,6 +36,9 @@ data class LatencyReport(
                 bufferFrames = fields[7].toInt(),
                 underruns = fields[8].toInt(),
                 deviceId = fields[9].toInt(),
+                loadAverage = fields[10].toFloat(),
+                loadPeak = fields[11].toFloat(),
+                voices = fields[12].toInt(),
             )
         }
     }
