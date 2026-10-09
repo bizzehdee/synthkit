@@ -9,7 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.R
+import com.bizzeh.synthkit.ui.theme.DarkPalette
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.Quantise
@@ -45,12 +48,15 @@ class LoopEditorScreenTest {
     private var quantise by mutableStateOf(Quantise.OFF)
     private var bars by mutableStateOf(1)
     private var doubled = 0
+    private val auditioned = mutableListOf<Note>()
+    private var playhead: (() -> Int?)? = null
+    private var bank = 128
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
 
     private fun show() {
         composeRule.setContent {
-            val track = Track("t", 128, 0, takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes)), quantise = quantise)
+            val track = Track("t", bank, 0, takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes)), quantise = quantise)
             Box(Modifier.size(640.dp, 340.dp)) {
                 LoopEditorScreen(
                     color = Color.Cyan,
@@ -61,14 +67,18 @@ class LoopEditorScreenTest {
                     onQuantise = { quantise = it },
                     onNotes = { notes = it },
                     onDoubleLoop = { doubled++ },
+                    onAudition = { auditioned += it },
+                    playhead = playhead,
                 )
             }
         }
     }
 
+    private fun gridBounds() = composeRule.onNode(hasContentDescription("Step grid", substring = true)).fetchSemanticsNode().boundsInRoot
+
     // Centre of a grid cell; the grid opens at the first drum row (kick) with no scroll.
     private fun cell(column: Int, row: Int): Offset {
-        val grid = composeRule.onNode(hasContentDescription("Step grid", substring = true)).fetchSemanticsNode().boundsInRoot
+        val grid = gridBounds()
         val size = with(composeRule.density) { 48.dp.toPx() }
         return Offset(grid.left + (column + 0.5f) * size, grid.top + (row + 0.5f) * size)
     }
@@ -86,6 +96,7 @@ class LoopEditorScreenTest {
         tap(4, 1)
 
         assertEquals(listOf(Note(480, 38, 100, 120)), notes)
+        assertEquals(notes, auditioned)
     }
 
     @Test
@@ -95,9 +106,34 @@ class LoopEditorScreenTest {
 
         tap(0, 0)
         composeRule.onNodeWithText(string(R.string.velocity)).assertIsDisplayed()
+        assertEquals(listOf(Note(0, 36, 100, 120)), auditioned)
         tap(0, 0)
 
         assertTrue(notes.isEmpty())
+    }
+
+    @Test
+    fun selectingANoteDoesNotMoveTheGrid() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        val before = gridBounds()
+
+        tap(0, 0)
+
+        composeRule.onNodeWithText(string(R.string.velocity)).assertIsDisplayed()
+        assertEquals(before, gridBounds())
+    }
+
+    @Test
+    fun doneHidesTheNoteControlsAndKeepsTheNote() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        tap(0, 0)
+
+        composeRule.onNodeWithContentDescription(string(R.string.note_done)).performClick()
+
+        composeRule.onNodeWithText(string(R.string.double_loop)).assertIsDisplayed()
+        assertEquals(1, notes.size)
     }
 
     @Test
@@ -116,6 +152,7 @@ class LoopEditorScreenTest {
         composeRule.waitForIdle()
 
         assertEquals(listOf(Note(360, 42, 100, 120)), notes)
+        assertEquals(notes, auditioned)
     }
 
     @Test
@@ -157,5 +194,72 @@ class LoopEditorScreenTest {
         show()
 
         composeRule.onNodeWithContentDescription(string(R.string.grid_description, "16 steps", "1 note")).assertIsDisplayed()
+    }
+
+    @Test
+    fun playheadDrawsAnAmberLineAtThePlayingStep() {
+        playhead = { 4 * StepGrid.STEP_TICKS }
+        composeRule.mainClock.autoAdvance = false
+        show()
+        composeRule.mainClock.advanceTimeByFrame()
+
+        val grid = composeRule.onNode(hasContentDescription("Step grid", substring = true)).captureToImage().toPixelMap()
+        val cellPx = with(composeRule.density) { 48.dp.toPx() }
+        val y = (cellPx * 2.5f).toInt()
+
+        assertEquals(DarkPalette.amber, grid[(4 * cellPx).toInt(), y])
+        assertEquals(false, grid[(5 * cellPx + cellPx / 2).toInt(), y] == DarkPalette.amber)
+    }
+
+    @Test
+    fun tappingARowNamePlaysItWithoutAddingANote() {
+        show()
+
+        composeRule.onNodeWithContentDescription(string(R.string.grid_rows_description)).performTouchInput {
+            click(Offset(centerX, with(composeRule.density) { 48.dp.toPx() } * 1.5f))
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(38), auditioned.map { it.key })
+        assertTrue(notes.isEmpty())
+    }
+
+    @Test
+    fun draggingTheSelectedMelodicNotesEdgeSetsItsLength() {
+        bank = 0
+        notes = listOf(Note(0, 60, 100, 120))
+        show()
+        tap(0, 0)
+        val edge = cell(0, 0) + Offset(with(composeRule.density) { 20.dp.toPx() }, 0f)
+
+        composeRule.onRoot().performTouchInput {
+            down(edge)
+            moveTo(edge + Offset(20f, 0f))
+            moveTo(cell(3, 0))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(Note(0, 60, 100, 480)), notes)
+        assertEquals(480, auditioned.last().lengthTicks)
+    }
+
+    @Test
+    fun drumNotesHaveNoLengthHandle() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        tap(0, 0)
+        val edge = cell(0, 0) + Offset(with(composeRule.density) { 20.dp.toPx() }, 0f)
+
+        composeRule.onRoot().performTouchInput {
+            down(edge)
+            moveTo(edge + Offset(20f, 0f))
+            moveTo(cell(3, 0))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        // Without a handle the drag moves the drum note instead.
+        assertEquals(listOf(Note(360, 36, 100, 120)), notes)
     }
 }

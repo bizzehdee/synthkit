@@ -70,6 +70,7 @@ class LooperSession(
     private var takeStart = 0L
     private var loopOrigin = 0L
     private var stopAfterFinish = false
+    private var focusTrackId: String? = null
 
     init {
         transport.setTempo(project.tempoBpm)
@@ -128,6 +129,15 @@ class LooperSession(
                 if (!state.finishing) record(state.recordingTrackId ?: return)
             }
         }
+    }
+
+    /**
+     * Where the loop is now, in ticks from the loop start, or null when no loop
+     * plays. Read it while drawing, not into UI state: it changes every frame.
+     */
+    fun playheadTick(): Int? = when (mutableState.value.phase) {
+        Phase.PLAYING, Phase.OVERDUBBING -> LoopMath.wrap(transport.clockTicks().toLong(), loopOrigin, project.loopTicks)
+        else -> null
     }
 
     /** Reads recorded notes and the clock. */
@@ -292,6 +302,22 @@ class LooperSession(
     fun replaceNotes(trackId: String, notes: List<Note>) =
         editTrack(trackId) { it.copy(takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes))) }
 
+    /** Plays only [trackId] in the loop, or every audible track again when null. Not saved. */
+    fun focusTrack(trackId: String?) {
+        if (focusTrackId == trackId) return
+        focusTrackId = trackId
+        publishLoop()
+    }
+
+    /** Plays one note on [trackId]'s instrument, for its length at the project tempo, so an edit is heard. */
+    fun audition(trackId: String, note: Note) {
+        val index = project.tracks.indexOfFirst { it.id == trackId }.takeIf { it >= 0 } ?: return
+        val channel = trackChannel(index)
+        val millis = note.lengthTicks * MILLIS_PER_MINUTE / (TICKS_PER_BEAT * project.tempoBpm)
+        player.noteOn(channel, note.key, note.velocity.coerceIn(1, 127) / 127f)
+        player.noteOff(channel, note.key, millis)
+    }
+
     /** Doubles the loop up to 8 bars, repeating every track's notes in the new half. */
     fun doubleLoop() {
         val bars = project.loopBars
@@ -321,7 +347,7 @@ class LooperSession(
     }
 
     private fun publishLoop() {
-        transport.publishLoopNotes(LoopSnapshot.build(project))
+        transport.publishLoopNotes(LoopSnapshot.build(project, focusTrackId))
         // Notes of the old loop may be sounding; their note offs are gone.
         project.tracks.indices.forEach { player.allNotesOff(trackChannel(it)) }
     }
@@ -332,6 +358,10 @@ class LooperSession(
             transport.setVolume(trackChannel(index), track.volume)
         }
         publishLoop()
+    }
+
+    private companion object {
+        const val MILLIS_PER_MINUTE = 60_000f
     }
 
     private fun update(transform: (LooperState) -> LooperState) {

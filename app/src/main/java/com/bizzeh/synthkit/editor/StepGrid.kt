@@ -35,8 +35,16 @@ object StepGrid {
     fun cellOf(note: Note, columns: Int): Cell =
         Cell(Math.floorMod((note.tick.toDouble() / STEP_TICKS).roundToInt(), columns), note.key)
 
+    /** How many steps a note covers on screen: its length rounded, at least 1, cut at the loop end. */
+    fun stepsOf(note: Note, columns: Int): Int =
+        (note.lengthTicks.toDouble() / STEP_TICKS).roundToInt().coerceIn(1, columns - cellOf(note, columns).column)
+
+    /** The note covering [cell], counting every step of a long note. */
     fun noteAt(notes: List<Note>, cell: Cell, columns: Int): Int? =
-        notes.indexOfFirst { cellOf(it, columns) == cell }.takeIf { it >= 0 }
+        notes.indexOfFirst { note ->
+            val start = cellOf(note, columns)
+            start.key == cell.key && cell.column - start.column in 0 until stepsOf(note, columns)
+        }.takeIf { it >= 0 }
 
     fun add(notes: List<Note>, cell: Cell): List<Note> =
         notes + Note(cell.column * STEP_TICKS, cell.key, NEW_NOTE_VELOCITY, TakeBuilder.ONE_SHOT_TICKS)
@@ -46,6 +54,13 @@ object StepGrid {
     /** Moves a note to a cell; its length and velocity stay. */
     fun move(notes: List<Note>, index: Int, cell: Cell): List<Note> =
         notes.mapIndexed { i, note -> if (i == index) note.copy(tick = cell.column * STEP_TICKS, key = cell.key) else note }
+
+    /** Sets a note's length in steps, at least 1 and no further than the loop end. */
+    fun setLength(notes: List<Note>, index: Int, steps: Int, columns: Int): List<Note> =
+        notes.mapIndexed { i, note ->
+            if (i != index) note
+            else note.copy(lengthTicks = steps.coerceIn(1, columns - cellOf(note, columns).column) * STEP_TICKS)
+        }
 
     fun setVelocity(notes: List<Note>, index: Int, velocity: Int): List<Note> =
         notes.mapIndexed { i, note -> if (i == index) note.copy(velocity = velocity.coerceIn(1, 127)) else note }

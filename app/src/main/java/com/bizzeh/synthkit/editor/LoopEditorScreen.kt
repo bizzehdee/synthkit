@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +37,7 @@ import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.drums.GmPercussionNotes
 import com.bizzeh.synthkit.drums.shortDrumName
 import com.bizzeh.synthkit.instruments.InstrumentCatalogue
+import com.bizzeh.synthkit.looper.TakeBuilder
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.Quantise
@@ -56,7 +57,10 @@ fun LoopEditorScreen(
     onQuantise: (Quantise) -> Unit,
     onNotes: (List<Note>) -> Unit,
     onDoubleLoop: () -> Unit,
+    onAudition: (Note) -> Unit,
     modifier: Modifier = Modifier,
+    playhead: (() -> Int?)? = null,
+    transport: @Composable () -> Unit = {},
 ) {
     val drums = track.bank == InstrumentCatalogue.DRUM_KIT_BANK
     val rows = StepGrid.rows(drums)
@@ -69,55 +73,64 @@ fun LoopEditorScreen(
     val shortNames = firstPageLabels()
 
     Column(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        // Note controls replace the loop controls in the same bar so the grid never moves.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             PanelIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), onBack)
-            Text(
-                stringResource(R.string.editor_title, instrumentName),
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            val quantiseLabel = stringResource(R.string.quantise)
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.semantics { contentDescription = quantiseLabel }) {
-                Quantise.entries.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        selected = track.quantise == option,
-                        onClick = { onQuantise(option) },
-                        shape = SegmentedButtonDefaults.itemShape(index, Quantise.entries.size),
-                    ) {
-                        Text(stringResource(when (option) {
-                            Quantise.OFF -> R.string.quantise_off
-                            Quantise.EIGHTH -> R.string.quantise_eighth
-                            Quantise.SIXTEENTH -> R.string.quantise_sixteenth
-                        }))
+            val index = selected
+            if (index == null) {
+                Text(
+                    stringResource(R.string.editor_title, instrumentName),
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                val quantiseLabel = stringResource(R.string.quantise)
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.semantics { contentDescription = quantiseLabel }) {
+                    Quantise.entries.forEachIndexed { i, option ->
+                        SegmentedButton(
+                            selected = track.quantise == option,
+                            onClick = { onQuantise(option) },
+                            shape = SegmentedButtonDefaults.itemShape(i, Quantise.entries.size),
+                        ) {
+                            Text(stringResource(when (option) {
+                                Quantise.OFF -> R.string.quantise_off
+                                Quantise.EIGHTH -> R.string.quantise_eighth
+                                Quantise.SIXTEENTH -> R.string.quantise_sixteenth
+                            }))
+                        }
                     }
                 }
-            }
-            OutlinedButton(
-                onClick = onDoubleLoop,
-                enabled = project.loopBars * 2 <= Project.MAX_LOOP_BARS,
-                modifier = Modifier.padding(start = 8.dp).heightIn(min = MinTouchTarget),
-            ) { Text(stringResource(R.string.double_loop)) }
-        }
-        selected?.let { index ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(start = 12.dp)) {
+                OutlinedButton(
+                    onClick = onDoubleLoop,
+                    enabled = project.loopBars * 2 <= Project.MAX_LOOP_BARS,
+                    modifier = Modifier.heightIn(min = MinTouchTarget),
+                ) { Text(stringResource(R.string.double_loop)) }
+            } else {
                 Text(stringResource(R.string.velocity), style = MaterialTheme.typography.labelLarge)
                 val velocityLabel = stringResource(R.string.velocity)
                 Slider(
                     value = notes[index].velocity.toFloat(),
                     onValueChange = { onNotes(StepGrid.setVelocity(notes, index, it.roundToInt())) },
+                    onValueChangeFinished = { notes.getOrNull(index)?.let(onAudition) },
                     valueRange = 1f..127f,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp).semantics { contentDescription = velocityLabel },
+                    modifier = Modifier.weight(1f).semantics { contentDescription = velocityLabel },
                 )
                 TextButton(onClick = {
                     onNotes(StepGrid.remove(notes, index))
                     selected = null
                 }, modifier = Modifier.heightIn(min = MinTouchTarget)) { Text(stringResource(R.string.note_delete)) }
+                PanelIconButton(Icons.Filled.Check, stringResource(R.string.note_done), { selected = null })
             }
+            transport()
         }
         StepGridCanvas(
             noteColor = color,
+            playhead = playhead,
             rows = rows,
             rowLabel = { key ->
                 if (drums) {
@@ -139,19 +152,35 @@ fun LoopEditorScreen(
                 val hit = StepGrid.noteAt(notes, cell, columns)
                 when {
                     hit == null -> {
-                        onNotes(StepGrid.add(notes, cell))
+                        val added = StepGrid.add(notes, cell)
+                        onNotes(added)
+                        onAudition(added.last())
                         selected = null
                     }
                     hit == selected -> {
                         onNotes(StepGrid.remove(notes, hit))
                         selected = null
                     }
-                    else -> selected = hit
+                    else -> {
+                        selected = hit
+                        onAudition(notes[hit])
+                    }
                 }
             },
             onMove = { index, cell ->
-                onNotes(StepGrid.move(notes, index, cell))
+                val moved = StepGrid.move(notes, index, cell)
+                onNotes(moved)
+                onAudition(moved[index])
                 selected = index
+            },
+            onRowTap = { key -> onAudition(Note(0, key, StepGrid.NEW_NOTE_VELOCITY, TakeBuilder.ONE_SHOT_TICKS)) },
+            rowsDescription = stringResource(R.string.grid_rows_description),
+            // Most drum sounds ring out whatever the note length, so drum notes stay one step.
+            resizable = !drums,
+            onResize = { index, steps ->
+                val resized = StepGrid.setLength(notes, index, steps, columns)
+                onNotes(resized)
+                onAudition(resized[index])
             },
             modifier = Modifier.weight(1f),
         )

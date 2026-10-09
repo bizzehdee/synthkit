@@ -264,4 +264,40 @@ class LooperSessionTest {
         assertTrue(project.tracks[0].takes.isEmpty())
         assertEquals(2, project.loopBars)
     }
+
+    @Test
+    fun focusPublishesOnlyTheFocusedTrackUntilCleared() {
+        val drums = recordFirstTake()
+        val keys = session.addTrack(0, 0)!!
+        session.replaceNotes(keys, listOf(Note(0, 60, 100, 120)))
+
+        session.focusTrack(drums)
+        assertEquals(setOf(1), transport.loopNotes.map { it.channel }.toSet())
+        session.focusTrack(null)
+
+        assertEquals(setOf(1, 2), transport.loopNotes.map { it.channel }.toSet())
+        assertTrue(saved.none { project -> project.tracks.any { it.solo || it.muted } })
+    }
+
+    @Test
+    fun auditionPlaysTheNoteForItsLengthOnTheTrackChannel() {
+        session.addTrack(0, 0)
+        val keys = session.addTrack(0, 0)!!
+
+        session.audition(keys, Note(0, 60, 127, 960))
+        session.audition("gone", Note(0, 60, 127, 960))
+
+        // Two beats at 120 BPM.
+        assertEquals(listOf("on 2 60 1.0", "off 2 60 1000.0ms"), player.played)
+    }
+
+    @Test
+    fun playheadFollowsTheClockFromTheLoopStartOnlyWhilePlaying() {
+        recordFirstTake()
+        transport.clock = 480.0 + 3840 + 100
+
+        assertEquals(100, session.playheadTick())
+        session.playStop()
+        assertNull(session.playheadTick())
+    }
 }

@@ -7,7 +7,7 @@
 - [large-screen-orientation.md](large-screen-orientation.md): Android 16+ ignores the landscape lock on screens 600 dp or wider, and the rotate-message decision. Read before changing orientation handling or targetSdk.
 - [tinysoundfont-realtime.md](tinysoundfont-realtime.md): what TinySoundFont allocates and when, voice stealing, and load cost. Read before changing the synth or calling tsf from a new thread.
 - [latency-measurements.md](latency-measurements.md): Oboe-reported output latency and SoundFont load time per test phone. Read before changing buffer sizes or judging the 20 ms target.
-- [device-test-screen-timeout.md](device-test-screen-timeout.md): why device UI tests fail with "No compose hierarchies found", and how to keep the screen on. Read before running or debugging connected tests.
+- [device-test-screen-timeout.md](device-test-screen-timeout.md): why device UI tests fail with "No compose hierarchies found", how to keep the screen on, and the Android 17 Espresso failure.  Read before running or debugging connected tests.
 - [short-landscape-menus.md](short-landscape-menus.md): long dropdown menus scroll and hide items on landscape phones. Read before adding a menu or picker.
 - [sequencer-timing.md](sequencer-timing.md): why the sequencer clock counts frames, and why host tests use Clang for sanitizers. Read before changing transport timing or the host test build.
 - [viewmodel-clear-order-and-polling.md](viewmodel-clear-order-and-polling.md): view model clear order, how often polled state may change, and portrait test activities. Read before adding a view model, polling, or a crowded top bar.
