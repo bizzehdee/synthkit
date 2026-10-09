@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -63,6 +64,7 @@ fun ProjectListScreen(
     onRename: (String, String) -> Unit,
     onDuplicate: (String) -> Unit,
     onDelete: (String) -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val p = StudioTheme.palette
@@ -78,6 +80,7 @@ fun ProjectListScreen(
                 color = p.text,
                 modifier = Modifier.padding(start = 12.dp).weight(1f),
             )
+            PanelIconButton(Icons.Filled.Settings, stringResource(R.string.settings), onSettings, modifier = Modifier.padding(end = 12.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

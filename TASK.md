@@ -162,15 +162,15 @@ Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-1
 
 Branch `feat/milestone-5`. Device tests run on the 3 test phones only (Xperia 1 II, Xperia XZ Premium, Galaxy A03), not the Pixel 11 (user, 2026-10-09).
 
-- [ ] TASK-026: Settings screen
+- [x] TASK-026: Settings screen
   - Gear button on the project list opens Settings.
   - Theme: System (default), Light or Dark, applied at once and kept after restart.
   - Haptic feedback on taps, on by default.
   - Metronome during playback and quantise, with the meaning the user chooses before work starts.
-  - Settings stored on the device only. Links to the licence screen (TASK-027) and the privacy policy (TASK-028).
+  - Settings stored on the device only. TASK-027 and TASK-028 add the links to the licence screen and the privacy policy.
   - Depends on: TASK-025. Required by: TASK-027, TASK-028.
 - [ ] TASK-027: Licence screen
-  - Opened from Settings. Lists every third-party part with its licence text: Oboe, TinySoundFont, LAME, libFLAC, GeneralUser GS, Material icons, Archivo, JetBrains Mono, and the app's own GPL-3.0.
+  - Opened from Settings. Lists every third-party part with its licence text: Oboe, TinySoundFont, LAME, libFLAC, GeneralUser GS, Material icons, Archivo, JetBrains Mono, the AndroidX, Jetpack Compose, DataStore, Okio and Kotlin libraries (Apache-2.0), and the app's own GPL-3.0.
   - Texts are bundled in the app; no network.
   - Device test: every listed part opens its full text.
   - Depends on: TASK-026.

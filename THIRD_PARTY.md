@@ -6,6 +6,7 @@ Licence texts shipped in the app live in `app/src/main/assets/licences/`.
 | Component | Version | Source | Licence | Where |
 |---|---|---|---|---|
 | Oboe | 1.11.0 | Google Maven, `com.google.oboe:oboe` | Apache-2.0 | Gradle dependency |
+| Jetpack DataStore Preferences | 1.2.1 | Google Maven, `androidx.datastore:datastore-preferences` | Apache-2.0 | Gradle dependency (brings DataStore core and Okio, Apache-2.0) |
 | TinySoundFont | commit `853a0a171759f1ddba0de1442133a75912bbeffa` (2026-07-19) | https://github.com/schellingb/TinySoundFont | MIT | `app/src/main/cpp/third_party/tinysoundfont/` |
 | GeneralUser GS | v2.0.3, commit `684543d5e5efaef08d02be50dcda8d552478fa60` (2026-02-23) | https://github.com/mrbumpy409/GeneralUser-GS | GeneralUser GS License v2.0 (permissive) | `app/src/main/assets/GeneralUser-GS.sf2` |
 | LAME | 3.100 (2017-10-13) | https://sourceforge.net/projects/lame/files/lame/3.100/ | LGPL-2.0-or-later, built as its own shared library `libmp3lame.so` | `app/src/main/cpp/third_party/lame/` (library sources and `lame.h` only) |

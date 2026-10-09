@@ -60,6 +60,12 @@ import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.audio.LatencyWarning
 import com.bizzeh.synthkit.browser.BrowserScreen
 import com.bizzeh.synthkit.editor.LoopEditorScreen
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.bizzeh.synthkit.play.HapticNotePlayer
+import com.bizzeh.synthkit.settings.AppSettings
+import com.bizzeh.synthkit.settings.SettingsActions
+import com.bizzeh.synthkit.settings.SettingsScreen
 import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
@@ -90,6 +96,8 @@ fun SynthKitApp(
     sessions: SessionHost,
     exportState: ExportState,
     exportActions: ExportActions,
+    settings: AppSettings,
+    settingsActions: SettingsActions,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -111,7 +119,7 @@ fun SynthKitApp(
             )
             is EngineState.Ready -> Navigation(
                 engineState, latency, library, onToggleFavourite, onInstrumentOpened, warning, onDismissWarning,
-                projects, projectActions, sessions, exportState, exportActions,
+                projects, projectActions, sessions, exportState, exportActions, settings, settingsActions,
             )
         }
     }
@@ -131,6 +139,8 @@ private fun Navigation(
     sessions: SessionHost,
     exportState: ExportState,
     exportActions: ExportActions,
+    settings: AppSettings,
+    settingsActions: SettingsActions,
 ) {
     val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Projects) }
     fun replaceTop(route: Route) {
@@ -151,11 +161,16 @@ private fun Navigation(
             projects = projects,
             familyOf = { track -> engine.catalogue.byId("${track.bank}:${track.program}")?.family },
             onOpen = { stack.add(Route.Project(it)) },
-            onCreate = { stack.add(Route.Project(projectActions.create().id)) },
+            onCreate = { stack.add(Route.Project(projectActions.create(settings.clickInNewProjects).id)) },
             onRename = projectActions.rename,
             onDuplicate = projectActions.duplicate,
             onDelete = projectActions.delete,
+            onSettings = { stack.add(Route.Settings) },
         )
+        return
+    }
+    if (route == Route.Settings) {
+        SettingsScreen(settings = settings, actions = settingsActions, onBack = ::pop)
         return
     }
 
@@ -178,7 +193,7 @@ private fun Navigation(
     val catalogue = engine.catalogue
     fun instrumentOf(track: Track) = catalogue.byId("${track.bank}:${track.program}")
     fun addTrack(instrument: Instrument) {
-        session.addTrack(instrument.bank, instrument.program)?.let { replaceTop(Route.Track(project.id, it)) }
+        session.addTrack(instrument.bank, instrument.program, settings.newTrackQuantise)?.let { replaceTop(Route.Track(project.id, it)) }
     }
 
     when (route) {
@@ -240,10 +255,14 @@ private fun Navigation(
                 return
             }
             LaunchedEffect(instrument.id) { onInstrumentOpened(instrument.id) }
+            val haptic = LocalHapticFeedback.current
+            val player = remember(engine.player, settings.haptics, haptic) {
+                if (settings.haptics) HapticNotePlayer(engine.player) { haptic.performHapticFeedback(HapticFeedbackType.VirtualKey) } else engine.player
+            }
             PlayScreen(
                 instrument = instrument,
                 channel = trackChannel(index),
-                player = engine.player,
+                player = player,
                 latency = latency,
                 warning = warning,
                 onDismissWarning = onDismissWarning,
@@ -305,7 +324,7 @@ private fun Navigation(
                 pop()
             },
         )
-        Route.Projects -> Unit
+        Route.Projects, Route.Settings -> Unit
     }
 }
 

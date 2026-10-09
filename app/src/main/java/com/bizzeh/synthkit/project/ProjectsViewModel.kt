@@ -36,9 +36,13 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     fun project(id: String): Project? = mutableProjects.value?.firstOrNull { it.project.id == id }?.project
 
     /** Creates and saves a new empty project and returns it. */
-    fun create(): Project {
+    fun create(metronomeOnPlayback: Boolean): Project {
         val names = mutableProjects.value.orEmpty().map { it.project.name }
-        val project = Project(id = newId(), name = ProjectNames.next(names, resources.getString(R.string.project_default_name)))
+        val project = Project(
+            id = newId(),
+            name = ProjectNames.next(names, resources.getString(R.string.project_default_name)),
+            metronomeOnPlayback = metronomeOnPlayback,
+        )
         update(project)
         return project
     }

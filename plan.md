@@ -47,7 +47,7 @@ Out of scope:
 | Export | Save or share files as MIDI (type 1), WAV, MP3, FLAC and audio-only MP4 (AAC). Audio is a mixdown of a user-chosen number of loop passes; MIDI has one track per layer plus tempo and program (decided 2026-10-09). Defaults: 1 to 16 passes (2 by default) for every format; 44.1 kHz 16-bit stereo; MP3 and AAC at 192 kbit/s; a 2-second release tail on audio; drum tracks on MIDI channel 10 | built |
 | Latency warning | Dismissible banner when the audio stream is not low-latency or the output is Bluetooth, suggesting wired or speaker; play is never blocked (decided 2026-10-09). The latency and load readout moves from the play screens to a Diagnostics panel reached from the More menu (decided 2026-10-09) | built |
 | Licence screen | In-app notices for Oboe, TinySoundFont, LAME, libFLAC, GeneralUser GS, Material icons, Archivo and JetBrains Mono | planned |
-| Settings | Opened from a gear button on the project list. Haptic feedback on taps (on by default), metronome during playback, quantise, and theme: System (default), Light or Dark (decided 2026-10-09) | planned |
+| Settings | Opened from a gear button on the project list. Haptic feedback when a pad, key or chord is struck (on by default; buttons give no pulse); the click setting for new projects and the quantise for new tracks (each project and track keeps its own after that); theme: System (default), Light or Dark. Stored on the device with Jetpack DataStore (decided 2026-10-09) | built |
 | Privacy policy | Policy text for the Play listing and in-app, stating that the app collects no data, uses no network and has no ads or accounts | planned |
 | Play Store listing guide | A markdown file in the repo with everything needed to fill in the Play Console listing: title, short and full description, category, content and data-safety answers, age declaration, links | planned |
 | App icon | One icon design, used both as the Play Store icon (512 x 512, decided 2026-10-09) and as the app's launcher icon (same artwork, adaptive-icon layers for Android) | planned |
@@ -135,6 +135,7 @@ Out of scope:
 | 2026-10-09 | Changed | Loop editor: note controls swap into the top bar so the grid does not move; added, selected and moved notes play; play/stop button plays only the edited track; playback position line; tap a row name to hear it. |
 | 2026-10-09 | Changed | Loop editor: note length drawn and set by dragging the right edge, melodic tracks only. Settings: theme choice (System, Light, Dark) and a gear button on the project list. |
 | 2026-10-09 | Changed | Drum kit pages change with previous and next arrows; swiping across the pads no longer changes the page. |
+| 2026-10-09 | Changed | Settings built (TASK-026): theme, haptics on note strikes, click default for new projects, quantise default for new tracks; stored with Jetpack DataStore (approved 2026-10-09). |
 | 2026-10-09 | Changed | Milestone 4 built: export marked built. |
 | 2026-10-09 | Changed | Milestone 4 planned with export defaults. |
 | 2026-10-09 | Changed | Milestone 3 built: projects, record and loop, loop editor, metronome and quantise marked built. |

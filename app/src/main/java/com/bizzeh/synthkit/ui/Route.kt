@@ -6,6 +6,7 @@ package com.bizzeh.synthkit.ui
  */
 sealed interface Route {
     data object Projects : Route
+    data object Settings : Route
     data class Project(val projectId: String) : Route
     data class AddTrack(val projectId: String) : Route
 
@@ -17,6 +18,7 @@ sealed interface Route {
 
     fun encode(): String = when (this) {
         Projects -> PROJECTS
+        Settings -> SETTINGS
         is Project -> "project/$projectId"
         is AddTrack -> "add-track/$projectId"
         is Browser -> listOfNotNull("browser", projectId, swapTrackId).joinToString("/")
@@ -27,11 +29,13 @@ sealed interface Route {
 
     companion object {
         private const val PROJECTS = "projects"
+        private const val SETTINGS = "settings"
 
         fun decode(value: String): Route {
             val parts = value.split("/")
             return when {
                 value == PROJECTS -> Projects
+                value == SETTINGS -> Settings
                 parts[0] == "project" && parts.size == 2 -> Project(parts[1])
                 parts[0] == "add-track" && parts.size == 2 -> AddTrack(parts[1])
                 parts[0] == "browser" && parts.size in 2..3 -> Browser(parts[1], parts.getOrNull(2))
@@ -47,7 +51,7 @@ sealed interface Route {
 /** The project the screen belongs to, if any. */
 val Route.projectId: String?
     get() = when (this) {
-        Route.Projects -> null
+        Route.Projects, Route.Settings -> null
         is Route.Project -> projectId
         is Route.AddTrack -> projectId
         is Route.Browser -> projectId

@@ -7,6 +7,7 @@ import org.junit.Test
 class RouteTest {
     private val routes = listOf(
         Route.Projects,
+        Route.Settings,
         Route.Project("p-1"),
         Route.AddTrack("p-1"),
         Route.Browser("p-1"),
@@ -23,7 +24,7 @@ class RouteTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun unknownRouteIsRejected() {
-        Route.decode("settings")
+        Route.decode("help")
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -32,8 +33,9 @@ class RouteTest {
     }
 
     @Test
-    fun everyScreenButTheListBelongsToAProject() {
+    fun everyScreenButTheListAndSettingsBelongsToAProject() {
         assertNull(Route.Projects.projectId)
-        routes.drop(1).forEach { assertEquals("p-1", it.projectId) }
+        assertNull(Route.Settings.projectId)
+        routes.drop(2).forEach { assertEquals("p-1", it.projectId) }
     }
 }
