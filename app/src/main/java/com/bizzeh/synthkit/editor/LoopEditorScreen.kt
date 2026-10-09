@@ -37,6 +37,7 @@ import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.drums.GmPercussionNotes
 import com.bizzeh.synthkit.drums.shortDrumName
 import com.bizzeh.synthkit.instruments.InstrumentCatalogue
+import com.bizzeh.synthkit.looper.TakeBuilder
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.Quantise
@@ -58,6 +59,7 @@ fun LoopEditorScreen(
     onDoubleLoop: () -> Unit,
     onAudition: (Note) -> Unit,
     modifier: Modifier = Modifier,
+    playhead: (() -> Int?)? = null,
     transport: @Composable () -> Unit = {},
 ) {
     val drums = track.bank == InstrumentCatalogue.DRUM_KIT_BANK
@@ -128,6 +130,7 @@ fun LoopEditorScreen(
         }
         StepGridCanvas(
             noteColor = color,
+            playhead = playhead,
             rows = rows,
             rowLabel = { key ->
                 if (drums) {
@@ -170,6 +173,8 @@ fun LoopEditorScreen(
                 onAudition(moved[index])
                 selected = index
             },
+            onRowTap = { key -> onAudition(Note(0, key, StepGrid.NEW_NOTE_VELOCITY, TakeBuilder.ONE_SHOT_TICKS)) },
+            rowsDescription = stringResource(R.string.grid_rows_description),
             modifier = Modifier.weight(1f),
         )
     }

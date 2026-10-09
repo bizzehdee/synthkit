@@ -284,6 +284,7 @@ private fun Navigation(
                 onNotes = { session.replaceNotes(track.id, it) },
                 onDoubleLoop = session::doubleLoop,
                 onAudition = { session.audition(track.id, it.key, it.velocity) },
+                playhead = if (looper.isPlaying) session::playheadTick else null,
                 transport = {
                     PlayStopButton(
                         playing = looper.isPlaying,

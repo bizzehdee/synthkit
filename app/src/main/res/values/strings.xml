@@ -149,6 +149,7 @@
     <string name="velocity">Velocity</string>
     <string name="note_delete">Delete note</string>
     <string name="note_done">Done editing note</string>
+    <string name="grid_rows_description">Row names. Tap a name to hear it.</string>
     <string name="grid_description">Step grid: %1$s, %2$s. Tap an empty step to add a note; tap a note to select it.</string>
     <plurals name="grid_steps">
         <item quantity="one">%d step</item>

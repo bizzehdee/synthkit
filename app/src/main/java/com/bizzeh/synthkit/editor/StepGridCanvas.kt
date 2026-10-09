@@ -3,6 +3,7 @@ package com.bizzeh.synthkit.editor
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -34,13 +37,14 @@ import com.bizzeh.synthkit.ui.theme.StudioTheme
 import androidx.compose.ui.graphics.Color
 
 private val LabelWidth = 96.dp
+private val PlayheadWidth = 2.dp
 private const val STEPS_PER_BEAT = 4
 private const val STEPS_PER_BAR = 16
 
 /**
  * The step grid as one canvas, so a 128 x 128 grid costs no more than what is
  * visible. A tap on an empty cell or a note reports the cell; dragging a note
- * moves it; dragging empty space scrolls.
+ * moves it; dragging empty space scrolls. A tap on a row name reports its key.
  */
 @Composable
 fun StepGridCanvas(
@@ -54,7 +58,10 @@ fun StepGridCanvas(
     description: String,
     onTap: (Cell) -> Unit,
     onMove: (Int, Cell) -> Unit,
+    onRowTap: (Int) -> Unit,
+    rowsDescription: String,
     modifier: Modifier = Modifier,
+    playhead: (() -> Int?)? = null,
 ) {
     val cellPx = with(LocalDensity.current) { MinTouchTarget.toPx() }
     val touchSlop = LocalViewConfiguration.current.touchSlop
@@ -64,12 +71,29 @@ fun StepGridCanvas(
     val currentNotes by rememberUpdatedState(notes)
     val currentOnTap by rememberUpdatedState(onTap)
     val currentOnMove by rememberUpdatedState(onMove)
+    val currentOnRowTap by rememberUpdatedState(onRowTap)
     val p = StudioTheme.palette
     val labelStyle = MaterialTheme.typography.labelMedium.copy(color = p.muted)
     val measurer = rememberTextMeasurer()
+    // Ticks every frame only while a loop plays; reading it in the draw block redraws without recomposing.
+    val frame by produceState(0L, playhead != null) {
+        if (playhead != null) while (true) withFrameNanos { value = it }
+    }
+    val lineWidth = with(LocalDensity.current) { PlayheadWidth.toPx() }
 
     Row(modifier = modifier.fillMaxSize()) {
-        Canvas(Modifier.width(LabelWidth).fillMaxHeight()) {
+        Canvas(
+            Modifier
+                .width(LabelWidth)
+                .fillMaxHeight()
+                .semantics { contentDescription = rowsDescription }
+                .pointerInput(rows) {
+                    detectTapGestures { position ->
+                        val row = ((position.y + scrollY) / cellPx).toInt()
+                        rows.getOrNull(row)?.let(currentOnRowTap)
+                    }
+                },
+        ) {
             val first = (scrollY / cellPx).toInt().coerceAtLeast(0)
             for (row in first until rows.size) {
                 val top = row * cellPx - scrollY
@@ -151,6 +175,11 @@ fun StepGridCanvas(
                     Size(cellPx - 6f, cellPx - 6f),
                     CornerRadius(8f, 8f),
                 )
+            }
+            frame.let { _ ->
+                val tick = playhead?.invoke() ?: return@let
+                val x = tick.toFloat() / StepGrid.STEP_TICKS * cellPx - scrollX
+                if (x in 0f..size.width) drawLine(p.amber, Offset(x, 0f), Offset(x, size.height), lineWidth)
             }
         }
     }

@@ -289,4 +289,14 @@ class LooperSessionTest {
 
         assertEquals(listOf("on 2 60 1.0", "off 2 60"), player.played)
     }
+
+    @Test
+    fun playheadFollowsTheClockFromTheLoopStartOnlyWhilePlaying() {
+        recordFirstTake()
+        transport.clock = 480.0 + 3840 + 100
+
+        assertEquals(100, session.playheadTick())
+        session.playStop()
+        assertNull(session.playheadTick())
+    }
 }

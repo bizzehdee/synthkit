@@ -9,7 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.R
+import com.bizzeh.synthkit.ui.theme.DarkPalette
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.Quantise
@@ -46,6 +49,7 @@ class LoopEditorScreenTest {
     private var bars by mutableStateOf(1)
     private var doubled = 0
     private val auditioned = mutableListOf<Note>()
+    private var playhead: (() -> Int?)? = null
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
 
@@ -63,6 +67,7 @@ class LoopEditorScreenTest {
                     onNotes = { notes = it },
                     onDoubleLoop = { doubled++ },
                     onAudition = { auditioned += it },
+                    playhead = playhead,
                 )
             }
         }
@@ -188,5 +193,33 @@ class LoopEditorScreenTest {
         show()
 
         composeRule.onNodeWithContentDescription(string(R.string.grid_description, "16 steps", "1 note")).assertIsDisplayed()
+    }
+
+    @Test
+    fun playheadDrawsAnAmberLineAtThePlayingStep() {
+        playhead = { 4 * StepGrid.STEP_TICKS }
+        composeRule.mainClock.autoAdvance = false
+        show()
+        composeRule.mainClock.advanceTimeByFrame()
+
+        val grid = composeRule.onNode(hasContentDescription("Step grid", substring = true)).captureToImage().toPixelMap()
+        val cellPx = with(composeRule.density) { 48.dp.toPx() }
+        val y = (cellPx * 2.5f).toInt()
+
+        assertEquals(DarkPalette.amber, grid[(4 * cellPx).toInt(), y])
+        assertEquals(false, grid[(5 * cellPx + cellPx / 2).toInt(), y] == DarkPalette.amber)
+    }
+
+    @Test
+    fun tappingARowNamePlaysItWithoutAddingANote() {
+        show()
+
+        composeRule.onNodeWithContentDescription(string(R.string.grid_rows_description)).performTouchInput {
+            click(Offset(centerX, with(composeRule.density) { 48.dp.toPx() } * 1.5f))
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(38), auditioned.map { it.key })
+        assertTrue(notes.isEmpty())
     }
 }

@@ -131,6 +131,15 @@ class LooperSession(
         }
     }
 
+    /**
+     * Where the loop is now, in ticks from the loop start, or null when no loop
+     * plays. Read it while drawing, not into UI state: it changes every frame.
+     */
+    fun playheadTick(): Int? = when (mutableState.value.phase) {
+        Phase.PLAYING, Phase.OVERDUBBING -> LoopMath.wrap(transport.clockTicks().toLong(), loopOrigin, project.loopTicks)
+        else -> null
+    }
+
     /** Reads recorded notes and the clock. */
     fun poll() {
         transport.drainRecorded().forEach(::onRecorded)

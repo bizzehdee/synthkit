@@ -22,3 +22,11 @@ Established 2026-10-09 by elimination on a Galaxy A03 (screen timeout 30 s).
   Premium, 2026-10-09, right after the lock screen was dismissed. Its message was
   not captured. It did not recur in 3 single runs and 4 full-class runs. If it
   recurs, record the message here.
+- 2026-10-09: a Pixel 11 on Android 17 (serial 66241FDKY001PL) was connected.
+  Every Compose test failed on it before test code ran:
+  `NoSuchMethodException: android.hardware.input.InputManager.getInstance`
+  inside `Espresso.onIdle`. The 3 test phones passed the same tests. Unverified
+  cause: the Espresso version in use calls an API that Android 17 removed.
+  Remedy for now: limit the run with
+  `ANDROID_SERIAL=CB512ECGL7,QV710FXP3F,R9YT71C0GSL`; AGP honours the
+  comma-separated list.
