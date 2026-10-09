@@ -35,7 +35,11 @@ itself after every change. Inside a project:
 5. Use **Edit loop** to tidy a track: quantise it, add, move or delete notes on
    a grid, change how hard a note is played, or double the loop.
 
-A project holds up to 8 tracks. Export to audio and MIDI is planned.
+A project holds up to 8 tracks.
+
+**Export.** Tap **Export** in a project to save or share it as MIDI, WAV, MP3,
+FLAC or MP4 audio. Choose how many times the loop plays (1 to 16). Save uses the
+system file picker, so the app never asks for storage permission.
 See [plan.md](plan.md) for the full plan.
 
 ## Requirements
@@ -51,7 +55,8 @@ You need:
 
 - JDK 17 or newer.
 - The Android SDK with platform 37, NDK r30 and CMake 4.1.
-- For the C++ host tests: CMake, Ninja and Clang on the build machine.
+- For the C++ host tests: CMake, Ninja and Clang on the build machine. The host
+  tests download GoogleTest when first configured.
 
 Steps:
 

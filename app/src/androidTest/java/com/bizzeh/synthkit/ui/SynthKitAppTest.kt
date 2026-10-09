@@ -14,6 +14,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.browser.Library
+import com.bizzeh.synthkit.export.ExportActions
+import com.bizzeh.synthkit.export.ExportState
 import com.bizzeh.synthkit.looper.SessionViewModel
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.ProjectActions
@@ -64,6 +66,8 @@ class SynthKitAppTest {
                 projects = projects,
                 projectActions = actions,
                 sessions = sessions,
+                exportState = ExportState.Idle,
+                exportActions = ExportActions({ _, _, _, _, _ -> }, {}, {}, { _, _ -> }),
             )
         }
     }

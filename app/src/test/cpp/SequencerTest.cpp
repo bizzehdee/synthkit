@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "audio/SoundFontSynth.h"
-#include "tsf.h"
+#include "TestFont.h"
 
 using synthkit::LoopNote;
 using synthkit::LoopNotes;
@@ -232,7 +232,7 @@ TEST(Sequencer, SnapshotsCanBeReplacedWhileTheAudioThreadPlays) {
 namespace {
 
 std::unique_ptr<SoundFontSynth> loadSynth() {
-    auto synth = SoundFontSynth::create(tsf_load_filename(SYNTHKIT_SOUND_FONT));
+    auto synth = SoundFontSynth::create(loadTestFont());
     if (synth) {
         synth->setSampleRate(kRate);
         synth->programChange(Sequencer::kClickChannel, SoundFontSynth::kDrumBank, 0);

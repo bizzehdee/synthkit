@@ -106,3 +106,31 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
 - [x] TASK-016: Track limit on the budget phone
   - Measure audio callback load and underruns on the Galaxy A03 with 4, 6 and 8 busy tracks; set the shipped limit (design 8, never below 4); record the result in `.learnings/`.
   - Depends on: TASK-014.
+
+## Milestone 4: export to audio and MIDI
+
+Branch `feat/milestone-4`. Defaults chosen by Claude where the plan is silent are marked "Default".
+
+Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kbit/s; FLAC level 5; loop passes 1 to 16, default 2, used by every format; audio adds a 2-second release tail. MIDI drum tracks use channel 10 with the kit as a GS program change; melodic tracks use channels 1 to 9 and 11 to 16.
+
+- [x] TASK-017: Offline renderer
+  - Renders the project's notes for N passes plus the tail, in blocks, on a worker thread, while live audio keeps playing.
+  - Uses a TinySoundFont copy of an idle template made at load, so the 32 MB SoundFont is not loaded twice and the live instance is never read concurrently.
+  - Streams: memory use does not grow with export length.
+  - GoogleTest host tests. Depends on: TASK-013. Required by: TASK-018 to TASK-021.
+- [x] TASK-018: WAV and MIDI writers
+  - WAV: streaming 16-bit PCM writer, header fixed up at the end.
+  - MIDI: Type 1 file, a tempo and time-signature track, one track per project track with program change and notes.
+  - JVM tests on the bytes. Depends on: TASK-017.
+- [x] TASK-019: MP3 and FLAC encoders
+  - LAME 3.100 and libFLAC 1.5.0 vendored from verified official tarballs, built with CMake. LAME is a separate shared library (LGPL).
+  - Streaming native encoders fed from the renderer.
+  - Host tests decode the output (FLAC with libFLAC, MP3 frame headers) and check length and format.
+  - Licence notices added. Depends on: TASK-017.
+- [x] TASK-020: AAC in MP4
+  - Platform AAC encoder through MediaCodec and MediaMuxer, fed from the renderer.
+  - Device test reads the file back with MediaExtractor. Depends on: TASK-017.
+- [x] TASK-021: Export screen
+  - From the project screen: format, loop passes, Export with progress and Cancel, then Save (system file picker) or Share.
+  - Export files live in app cache and the previous export is deleted at the next export. No storage permission.
+  - Depends on: TASK-018, TASK-019, TASK-020.

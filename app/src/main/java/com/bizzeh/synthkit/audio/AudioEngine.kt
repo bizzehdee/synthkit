@@ -1,6 +1,7 @@
 package com.bizzeh.synthkit.audio
 
 import android.content.res.AssetManager
+import com.bizzeh.synthkit.export.ExportSpec
 
 /**
  * Low-latency SoundFont playback. Note calls must come from one thread at a
@@ -58,6 +59,20 @@ class AudioEngine private constructor(private var handle: Long) : InstrumentPlay
 
     /** Recording subtracts this from every live note, so takes match what the player heard. */
     fun setLatency(millis: Float): Boolean = nativeSetLatency(checkOpen(), millis)
+
+    /** Opens an offline render; safe off the main thread while playing. Null when refused. */
+    fun openExport(spec: ExportSpec): ExportRender? = nativeOpenExport(
+        checkOpen(),
+        spec.sampleRate, spec.bpm, spec.loopTicks, spec.passes, spec.tailMillis,
+        IntArray(spec.tracks.size) { spec.tracks[it].channel },
+        IntArray(spec.tracks.size) { spec.tracks[it].bank },
+        IntArray(spec.tracks.size) { spec.tracks[it].program },
+        FloatArray(spec.tracks.size) { spec.tracks[it].volume },
+        IntArray(spec.notes.size) { spec.notes[it].tick },
+        IntArray(spec.notes.size) { spec.notes[it].channel },
+        IntArray(spec.notes.size) { spec.notes[it].key },
+        FloatArray(spec.notes.size) { spec.notes[it].velocity },
+    ).takeIf { it != 0L }?.let { ExportRender(it, spec.sampleRate) }
 
     fun presets(): List<Preset> = Preset.fromNative(nativePresets(checkOpen()))
 
@@ -119,6 +134,22 @@ class AudioEngine private constructor(private var handle: Long) : InstrumentPlay
             velocities: FloatArray,
         ): Boolean
         @JvmStatic private external fun nativeDrainRecorded(handle: Long): DoubleArray
+        @JvmStatic private external fun nativeOpenExport(
+            handle: Long,
+            sampleRate: Int,
+            bpm: Int,
+            loopTicks: Int,
+            passes: Int,
+            tailMillis: Int,
+            trackChannels: IntArray,
+            banks: IntArray,
+            programs: IntArray,
+            volumes: FloatArray,
+            ticks: IntArray,
+            channels: IntArray,
+            keys: IntArray,
+            velocities: FloatArray,
+        ): Long
         @JvmStatic private external fun nativeLatencyReport(handle: Long): Array<String>
     }
 }

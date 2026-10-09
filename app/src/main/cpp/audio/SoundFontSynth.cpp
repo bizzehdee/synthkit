@@ -45,16 +45,23 @@ std::unique_ptr<SoundFontSynth> SoundFontSynth::create(tsf* font) {
         const int midiDrums = channel == kDrumChannel ? 1 : 0;
         ready = tsf_channel_set_presetnumber(font, channel, 0, midiDrums) != 0;
     }
-    if (!ready) {
+    // The export template is copied before any audio thread exists, so the
+    // copy never races the live instance.
+    auto shared = std::make_shared<SharedFont>();
+    shared->idle = ready ? tsf_copy(font) : nullptr;
+    if (shared->idle == nullptr) {
         tsf_close(font);
         return nullptr;
     }
-    return std::unique_ptr<SoundFontSynth>(new SoundFontSynth(font));
+    return std::unique_ptr<SoundFontSynth>(new SoundFontSynth(font, std::move(shared)));
 }
 
-SoundFontSynth::SoundFontSynth(tsf* font) : font_(font) {}
+SoundFontSynth::SoundFontSynth(tsf* font, std::shared_ptr<SharedFont> shared) : font_(font), shared_(std::move(shared)) {}
 
-SoundFontSynth::~SoundFontSynth() { tsf_close(font_); }
+SoundFontSynth::~SoundFontSynth() {
+    std::lock_guard<std::mutex> guard(shared_->lock);
+    tsf_close(font_);
+}
 
 void SoundFontSynth::setSampleRate(int32_t sampleRate) {
     sampleRate_ = sampleRate;

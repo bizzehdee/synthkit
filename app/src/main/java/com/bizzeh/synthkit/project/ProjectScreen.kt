@@ -26,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -76,6 +77,7 @@ fun ProjectScreen(
     onPlayStop: () -> Unit,
     tracks: TrackActions,
     modifier: Modifier = Modifier,
+    onExport: () -> Unit = {},
 ) {
     val project = state.project
     var confirmDelete by rememberSaveable { mutableStateOf<String?>(null) }
@@ -104,6 +106,11 @@ fun ProjectScreen(
         }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(start = 12.dp)) {
             PhaseStatus(state, Modifier.weight(1f))
+            OutlinedButton(
+                onClick = onExport,
+                enabled = project.loopBars > 0,
+                modifier = Modifier.heightIn(min = MinTouchTarget).padding(end = 8.dp),
+            ) { Text(stringResource(R.string.export)) }
             Button(onClick = onAddTrack, enabled = canAddTrack, modifier = Modifier.heightIn(min = MinTouchTarget)) {
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Text(stringResource(R.string.add_track))

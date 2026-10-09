@@ -1,6 +1,6 @@
 # Export encoders on Android
 
-Established 2026-10-09 from web search extracts (not archived under `research/`). Nothing has been added to the project yet; each dependency needs user approval first.
+Established 2026-10-09 from web search extracts (not archived under `research/`). Approved in `plan.md`; vendored in milestone 4 (see `THIRD_PARTY.md`).
 
 - MP3: Android decodes MP3 but lists no MP3 encoder, and the CDD requires none. Encoding needs a library. Inferred from the supported-formats table; verify on a device with `MediaCodecList`.
 - AAC: the platform AAC LC encoder exists. `MediaMuxer` writes MP4, WebM, 3GP, HEIF and Ogg, so audio-only MP4 (AAC) needs no dependency.
@@ -14,3 +14,17 @@ Sources:
 - https://developer.android.com/reference/android/media/MediaMuxer
 - https://seclists.org/oss-sec/2017/q4/121
 - https://newreleases.io/project/github/xiph/flac/release/1.5.0
+
+Building them (2026-10-09, milestone 4):
+
+- Neither library is built with its own build system. LAME's autotools output
+  and libFLAC's CMake probe for Ogg, iconv and SIMD; our `third_party_config/`
+  holds a fixed `config.h` per library and `codecs.cmake` compiles only the
+  library sources.
+- LAME's generated config normally adds `typedef float ieee754_float32_t` (and
+  the 64-bit one); without it `util.h` does not compile. `fft.c` always includes
+  `vector/lame_intrin.h`, so that header is vendored though the SSE source is not.
+- libFLAC includes `deduplication/*.c` from `bitreader.c` and `lpc.c`; the
+  folder must be vendored even with `FLAC__NO_ASM`.
+- Host tests prove FLAC is lossless (decoded samples equal the input) and walk
+  every MP3 frame header (MPEG-1 Layer III, 192 kbit/s, 44.1 kHz).

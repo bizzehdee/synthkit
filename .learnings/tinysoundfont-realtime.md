@@ -27,3 +27,19 @@ Established 2026-10-09 by reading `tsf.h` at commit 853a0a1 (vendored in
   exposes one from the implementation unit.
 - TinySoundFont's sustain does not end a held note when the same key is
   replayed, which the agreed hold rule requires. Hold is therefore done in Kotlin.
+- `tsf_copy` (2026-10-09, read in `tsf.h`): memcpy of the whole struct, then
+  voices and channels set to null. It keeps `maxVoiceNum`, so a copy plays
+  nothing until `tsf_set_max_voices` is called on it. It reads every field of
+  the source, so copying the live instance races the audio thread; exports copy
+  an idle template made at load (`SharedFont`). All copies share one
+  non-atomic reference count: close them under `SharedFont::lock`.
+- Output depends on how rendering is split: envelopes update per internal block,
+  so rendering 777 frames at a time differs from 4096 at a time (host test
+  `OfflineRenderer.OutputIsTheSameEveryTime`). The export renderer always
+  renders fixed chunks split only at note events.
+- `tsf.h` line 627 shifts a negative `short` left (`shortAmount << 15`),
+  which is undefined in C++17 and reported by UndefinedBehaviorSanitizer when
+  GeneralUser GS loads. The native code builds as C++20, where it is defined.
+  `tsf_load_filename` and `tsf_load_memory` call stdio callbacks through
+  mismatched function types (also a UBSan report); the app and tests load
+  through typed `tsf_stream` callbacks instead.

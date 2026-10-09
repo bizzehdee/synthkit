@@ -198,6 +198,89 @@ JNIEXPORT jdoubleArray JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_native
     return result;
 }
 
+namespace {
+
+constexpr int kMinExportRate = 8000;
+constexpr int kMaxExportRate = 96000;
+constexpr int kMaxPasses = 16;
+constexpr int kMaxTailMillis = 10000;
+
+}  // namespace
+
+// Everything from Kotlin is checked before the renderer sees it. Returns 0 on
+// a bad request; otherwise a handle owned by the caller until nativeExportClose.
+JNIEXPORT jlong JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_nativeOpenExport(
+        JNIEnv* env, jclass /*clazz*/, jlong handle, jint sampleRate, jint bpm, jint loopTicks, jint passes,
+        jint tailMillis, jintArray trackChannels, jintArray banks, jintArray programs, jfloatArray volumes,
+        jintArray ticks, jintArray channels, jintArray keys, jfloatArray velocities) {
+    if (sampleRate < kMinExportRate || sampleRate > kMaxExportRate || bpm < synthkit::SoundFontSynth::kMinTempo ||
+        bpm > synthkit::SoundFontSynth::kMaxTempo || loopTicks <= 0 || passes < 1 || passes > kMaxPasses ||
+        tailMillis < 0 || tailMillis > kMaxTailMillis) {
+        return 0;
+    }
+    const jsize trackCount = env->GetArrayLength(trackChannels);
+    const jsize noteCount = env->GetArrayLength(ticks);
+    if (trackCount > synthkit::SoundFontSynth::kMidiChannels || env->GetArrayLength(banks) != trackCount ||
+        env->GetArrayLength(programs) != trackCount || env->GetArrayLength(volumes) != trackCount ||
+        env->GetArrayLength(channels) != noteCount || env->GetArrayLength(keys) != noteCount ||
+        env->GetArrayLength(velocities) != noteCount) {
+        return 0;
+    }
+    std::vector<jint> trackChannelValues(trackCount), bankValues(trackCount), programValues(trackCount);
+    std::vector<jfloat> volumeValues(trackCount);
+    env->GetIntArrayRegion(trackChannels, 0, trackCount, trackChannelValues.data());
+    env->GetIntArrayRegion(banks, 0, trackCount, bankValues.data());
+    env->GetIntArrayRegion(programs, 0, trackCount, programValues.data());
+    env->GetFloatArrayRegion(volumes, 0, trackCount, volumeValues.data());
+    std::vector<jint> tickValues(noteCount), channelValues(noteCount), keyValues(noteCount);
+    std::vector<jfloat> velocityValues(noteCount);
+    env->GetIntArrayRegion(ticks, 0, noteCount, tickValues.data());
+    env->GetIntArrayRegion(channels, 0, noteCount, channelValues.data());
+    env->GetIntArrayRegion(keys, 0, noteCount, keyValues.data());
+    env->GetFloatArrayRegion(velocities, 0, noteCount, velocityValues.data());
+
+    const auto validChannel = [](jint channel) { return channel >= 0 && channel < synthkit::SoundFontSynth::kMidiChannels; };
+    synthkit::ExportSpec spec{sampleRate, bpm, loopTicks, passes, tailMillis, {}, {}};
+    for (jsize i = 0; i < trackCount; ++i) {
+        if (!validChannel(trackChannelValues[i]) || bankValues[i] < 0 || bankValues[i] > 16383 || programValues[i] < 0 ||
+            programValues[i] > 127 || !(volumeValues[i] >= 0.0f && volumeValues[i] <= 1.0f)) {
+            return 0;
+        }
+        spec.tracks.push_back({static_cast<uint8_t>(trackChannelValues[i]), static_cast<uint16_t>(bankValues[i]),
+                               static_cast<uint8_t>(programValues[i]), volumeValues[i]});
+    }
+    spec.notes.reserve(noteCount);
+    for (jsize i = 0; i < noteCount; ++i) {
+        if (tickValues[i] < 0 || tickValues[i] >= 2 * loopTicks || !validChannel(channelValues[i]) || keyValues[i] < 0 ||
+            keyValues[i] > 127 || !(velocityValues[i] >= 0.0f && velocityValues[i] <= 1.0f)) {
+            return 0;
+        }
+        spec.notes.push_back({tickValues[i], static_cast<uint8_t>(channelValues[i]), static_cast<uint8_t>(keyValues[i]),
+                              velocityValues[i]});
+    }
+    auto renderer = engine(handle).synth().openExport(spec);
+    return renderer ? reinterpret_cast<jlong>(renderer.release()) : 0;
+}
+
+JNIEXPORT jint JNICALL Java_com_bizzeh_synthkit_audio_ExportRender_nativeRender(
+        JNIEnv* env, jclass /*clazz*/, jlong exportHandle, jshortArray buffer) {
+    const jsize frames = env->GetArrayLength(buffer) / 2;
+    std::vector<int16_t> samples(static_cast<size_t>(frames) * 2);
+    const int32_t rendered = reinterpret_cast<synthkit::OfflineRenderer*>(exportHandle)->render(samples.data(), frames);
+    env->SetShortArrayRegion(buffer, 0, rendered * 2, samples.data());
+    return rendered;
+}
+
+JNIEXPORT jlong JNICALL Java_com_bizzeh_synthkit_audio_ExportRender_nativeTotalFrames(
+        JNIEnv* /*env*/, jclass /*clazz*/, jlong exportHandle) {
+    return reinterpret_cast<synthkit::OfflineRenderer*>(exportHandle)->totalFrames();
+}
+
+JNIEXPORT void JNICALL Java_com_bizzeh_synthkit_audio_ExportRender_nativeClose(
+        JNIEnv* /*env*/, jclass /*clazz*/, jlong exportHandle) {
+    delete reinterpret_cast<synthkit::OfflineRenderer*>(exportHandle);
+}
+
 // Field order must match LatencyReport.fromNative in Kotlin.
 JNIEXPORT jobjectArray JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_nativeLatencyReport(
         JNIEnv* env, jclass /*clazz*/, jlong handle) {

@@ -1,12 +1,13 @@
 #include "audio/SoundFontSynth.h"
 
 #include <algorithm>
+#include <cstring>
 #include <cmath>
 #include <vector>
 
 #include <gtest/gtest.h>
 
-#include "tsf.h"
+#include "TestFont.h"
 
 using synthkit::SoundFontSynth;
 
@@ -19,7 +20,7 @@ constexpr int kSnare = 38;
 constexpr float kVelocity = 0.8f;
 
 std::unique_ptr<SoundFontSynth> loadSynth() {
-    auto synth = SoundFontSynth::create(tsf_load_filename(SYNTHKIT_SOUND_FONT));
+    auto synth = SoundFontSynth::create(loadTestFont());
     if (synth) {
         synth->setSampleRate(kSampleRate);
     }
@@ -43,9 +44,33 @@ TEST(SoundFontSynth, CreateRejectsAMissingFont) {
 }
 
 TEST(SoundFontSynth, CreateRejectsDataThatIsNotASoundFont) {
-    const char notASoundFont[] = "RIFF....WAVEfmt ";
+    struct Memory {
+        const char* data;
+        unsigned int size;
+        unsigned int at;
+    };
+    static const char notASoundFont[] = "RIFF....WAVEfmt ";
+    Memory memory{notASoundFont, sizeof(notASoundFont), 0};
+    // tsf_load_memory calls through mismatched function types (a UBSan report);
+    // this stream has the right types.
+    tsf_stream stream{
+        &memory,
+        [](void* data, void* ptr, unsigned int size) {
+            auto* m = static_cast<Memory*>(data);
+            const unsigned int count = std::min(size, m->size - m->at);
+            std::memcpy(ptr, m->data + m->at, count);
+            m->at += count;
+            return static_cast<int>(count);
+        },
+        [](void* data, unsigned int count) {
+            auto* m = static_cast<Memory*>(data);
+            if (count > m->size - m->at) return 0;
+            m->at += count;
+            return 1;
+        },
+    };
 
-    tsf* font = tsf_load_memory(notASoundFont, sizeof(notASoundFont));
+    tsf* font = tsf_load(&stream);
 
     EXPECT_EQ(SoundFontSynth::create(font), nullptr);
 }
