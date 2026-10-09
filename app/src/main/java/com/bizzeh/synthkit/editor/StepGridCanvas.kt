@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 
 private val LabelWidth = 96.dp
 private val PlayheadWidth = 2.dp
+private val HandleWidth = 4.dp
 private const val STEPS_PER_BEAT = 4
 private const val STEPS_PER_BAR = 16
 
@@ -45,6 +46,7 @@ private const val STEPS_PER_BAR = 16
  * The step grid as one canvas, so a 128 x 128 grid costs no more than what is
  * visible. A tap on an empty cell or a note reports the cell; dragging a note
  * moves it; dragging empty space scrolls. A tap on a row name reports its key.
+ * When [resizable], dragging the selected note's right edge sets its length.
  */
 @Composable
 fun StepGridCanvas(
@@ -60,6 +62,8 @@ fun StepGridCanvas(
     onMove: (Int, Cell) -> Unit,
     onRowTap: (Int) -> Unit,
     rowsDescription: String,
+    resizable: Boolean,
+    onResize: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
     playhead: (() -> Int?)? = null,
 ) {
@@ -68,10 +72,13 @@ fun StepGridCanvas(
     var scrollX by remember { mutableFloatStateOf(0f) }
     var scrollY by remember { mutableFloatStateOf(initialRow * cellPx) }
     var dragTarget by remember { mutableStateOf<Pair<Int, Cell>?>(null) }
+    var resizeTarget by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val currentNotes by rememberUpdatedState(notes)
     val currentOnTap by rememberUpdatedState(onTap)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnRowTap by rememberUpdatedState(onRowTap)
+    val currentOnResize by rememberUpdatedState(onResize)
+    val currentSelected by rememberUpdatedState(selected)
     val p = StudioTheme.palette
     val labelStyle = MaterialTheme.typography.labelMedium.copy(color = p.muted)
     val measurer = rememberTextMeasurer()
@@ -80,6 +87,7 @@ fun StepGridCanvas(
         if (playhead != null) while (true) withFrameNanos { value = it }
     }
     val lineWidth = with(LocalDensity.current) { PlayheadWidth.toPx() }
+    val handleWidth = with(LocalDensity.current) { HandleWidth.toPx() }
 
     Row(modifier = modifier.fillMaxSize()) {
         Canvas(
@@ -105,7 +113,7 @@ fun StepGridCanvas(
             Modifier
                 .fillMaxSize()
                 .semantics { contentDescription = description }
-                .pointerInput(rows, columns) {
+                .pointerInput(rows, columns, resizable) {
                     fun clampScroll() {
                         scrollX = scrollX.coerceIn(0f, (columns * cellPx - size.width).coerceAtLeast(0f))
                         scrollY = scrollY.coerceIn(0f, (rows.size * cellPx - size.height).coerceAtLeast(0f))
@@ -115,10 +123,22 @@ fun StepGridCanvas(
                         val row = ((position.y + scrollY) / cellPx).toInt()
                         return if (column in 0 until columns && row in rows.indices) Cell(column, rows[row]) else null
                     }
+                    // The selected note's right edge, give or take a third of a cell, is its length handle.
+                    fun handleAt(position: Offset): Int? {
+                        val index = currentSelected?.takeIf { resizable } ?: return null
+                        val note = currentNotes.getOrNull(index) ?: return null
+                        val cell = StepGrid.cellOf(note, columns)
+                        val edge = (cell.column + StepGrid.stepsOf(note, columns)) * cellPx - scrollX
+                        val row = rows.indexOf(cell.key)
+                        val onRow = ((position.y + scrollY) / cellPx).toInt() == row
+                        return index.takeIf { onRow && position.x in edge - cellPx / 3..edge + cellPx / 3 }
+                    }
                     awaitEachGesture {
                         val down = awaitFirstDown()
+                        val handle = handleAt(down.position)
                         val start = cellAt(down.position) ?: return@awaitEachGesture
-                        val note = StepGrid.noteAt(currentNotes, start, columns)
+                        val note = if (handle == null) StepGrid.noteAt(currentNotes, start, columns) else null
+                        val grabOffset = note?.let { start.column - StepGrid.cellOf(currentNotes[it], columns).column } ?: 0
                         var travelled = 0f
                         while (true) {
                             val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
@@ -126,8 +146,14 @@ fun StepGridCanvas(
                             val delta = change.positionChange()
                             travelled += delta.getDistance()
                             if (travelled > touchSlop) {
-                                if (note != null) {
-                                    cellAt(change.position)?.let { dragTarget = note to it }
+                                if (handle != null) {
+                                    val first = StepGrid.cellOf(currentNotes[handle], columns).column
+                                    val column = ((change.position.x + scrollX) / cellPx).toInt()
+                                    resizeTarget = handle to (column - first + 1).coerceIn(1, columns - first)
+                                } else if (note != null) {
+                                    cellAt(change.position)?.let {
+                                        dragTarget = note to it.copy(column = (it.column - grabOffset).coerceIn(0, columns - 1))
+                                    }
                                 } else {
                                     scrollX -= delta.x
                                     scrollY -= delta.y
@@ -137,9 +163,12 @@ fun StepGridCanvas(
                             }
                         }
                         val target = dragTarget
+                        val resized = resizeTarget
                         dragTarget = null
+                        resizeTarget = null
                         when {
                             travelled <= touchSlop -> currentOnTap(start)
+                            resized != null -> currentOnResize(resized.first, resized.second)
                             note != null && target != null -> currentOnMove(target.first, target.second)
                         }
                     }
@@ -167,14 +196,26 @@ fun StepGridCanvas(
                 val cell = dragging ?: StepGrid.cellOf(note, columns)
                 val row = rows.indexOf(cell.key)
                 if (row < 0) return@forEachIndexed
+                val steps = resizeTarget?.takeIf { it.first == index }?.second
+                    ?: StepGrid.stepsOf(note, columns).coerceAtMost(columns - cell.column)
                 val origin = Offset(cell.column * cellPx - scrollX + 3f, row * cellPx - scrollY + 3f)
+                val noteSize = Size(steps * cellPx - 6f, cellPx - 6f)
                 val color = if (index == selected || dragging != null) p.amber else noteColor
                 drawRoundRect(
                     color.copy(alpha = 0.35f + 0.65f * note.velocity / 127f),
                     origin,
-                    Size(cellPx - 6f, cellPx - 6f),
+                    noteSize,
                     CornerRadius(8f, 8f),
                 )
+                if (resizable && index == selected) {
+                    val grip = Size(handleWidth, noteSize.height / 2)
+                    drawRoundRect(
+                        p.onLit,
+                        Offset(origin.x + noteSize.width - handleWidth * 2, origin.y + noteSize.height / 4),
+                        grip,
+                        CornerRadius(handleWidth / 2, handleWidth / 2),
+                    )
+                }
             }
             frame.let { _ ->
                 val tick = playhead?.invoke() ?: return@let

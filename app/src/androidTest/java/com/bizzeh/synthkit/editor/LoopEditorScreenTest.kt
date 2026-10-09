@@ -50,12 +50,13 @@ class LoopEditorScreenTest {
     private var doubled = 0
     private val auditioned = mutableListOf<Note>()
     private var playhead: (() -> Int?)? = null
+    private var bank = 128
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
 
     private fun show() {
         composeRule.setContent {
-            val track = Track("t", 128, 0, takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes)), quantise = quantise)
+            val track = Track("t", bank, 0, takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes)), quantise = quantise)
             Box(Modifier.size(640.dp, 340.dp)) {
                 LoopEditorScreen(
                     color = Color.Cyan,
@@ -221,5 +222,44 @@ class LoopEditorScreenTest {
 
         assertEquals(listOf(38), auditioned.map { it.key })
         assertTrue(notes.isEmpty())
+    }
+
+    @Test
+    fun draggingTheSelectedMelodicNotesEdgeSetsItsLength() {
+        bank = 0
+        notes = listOf(Note(0, 60, 100, 120))
+        show()
+        tap(0, 0)
+        val edge = cell(0, 0) + Offset(with(composeRule.density) { 20.dp.toPx() }, 0f)
+
+        composeRule.onRoot().performTouchInput {
+            down(edge)
+            moveTo(edge + Offset(20f, 0f))
+            moveTo(cell(3, 0))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(Note(0, 60, 100, 480)), notes)
+        assertEquals(480, auditioned.last().lengthTicks)
+    }
+
+    @Test
+    fun drumNotesHaveNoLengthHandle() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        tap(0, 0)
+        val edge = cell(0, 0) + Offset(with(composeRule.density) { 20.dp.toPx() }, 0f)
+
+        composeRule.onRoot().performTouchInput {
+            down(edge)
+            moveTo(edge + Offset(20f, 0f))
+            moveTo(cell(3, 0))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        // Without a handle the drag moves the drum note instead.
+        assertEquals(listOf(Note(360, 36, 100, 120)), notes)
     }
 }

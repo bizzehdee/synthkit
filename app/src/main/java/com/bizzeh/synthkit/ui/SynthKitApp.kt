@@ -283,7 +283,7 @@ private fun Navigation(
                 onQuantise = { session.setQuantise(track.id, it) },
                 onNotes = { session.replaceNotes(track.id, it) },
                 onDoubleLoop = session::doubleLoop,
-                onAudition = { session.audition(track.id, it.key, it.velocity) },
+                onAudition = { session.audition(track.id, it) },
                 playhead = if (looper.isPlaying) session::playheadTick else null,
                 transport = {
                     PlayStopButton(

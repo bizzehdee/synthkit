@@ -68,4 +68,24 @@ class StepGridTest {
         assertEquals(127, StepGrid.setVelocity(notes, 0, 300)[0].velocity)
         assertEquals(1, StepGrid.setVelocity(notes, 0, 0)[0].velocity)
     }
+
+    @Test
+    fun aLongNoteCoversEveryStepOfItsLengthUpToTheLoopEnd() {
+        val long = listOf(Note(240, 60, 100, 4 * StepGrid.STEP_TICKS))
+
+        assertEquals(4, StepGrid.stepsOf(long[0], 16))
+        assertEquals(0, StepGrid.noteAt(long, Cell(5, 60), 16))
+        assertNull(StepGrid.noteAt(long, Cell(6, 60), 16))
+        assertEquals(1, StepGrid.stepsOf(Note(0, 60, 100, 10), 16))
+        assertEquals(2, StepGrid.stepsOf(Note(14 * StepGrid.STEP_TICKS, 60, 100, 960), 16))
+    }
+
+    @Test
+    fun setLengthKeepsAtLeastOneStepAndStopsAtTheLoopEnd() {
+        val note = listOf(Note(12 * StepGrid.STEP_TICKS, 60, 100, 120))
+
+        assertEquals(3 * StepGrid.STEP_TICKS, StepGrid.setLength(note, 0, 3, 16)[0].lengthTicks)
+        assertEquals(StepGrid.STEP_TICKS, StepGrid.setLength(note, 0, 0, 16)[0].lengthTicks)
+        assertEquals(4 * StepGrid.STEP_TICKS, StepGrid.setLength(note, 0, 9, 16)[0].lengthTicks)
+    }
 }

@@ -309,12 +309,13 @@ class LooperSession(
         publishLoop()
     }
 
-    /** Plays one note on [trackId]'s instrument so an edit is heard. */
-    fun audition(trackId: String, key: Int, velocity: Int) {
+    /** Plays one note on [trackId]'s instrument, for its length at the project tempo, so an edit is heard. */
+    fun audition(trackId: String, note: Note) {
         val index = project.tracks.indexOfFirst { it.id == trackId }.takeIf { it >= 0 } ?: return
         val channel = trackChannel(index)
-        player.noteOn(channel, key, velocity.coerceIn(1, 127) / 127f)
-        player.noteOff(channel, key, AUDITION_MILLIS)
+        val millis = note.lengthTicks * MILLIS_PER_MINUTE / (TICKS_PER_BEAT * project.tempoBpm)
+        player.noteOn(channel, note.key, note.velocity.coerceIn(1, 127) / 127f)
+        player.noteOff(channel, note.key, millis)
     }
 
     /** Doubles the loop up to 8 bars, repeating every track's notes in the new half. */
@@ -360,7 +361,7 @@ class LooperSession(
     }
 
     private companion object {
-        const val AUDITION_MILLIS = 300f
+        const val MILLIS_PER_MINUTE = 60_000f
     }
 
     private fun update(transform: (LooperState) -> LooperState) {

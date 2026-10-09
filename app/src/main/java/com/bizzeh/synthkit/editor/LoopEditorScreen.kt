@@ -175,6 +175,13 @@ fun LoopEditorScreen(
             },
             onRowTap = { key -> onAudition(Note(0, key, StepGrid.NEW_NOTE_VELOCITY, TakeBuilder.ONE_SHOT_TICKS)) },
             rowsDescription = stringResource(R.string.grid_rows_description),
+            // Most drum sounds ring out whatever the note length, so drum notes stay one step.
+            resizable = !drums,
+            onResize = { index, steps ->
+                val resized = StepGrid.setLength(notes, index, steps, columns)
+                onNotes(resized)
+                onAudition(resized[index])
+            },
             modifier = Modifier.weight(1f),
         )
     }

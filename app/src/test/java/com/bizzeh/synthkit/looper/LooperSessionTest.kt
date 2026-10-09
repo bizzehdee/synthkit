@@ -280,14 +280,15 @@ class LooperSessionTest {
     }
 
     @Test
-    fun auditionPlaysTheNoteOnTheTrackChannel() {
+    fun auditionPlaysTheNoteForItsLengthOnTheTrackChannel() {
         session.addTrack(0, 0)
         val keys = session.addTrack(0, 0)!!
 
-        session.audition(keys, 60, 127)
-        session.audition("gone", 60, 127)
+        session.audition(keys, Note(0, 60, 127, 960))
+        session.audition("gone", Note(0, 60, 127, 960))
 
-        assertEquals(listOf("on 2 60 1.0", "off 2 60"), player.played)
+        // Two beats at 120 BPM.
+        assertEquals(listOf("on 2 60 1.0", "off 2 60 1000.0ms"), player.played)
     }
 
     @Test
