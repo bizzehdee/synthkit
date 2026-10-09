@@ -77,6 +77,7 @@ class AudioEngineViewModel(application: Application) : AndroidViewModel(applicat
         latencyPolling = viewModelScope.launch {
             while (true) {
                 val report = engine.latencyReport()
+                report?.outputLatencyMs?.let { engine.setLatency(it.toFloat()) }
                 mutableLatency.value = report
                 logWhenStreamChanges(report)
                 updateWarning(LatencyWarnings.evaluate(report, outputKind(report?.deviceId ?: 0)))

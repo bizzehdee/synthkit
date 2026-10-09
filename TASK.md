@@ -82,7 +82,7 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
   - Project list on launch: new, rename, duplicate, delete (with confirmation). Default: new projects are named "Project 1", "Project 2" and so on, at 120 BPM.
   - JVM tests for the model, validation and store.
   - Depends on: TASK-007. Required by: TASK-014.
-- [ ] TASK-013: Native transport, sequencer and metronome
+- [x] TASK-013: Native transport, sequencer and metronome
   - Tick clock at the project tempo; loop playback of every track's notes at their sample position; metronome click (bell on beat 1).
   - Recording captures live notes with clock position minus output latency into a lock-free queue for Kotlin.
   - Loop notes reach the audio thread as an immutable snapshot swapped atomically; the audio thread never allocates or frees memory.

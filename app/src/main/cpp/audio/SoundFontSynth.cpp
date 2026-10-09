@@ -17,6 +17,21 @@ bool validKey(int key) { return key >= 0 && key <= 127; }
 
 bool validDelay(float delayMillis) { return delayMillis >= 0.0f && std::isfinite(delayMillis); }
 
+bool isTransport(SynthEvent::Type type) {
+    switch (type) {
+        case SynthEvent::Type::TransportStart:
+        case SynthEvent::Type::TransportStop:
+        case SynthEvent::Type::Tempo:
+        case SynthEvent::Type::Click:
+        case SynthEvent::Type::Recording:
+        case SynthEvent::Type::Loop:
+        case SynthEvent::Type::Latency:
+            return true;
+        default:
+            return false;
+    }
+}
+
 }  // namespace
 
 std::unique_ptr<SoundFontSynth> SoundFontSynth::create(tsf* font) {
@@ -43,6 +58,7 @@ SoundFontSynth::~SoundFontSynth() { tsf_close(font_); }
 
 void SoundFontSynth::setSampleRate(int32_t sampleRate) {
     sampleRate_ = sampleRate;
+    sequencer_.setSampleRate(sampleRate);
     tsf_set_output(font_, TSF_STEREO_INTERLEAVED, sampleRate, 0.0f);
 }
 
@@ -51,23 +67,23 @@ bool SoundFontSynth::noteOn(int channel, int key, float velocity, float delayMil
         !validDelay(delayMillis)) {
         return false;
     }
-    return enqueue({SynthEvent::Type::NoteOn, static_cast<uint8_t>(channel),
-                    static_cast<uint8_t>(key), 0, velocity, delayMillis});
+    return enqueue({SynthEvent::Type::NoteOn, static_cast<uint8_t>(channel), static_cast<uint8_t>(key), 0,
+                    velocity, delayMillis, 0, 0, true});
 }
 
 bool SoundFontSynth::noteOff(int channel, int key, float delayMillis) {
     if (!validChannel(channel) || !validKey(key) || !validDelay(delayMillis)) {
         return false;
     }
-    return enqueue({SynthEvent::Type::NoteOff, static_cast<uint8_t>(channel),
-                    static_cast<uint8_t>(key), 0, 0.0f, delayMillis});
+    return enqueue({SynthEvent::Type::NoteOff, static_cast<uint8_t>(channel), static_cast<uint8_t>(key), 0,
+                    0.0f, delayMillis, 0, 0, true});
 }
 
 bool SoundFontSynth::allNotesOff(int channel) {
     if (!validChannel(channel)) {
         return false;
     }
-    return enqueue({SynthEvent::Type::AllNotesOff, static_cast<uint8_t>(channel), 0, 0, 0.0f, 0.0f});
+    return enqueue({SynthEvent::Type::AllNotesOff, static_cast<uint8_t>(channel), 0, 0, 0.0f, 0.0f, 0, 0, false});
 }
 
 bool SoundFontSynth::programChange(int channel, int bank, int program) {
@@ -75,8 +91,49 @@ bool SoundFontSynth::programChange(int channel, int bank, int program) {
         tsf_get_presetindex(font_, bank, program) < 0) {
         return false;
     }
-    return enqueue({SynthEvent::Type::Program, static_cast<uint8_t>(channel),
-                    static_cast<uint8_t>(program), static_cast<uint16_t>(bank), 0.0f, 0.0f});
+    return enqueue({SynthEvent::Type::Program, static_cast<uint8_t>(channel), static_cast<uint8_t>(program),
+                    static_cast<uint16_t>(bank), 0.0f, 0.0f, 0, 0, false});
+}
+
+bool SoundFontSynth::setVolume(int channel, float volume) {
+    if (!validChannel(channel) || !(volume >= 0.0f && volume <= 1.0f)) {
+        return false;
+    }
+    return enqueue({SynthEvent::Type::Volume, static_cast<uint8_t>(channel), 0, 0, volume, 0.0f, 0, 0, false});
+}
+
+bool SoundFontSynth::control(SynthEvent::Type type, uint8_t value, uint16_t bank, float velocity, int64_t position,
+                             int32_t length) {
+    return enqueue({type, 0, value, bank, velocity, 0.0f, position, length, false});
+}
+
+bool SoundFontSynth::startTransport() { return control(SynthEvent::Type::TransportStart); }
+
+bool SoundFontSynth::stopTransport() { return control(SynthEvent::Type::TransportStop); }
+
+bool SoundFontSynth::setTempo(int bpm) {
+    if (bpm < kMinTempo || bpm > kMaxTempo) {
+        return false;
+    }
+    return control(SynthEvent::Type::Tempo, 0, static_cast<uint16_t>(bpm));
+}
+
+bool SoundFontSynth::setClick(bool on) { return control(SynthEvent::Type::Click, on ? 1 : 0); }
+
+bool SoundFontSynth::setRecording(bool on) { return control(SynthEvent::Type::Recording, on ? 1 : 0); }
+
+bool SoundFontSynth::setLoop(int64_t origin, int32_t length, bool playing) {
+    if (origin < 0 || length < 0) {
+        return false;
+    }
+    return control(SynthEvent::Type::Loop, playing ? 1 : 0, 0, 0.0f, origin, length);
+}
+
+bool SoundFontSynth::setLatency(float millis) {
+    if (!(millis >= 0.0f && millis < kMaxLatencyMillis)) {
+        return false;
+    }
+    return control(SynthEvent::Type::Latency, 0, 0, millis);
 }
 
 std::vector<PresetInfo> SoundFontSynth::presets() const {
@@ -95,11 +152,15 @@ std::vector<PresetInfo> SoundFontSynth::presets() const {
 bool SoundFontSynth::enqueue(const SynthEvent& event) { return queue_.push(event); }
 
 void SoundFontSynth::schedule(const SynthEvent& event) {
+    const auto delayFrames = static_cast<uint64_t>(event.delayMillis * sampleRate_ / 1000.0f);
+    scheduleAt(frameClock_ + delayFrames, event);
+}
+
+void SoundFontSynth::scheduleAt(uint64_t dueFrame, const SynthEvent& event) {
     if (scheduledCount_ == kMaxScheduledEvents) {
         return;
     }
-    const auto delayFrames = static_cast<uint64_t>(event.delayMillis * sampleRate_ / 1000.0f);
-    const ScheduledEvent entry{frameClock_ + delayFrames, event};
+    const ScheduledEvent entry{dueFrame, event};
     size_t position = scheduledCount_;
     while (position > 0 && scheduled_[position - 1].dueFrame > entry.dueFrame) {
         scheduled_[position] = scheduled_[position - 1];
@@ -110,12 +171,40 @@ void SoundFontSynth::schedule(const SynthEvent& event) {
 }
 
 void SoundFontSynth::apply(const SynthEvent& event) {
+    if (event.live && (event.type == SynthEvent::Type::NoteOn || event.type == SynthEvent::Type::NoteOff)) {
+        sequencer_.recordLive(static_cast<int32_t>(frameClock_ - blockStartFrame_), event.channel, event.value,
+                              event.type == SynthEvent::Type::NoteOn ? event.velocity : 0.0f);
+    }
     switch (event.type) {
         case SynthEvent::Type::NoteOn:
             tsf_channel_note_on(font_, event.channel, event.value, event.velocity);
             break;
         case SynthEvent::Type::NoteOff:
             tsf_channel_note_off(font_, event.channel, event.value);
+            break;
+        case SynthEvent::Type::Volume:
+            tsf_channel_set_volume(font_, event.channel, event.velocity);
+            break;
+        case SynthEvent::Type::TransportStart:
+            sequencer_.start();
+            break;
+        case SynthEvent::Type::TransportStop:
+            sequencer_.stop();
+            break;
+        case SynthEvent::Type::Tempo:
+            sequencer_.setTempo(event.bank);
+            break;
+        case SynthEvent::Type::Click:
+            sequencer_.setClick(event.value != 0);
+            break;
+        case SynthEvent::Type::Recording:
+            sequencer_.setRecording(event.value != 0);
+            break;
+        case SynthEvent::Type::Loop:
+            sequencer_.setLoop(event.position, event.length, event.value != 0);
+            break;
+        case SynthEvent::Type::Latency:
+            sequencer_.setLatencyMillis(event.velocity);
             break;
         case SynthEvent::Type::AllNotesOff:
             tsf_channel_note_off_all(font_, event.channel);
@@ -127,10 +216,22 @@ void SoundFontSynth::apply(const SynthEvent& event) {
 }
 
 void SoundFontSynth::render(float* stereoOut, int32_t frameCount) {
+    blockStartFrame_ = frameClock_;
     SynthEvent event{};
     while (queue_.pop(event)) {
-        schedule(event);
+        // Transport changes are state, not sound: they apply before this block's
+        // loop notes and clicks are collected. Sound events keep their order.
+        if (isTransport(event.type)) {
+            apply(event);
+        } else {
+            schedule(event);
+        }
     }
+    sequencer_.collect(frameCount, [this](int32_t offset, uint8_t channel, uint8_t key, float velocity) {
+        const auto type = velocity > 0.0f ? SynthEvent::Type::NoteOn : SynthEvent::Type::NoteOff;
+        scheduleAt(blockStartFrame_ + static_cast<uint64_t>(offset),
+                   {type, channel, key, 0, velocity, 0.0f, 0, 0, false});
+    });
 
     int32_t rendered = 0;
     while (true) {

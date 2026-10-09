@@ -10,7 +10,7 @@ using synthkit::SynthEvent;
 namespace {
 
 SynthEvent noteOn(uint8_t key, float velocity = 1.0f) {
-    return {SynthEvent::Type::NoteOn, 0, key, 0, velocity, 0.0f};
+    return {SynthEvent::Type::NoteOn, 0, key, 0, velocity, 0.0f, 0, 0, true};
 }
 
 }  // namespace

@@ -104,6 +104,8 @@ val configureNativeHostTest by tasks.registering(Exec::class) {
     commandLine(
         "cmake", "-S", nativeHostTestSource.asFile.absolutePath,
         "-B", nativeHostTestDir.get().asFile.absolutePath, "-G", "Ninja",
+        // Clang ships its sanitizer runtime; GCC needs separate libasan packages.
+        "-DCMAKE_CXX_COMPILER=clang++",
     )
 }
 

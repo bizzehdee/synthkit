@@ -9,3 +9,4 @@
 - [latency-measurements.md](latency-measurements.md): Oboe-reported output latency and SoundFont load time per test phone. Read before changing buffer sizes or judging the 20 ms target.
 - [device-test-screen-timeout.md](device-test-screen-timeout.md): why device UI tests fail with "No compose hierarchies found", and how to keep the screen on. Read before running or debugging connected tests.
 - [short-landscape-menus.md](short-landscape-menus.md): long dropdown menus scroll and hide items on landscape phones. Read before adding a menu or picker.
+- [sequencer-timing.md](sequencer-timing.md): why the sequencer clock counts frames, and why host tests use Clang for sanitizers. Read before changing transport timing or the host test build.
