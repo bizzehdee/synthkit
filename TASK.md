@@ -139,7 +139,7 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
 
 Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-10-09 (drums, keys, project, project list; light and dark). Every screen keeps its behaviour and tests; only the look changes, except the diagnostics panel.
 
-- [ ] TASK-022: Design foundation
+- [x] TASK-022: Design foundation
   - Brand light and dark colour schemes, no dynamic colour; instrument family colours; shapes and spacing.
   - Bundled Archivo (variable) and JetBrains Mono Bold fonts, with origin and licence recorded.
   - Shared studio components: panel buttons, lit toggle, LCD transport display, round Record and Play/Stop, square M/S toggles, small fader, family chip, page dots.
