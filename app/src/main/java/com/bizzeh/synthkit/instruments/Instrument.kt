@@ -23,8 +23,8 @@ sealed interface PlayLayout {
     /** One-shot pads on the GM percussion map. */
     data object DrumKit : PlayLayout
 
-    /** Chromatic pads from a root note, sounding while held. */
-    data object ChromaticPads : PlayLayout
+    /** Chromatic pads from [root], sounding while held. */
+    data class ChromaticPads(val root: Int) : PlayLayout
 }
 
 data class Instrument(

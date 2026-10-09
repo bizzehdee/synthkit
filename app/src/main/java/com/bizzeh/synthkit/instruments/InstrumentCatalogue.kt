@@ -47,6 +47,10 @@ class InstrumentCatalogue private constructor(val instruments: List<Instrument>)
         }
 
         private const val GM_PROGRAMS = 128
+        private const val MIDDLE_C = 60
+
+        // C3: timpani sound an octave below most pitched percussion.
+        private const val TIMPANI_ROOT = 48
 
         /** Family tab and layout for a 0-based GM program, from docs/gm-layouts.md. */
         fun gmPlacement(program: Int): Pair<Family, PlayLayout> = when (program) {
@@ -54,16 +58,16 @@ class InstrumentCatalogue private constructor(val instruments: List<Instrument>)
             in 24..31 -> Family.GUITAR_BASS to PlayLayout.Chords(bassRoots = false)
             in 32..39 -> Family.GUITAR_BASS to PlayLayout.Chords(bassRoots = true)
             in 40..46 -> Family.STRINGS_ORCHESTRA to PlayLayout.Keys(holdByDefault = false)
-            47 -> Family.DRUMS_PERCUSSION to PlayLayout.ChromaticPads
+            47 -> Family.DRUMS_PERCUSSION to PlayLayout.ChromaticPads(root = TIMPANI_ROOT)
             in 48..55 -> Family.STRINGS_ORCHESTRA to PlayLayout.Keys(holdByDefault = true)
             in 56..79 -> Family.BRASS_WINDS to PlayLayout.Keys(holdByDefault = false)
             in 80..87 -> Family.SYNTH to PlayLayout.Keys(holdByDefault = false)
             in 88..95 -> Family.SYNTH to PlayLayout.Keys(holdByDefault = true)
-            in 96..103 -> Family.SYNTH to PlayLayout.ChromaticPads
+            in 96..103 -> Family.SYNTH to PlayLayout.ChromaticPads(root = MIDDLE_C)
             in 104..107 -> Family.WORLD_MISC to PlayLayout.Chords(bassRoots = false)
             in 108..111 -> Family.WORLD_MISC to PlayLayout.Keys(holdByDefault = false)
-            in 112..119 -> Family.DRUMS_PERCUSSION to PlayLayout.ChromaticPads
-            in 120..127 -> Family.WORLD_MISC to PlayLayout.ChromaticPads
+            in 112..119 -> Family.DRUMS_PERCUSSION to PlayLayout.ChromaticPads(root = MIDDLE_C)
+            in 120..127 -> Family.WORLD_MISC to PlayLayout.ChromaticPads(root = MIDDLE_C)
             else -> throw IllegalArgumentException("Not a GM program: $program")
         }
     }

@@ -12,6 +12,16 @@
     <string name="drum_high_tom">High tom</string>
     <string name="drum_crash">Crash</string>
     <string name="drum_ride">Ride</string>
+    <string name="drum_clap">Clap</string>
+    <string name="drum_cowbell">Cowbell</string>
+    <string name="drum_tambourine">Tambourine</string>
+    <string name="drum_electric_snare">Electric snare</string>
+    <string name="drum_side_stick">Side stick</string>
+    <string name="drum_floor_tom">Floor tom</string>
+    <string name="drum_pedal_hat">Pedal hi-hat</string>
+    <string name="drum_splash">Splash</string>
+    <string name="drum_kit">Kit: %1$s</string>
+    <string name="pad_page">Page %1$d of %2$d</string>
     <string name="latency_readout">Output latency %1$s · %2$s · %3$s · %4$s · %5$d Hz · burst %6$d · buffer %7$d · underruns %8$d</string>
     <string name="latency_value_ms">%1$.1f ms</string>
     <string name="latency_measuring">measuring</string>

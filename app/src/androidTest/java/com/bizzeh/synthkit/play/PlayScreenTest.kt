@@ -44,6 +44,8 @@ class PlayScreenTest {
     private var backs = 0
     private var changes = 0
     private val opened = mutableListOf<String>()
+    private val openedFromLayout = mutableListOf<String>()
+    private val kits = listOf(catalogue.byId("128:0")!!, catalogue.byId("128:25")!!)
 
     private fun show(instrument: Instrument, latency: LatencyReport? = null) {
         composeRule.setContent {
@@ -54,6 +56,8 @@ class PlayScreenTest {
                 onBack = { backs++ },
                 onChangeInstrument = { changes++ },
                 onOpened = { opened += it.id },
+                kits = kits,
+                onOpenInstrument = { openedFromLayout += it.id },
             )
         }
         composeRule.waitForIdle()
@@ -76,10 +80,42 @@ class PlayScreenTest {
     }
 
     @Test
+    fun kitPickerOpensTheChosenKit() {
+        show(kit)
+
+        composeRule.onNodeWithText(context.getString(R.string.drum_kit, "Standard 1")).performClick()
+        composeRule.onNodeWithText("808/909").performClick()
+
+        assertEquals(listOf("128:25"), openedFromLayout)
+    }
+
+    @Test
+    fun pitchedPercussionShowsChromaticPads() {
+        show(catalogue.byId("0:47")!!)
+
+        composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
+    }
+
+    @Test
+    fun guitarShowsChordPads() {
+        show(catalogue.byId("0:24")!!)
+
+        composeRule.onNodeWithContentDescription("C major").assertIsDisplayed()
+    }
+
+    @Test
+    fun pianoShowsTheKeyboard() {
+        show(catalogue.byId("0:0")!!)
+
+        composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.hold)).assertIsDisplayed()
+    }
+
+    @Test
     fun switchingInstrumentSelectsTheNewOne() {
         var current by mutableStateOf(kit)
         composeRule.setContent {
-            PlayScreen(current, player, null, {}, {}, {})
+            PlayScreen(current, player, null, {}, {}, {}, kits, {})
         }
         composeRule.waitForIdle()
 
@@ -96,7 +132,7 @@ class PlayScreenTest {
     fun leavingTheScreenSilencesTheLiveChannel() {
         var shown by mutableStateOf(true)
         composeRule.setContent {
-            if (shown) PlayScreen(kit, player, null, {}, {}, {})
+            if (shown) PlayScreen(kit, player, null, {}, {}, {}, kits, {})
         }
         composeRule.waitForIdle()
 

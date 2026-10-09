@@ -29,6 +29,7 @@ import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.browser.BrowserScreen
 import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
+import com.bizzeh.synthkit.instruments.PlayLayout
 import com.bizzeh.synthkit.play.PlayScreen
 
 private val BackStackSaver = listSaver<SnapshotStateList<Route>, String>(
@@ -108,6 +109,8 @@ private fun Navigation(
                     onBack = { stack.removeAt(stack.lastIndex) },
                     onChangeInstrument = { stack.add(Route.Browser) },
                     onOpened = { onInstrumentOpened(it.id) },
+                    kits = engine.catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
+                    onOpenInstrument = { replaceWith(Route.openInstrument(it.id)) },
                 )
             }
         }

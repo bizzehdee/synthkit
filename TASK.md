@@ -59,7 +59,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Tap: short automatic strum. Holding a pad and swiping the strum strip plays string by string at the swipe speed. Default: six-string voicing from standard tuning (E A D G B E), each string taking the nearest chord tone at or above its open note; strum spacing 12 ms; chord notes stop when the pad is released.
   - Bass programs: the pad plays the chord root in a low octave, with octave shift.
   - Depends on: TASK-005, TASK-007.
-- [ ] TASK-010: Pads layout
+- [x] TASK-010: Pads layout
   - Drum kits: GM percussion notes 35 to 81, first page in the agreed order, 4 x 2 on small screens and 4 x 4 where space allows, further pages swiped sideways. Kit picker.
   - Melodic pads (timpani, synth effects, percussive): chromatic from a root with octave shift, sounding while held. Sound effects 121 to 128 also sound while held, because several of their samples loop (see `docs/gm-layouts.md`).
   - Multi-touch on every pad layout.

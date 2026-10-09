@@ -74,5 +74,7 @@ effects, including Gunshot, are kept under their standard GM names.
 | 2026-10-09 | Synth effects are chromatic pads. |
 | 2026-10-09 | First drum page order accepted. |
 | 2026-10-09 | Non-GM kits (GS programs 56 and 127) are not listed. |
+| 2026-10-09 | GM has no rimshot note: the 4 x 4 "rimshot" slot plays Electric Snare (40). The two spare pads are Pedal Hi-Hat (44) and Splash (55). Floor tom is High Floor Tom (43). Every other GM percussion note follows on later pages in note order. |
+| 2026-10-09 | Chromatic pads are 6 x 2 (one octave) on a phone and 6 x 4 where space allows, so octave shift has no gaps. Drum pages are 4 x 4 when the pad area is at least 312 dp tall, otherwise 4 x 2. |
 | 2026-10-09 | Sound effect pads (121-128) sound while held, not one-shot: several GM effect samples loop and would never stop without a note-off. |
 | 2026-10-09 | Bass pads play chord roots. Tap strums, strip strums manually. Triads only. Hold is sustain-pedal style. |

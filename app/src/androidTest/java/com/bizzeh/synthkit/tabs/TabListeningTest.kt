@@ -4,17 +4,17 @@ import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.audio.AudioEngine
+import com.bizzeh.synthkit.testing.ManualOnly
 import org.junit.After
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
  * Plays the tab fixtures aloud through the real engine for a person to listen
- * to. Skipped unless the runner gets "-e listen true", so the normal suite
- * stays silent.
+ * to. Run one by name with am instrument; Gradle runs skip it.
  */
+@ManualOnly
 @RunWith(AndroidJUnit4::class)
 class TabListeningTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -22,7 +22,6 @@ class TabListeningTest {
 
     @Before
     fun startEngine() {
-        assumeTrue(InstrumentationRegistry.getArguments().getString("listen") == "true")
         engine = requireNotNull(AudioEngine.load(instrumentation.targetContext.assets))
         check(engine.start())
     }

@@ -29,10 +29,10 @@ import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.InstrumentPlayer
 import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.chords.ChordsLayout
-import com.bizzeh.synthkit.drums.DrumPadGrid
-import com.bizzeh.synthkit.drums.FirstPageDrumPads
+import com.bizzeh.synthkit.drums.DrumKitLayout
 import com.bizzeh.synthkit.instruments.Instrument
 import com.bizzeh.synthkit.keys.KeysLayout
+import com.bizzeh.synthkit.pads.ChromaticPadsLayout
 import com.bizzeh.synthkit.instruments.PlayLayout
 
 /** The live instrument plays on one channel; recorded tracks will use the others. */
@@ -49,6 +49,8 @@ fun PlayScreen(
     onBack: () -> Unit,
     onChangeInstrument: () -> Unit,
     onOpened: (Instrument) -> Unit,
+    kits: List<Instrument>,
+    onOpenInstrument: (Instrument) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currentOnOpened by rememberUpdatedState(onOpened)
@@ -82,10 +84,10 @@ fun PlayScreen(
             // Keyed by instrument so hold, octave and other layout state start fresh.
             key(instrument.id) {
                 when (val layout = instrument.layout) {
-                    PlayLayout.DrumKit -> DrumPadGrid(pads = FirstPageDrumPads, player = player, channel = LIVE_CHANNEL)
+                    PlayLayout.DrumKit -> DrumKitLayout(player, LIVE_CHANNEL, instrument, kits, onOpenInstrument)
                     is PlayLayout.Keys -> KeysLayout(player, LIVE_CHANNEL, layout.holdByDefault)
                     is PlayLayout.Chords -> ChordsLayout(player, LIVE_CHANNEL, layout.bassRoots)
-                    PlayLayout.ChromaticPads -> Unit
+                    is PlayLayout.ChromaticPads -> ChromaticPadsLayout(player, LIVE_CHANNEL, layout.root)
                 }
             }
         }
