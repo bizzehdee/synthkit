@@ -11,7 +11,7 @@ Source of scope: `plan.md`. One commit per task, on branch `feat/milestone-1`.
   - JUnit 4 unit tests, Compose UI instrumented tests, `verify` Gradle task.
   - `README.md` for end users.
   - Required by: TASK-002, TASK-003, TASK-004.
-- [ ] TASK-002: Native audio engine
+- [x] TASK-002: Native audio engine
   - Oboe output stream: low-latency performance mode, exclusive sharing requested, float stereo.
   - TinySoundFont plays the bundled GeneralUser GS SoundFont from the APK assets.
   - Notes reach the audio thread through a lock-free single-producer queue. TinySoundFont is called only on the audio thread.

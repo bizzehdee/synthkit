@@ -17,3 +17,8 @@
 *.apk binary
 *.keystore binary
 *.jks binary
+
+# Vendored third-party files stay byte-identical to upstream, so their recorded
+# SHA-256 (THIRD_PARTY.md) still matches.
+app/src/main/cpp/third_party/** -text
+app/src/main/assets/licences/** -text

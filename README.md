@@ -25,7 +25,8 @@ See [plan.md](plan.md) for the full plan.
 You need:
 
 - JDK 17 or newer.
-- The Android SDK with platform 37.
+- The Android SDK with platform 37, NDK r30 and CMake 4.1.
+- For the C++ host tests: CMake, Ninja and a C++17 compiler on the build machine.
 
 Steps:
 
