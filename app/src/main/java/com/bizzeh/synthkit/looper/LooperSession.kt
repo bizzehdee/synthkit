@@ -7,7 +7,9 @@ import com.bizzeh.synthkit.instruments.InstrumentCatalogue
 import com.bizzeh.synthkit.project.Note
 import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.ProjectValidation
+import com.bizzeh.synthkit.project.BEATS_PER_BAR
 import com.bizzeh.synthkit.project.Quantise
+import com.bizzeh.synthkit.project.TICKS_PER_BEAT
 import com.bizzeh.synthkit.project.TICKS_PER_BAR
 import com.bizzeh.synthkit.project.Take
 import com.bizzeh.synthkit.project.Track
@@ -43,6 +45,8 @@ data class LooperState(
      * start. Only the bar is kept so the screen redraws once a bar, not every poll.
      */
     val bar: Int = 0,
+    /** Beat in the bar, 0 to 3, while the clock runs; null when stopped. */
+    val beat: Int? = null,
 )
 
 /**
@@ -136,7 +140,13 @@ class LooperSession(
             else -> 0L
         }
         val bar = (position / TICKS_PER_BAR).toInt()
-        if (bar != mutableState.value.bar) update { it.copy(bar = bar) }
+        val beat = when (mutableState.value.phase) {
+            Phase.STOPPED -> null
+            // Armed: the click counts from when recording was armed.
+            Phase.ARMED -> ((clock / TICKS_PER_BEAT) % BEATS_PER_BAR).toInt()
+            else -> ((position / TICKS_PER_BEAT) % BEATS_PER_BAR).toInt()
+        }
+        if (bar != mutableState.value.bar || beat != mutableState.value.beat) update { it.copy(bar = bar, beat = beat) }
     }
 
     private fun onRecorded(event: RecordedEvent) {
@@ -214,7 +224,7 @@ class LooperSession(
         transport.setClick(false)
         project.tracks.indices.forEach { player.allNotesOff(trackChannel(it)) }
         take.clear()
-        update { it.copy(phase = Phase.STOPPED, recordingTrackId = null, finishing = false, bar = 0) }
+        update { it.copy(phase = Phase.STOPPED, recordingTrackId = null, finishing = false, bar = 0, beat = null) }
     }
 
     private fun recordingChannel(): Int? =

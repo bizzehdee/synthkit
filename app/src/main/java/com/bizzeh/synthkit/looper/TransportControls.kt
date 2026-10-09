@@ -1,77 +1,79 @@
 package com.bizzeh.synthkit.looper
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
-import com.bizzeh.synthkit.ui.MinTouchTarget
-
-private val GlyphSize = 18.dp
+import com.bizzeh.synthkit.ui.studio.BeatLights
+import com.bizzeh.synthkit.ui.studio.LcdDisplay
+import com.bizzeh.synthkit.ui.studio.LcdValue
+import com.bizzeh.synthkit.ui.studio.RecTag
+import com.bizzeh.synthkit.ui.studio.RoundPlayStopButton
+import com.bizzeh.synthkit.ui.studio.RoundRecordButton
 
 /** Record arms or starts a take; while a take runs it ends it. */
 @Composable
 fun RecordButton(recording: Boolean, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val description = stringResource(if (recording) R.string.stop_recording else R.string.record)
-    FilledIconButton(
-        onClick = onClick,
+    RoundRecordButton(
+        live = recording,
         enabled = enabled,
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = if (recording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
-        ),
-        modifier = modifier.size(MinTouchTarget).semantics { contentDescription = description },
-    ) {
-        val color = if (recording) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.error
-        Canvas(Modifier.size(GlyphSize)) { drawCircle(color) }
-    }
+        contentDescription = stringResource(if (recording) R.string.stop_recording else R.string.record),
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 @Composable
 fun PlayStopButton(playing: Boolean, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val description = stringResource(if (playing) R.string.stop else R.string.play)
-    FilledIconButton(
-        onClick = onClick,
+    RoundPlayStopButton(
+        playing = playing,
         enabled = enabled,
-        modifier = modifier.size(MinTouchTarget).semantics { contentDescription = description },
-    ) {
-        val color = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-        Canvas(Modifier.size(GlyphSize)) {
-            if (playing) {
-                drawRect(color, Offset.Zero, Size(size.width, size.height))
-            } else {
-                drawPath(Path().apply {
-                    moveTo(0f, 0f)
-                    lineTo(size.width, size.height / 2)
-                    lineTo(0f, size.height)
-                    close()
-                }, color)
-            }
-        }
-    }
+        contentDescription = stringResource(if (playing) R.string.stop else R.string.play),
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 /**
- * One short line saying what the looper is doing and where it is. [inTrack] is
- * true on a track's screen, where the hint before the first take differs.
+ * The transport display: REC while recording, the beat lights, the bar and the
+ * tempo. TalkBack reads the full status sentence instead of the short codes.
  */
 @Composable
-fun PhaseStatus(state: LooperState, modifier: Modifier = Modifier, inTrack: Boolean = false) {
+fun TransportLcd(state: LooperState, modifier: Modifier = Modifier, inTrack: Boolean = false, showTempo: Boolean = true) {
+    val status = phaseText(state, inTrack)
     val bar = state.bar + 1
     val bars = state.project.loopBars
-    val text = when {
+    val code = when {
+        state.finishing -> stringResource(R.string.lcd_saving)
+        state.phase == Phase.ARMED -> stringResource(R.string.lcd_ready)
+        state.phase == Phase.RECORDING_FIRST -> stringResource(R.string.lcd_bar, bar)
+        state.phase == Phase.PLAYING || state.phase == Phase.OVERDUBBING -> stringResource(R.string.lcd_bar_of, bar, bars)
+        bars == 0 -> stringResource(R.string.lcd_no_loop)
+        else -> stringResource(R.string.lcd_bar_of, 1, bars)
+    }
+    LcdDisplay(
+        modifier = modifier.semantics(mergeDescendants = true) {
+            contentDescription = status
+            liveRegion = LiveRegionMode.Polite
+        },
+    ) {
+        if (state.phase == Phase.RECORDING_FIRST || state.phase == Phase.OVERDUBBING) RecTag(stringResource(R.string.lcd_rec))
+        BeatLights(state.beat)
+        LcdValue(code)
+        if (showTempo) LcdValue(state.project.tempoBpm.toString(), stringResource(R.string.lcd_bpm))
+    }
+}
+
+/** One sentence saying what the looper is doing and where it is. */
+@Composable
+fun phaseText(state: LooperState, inTrack: Boolean = false): String {
+    val bar = state.bar + 1
+    val bars = state.project.loopBars
+    return when {
         state.finishing -> stringResource(R.string.phase_finishing)
         state.phase == Phase.ARMED -> stringResource(R.string.phase_armed)
         state.phase == Phase.RECORDING_FIRST -> stringResource(R.string.phase_recording_first, bar)
@@ -80,15 +82,6 @@ fun PhaseStatus(state: LooperState, modifier: Modifier = Modifier, inTrack: Bool
         bars == 0 -> stringResource(if (inTrack) R.string.phase_no_loop_track else R.string.phase_no_loop)
         else -> stringResource(R.string.phase_stopped)
     }
-    val recording = state.phase == Phase.RECORDING_FIRST || state.phase == Phase.OVERDUBBING
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = if (recording) MaterialTheme.colorScheme.error else Color.Unspecified,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier,
-    )
 }
 
 val LooperState.isRecording: Boolean

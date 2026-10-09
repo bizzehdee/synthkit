@@ -144,7 +144,7 @@ Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-1
   - Bundled Archivo (variable) and JetBrains Mono Bold fonts, with origin and licence recorded.
   - Shared studio components: panel buttons, lit toggle, LCD transport display, round Record and Play/Stop, square M/S toggles, small fader, family chip, page dots.
   - Depends on: TASK-021. Required by: TASK-023 to TASK-025.
-- [ ] TASK-023: Play screens
+- [x] TASK-023: Play screens
   - Top bar: back, family chip that opens the instrument picker, LCD (beat lights, bar, BPM, REC), Record, Play/Stop, More menu (Diagnostics).
   - Lit drum, chord and chromatic pads; ivory keyboard on a dark keybed with lit HOLD, octave stepper and range mini-map; strum strip.
   - Diagnostics panel replaces the on-screen readout; the latency warning keeps its banner, restyled.

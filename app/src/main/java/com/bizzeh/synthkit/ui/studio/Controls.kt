@@ -224,6 +224,7 @@ fun LitToggle(label: String, on: Boolean, onChange: (Boolean) -> Unit, color: Co
             .raised(p, Corner, fill = if (on) color.copy(alpha = 0.16f).compositeOver(p.panel) else p.panel, edge = if (on) color else p.line)
             .clip(RoundedCornerShape(Corner))
             .toggleable(value = on, role = Role.Switch, onValueChange = onChange)
+            .semantics(mergeDescendants = true) { contentDescription = label }
             .padding(horizontal = 16.dp),
     ) {
         Box(Modifier.size(8.dp).glow(color, 4.dp, enabled = on, spread = 5.dp).background(if (on) color else p.off, CircleShape))

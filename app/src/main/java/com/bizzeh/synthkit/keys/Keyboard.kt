@@ -1,7 +1,14 @@
 package com.bizzeh.synthkit.keys
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.unit.sp
+import com.bizzeh.synthkit.ui.theme.LcdSmall
+import com.bizzeh.synthkit.ui.theme.StudioTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +16,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +41,8 @@ import com.bizzeh.synthkit.play.FIXED_VELOCITY
 import com.bizzeh.synthkit.play.HeldNotes
 import com.bizzeh.synthkit.play.noteName
 
+private val KeyShape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
+
 /** Black keys are narrower than the 48 dp minimum by agreement, so two octaves fit on a phone. */
 val BlackKeyWidth = 30.dp
 private const val BLACK_KEY_HEIGHT_FRACTION = 0.6f
@@ -51,13 +59,19 @@ fun Keyboard(
     firstWhite: Int,
     whiteCount: Int,
     notes: HeldNotes,
+    color: Color,
     onAccessibleTap: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pressed = remember { mutableStateMapOf<PointerId, Int>() }
     val currentNotes by rememberUpdatedState(notes)
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .background(StudioTheme.palette.keybed, RoundedCornerShape(12.dp))
+            .padding(top = 6.dp),
+    ) {
         val density = LocalDensity.current
         val whiteWidth: Dp = maxWidth / whiteCount
         val keyHeight: Dp = maxHeight
@@ -99,7 +113,7 @@ fun Keyboard(
                     }
                 },
         ) {
-            val colors = MaterialTheme.colorScheme
+            val p = StudioTheme.palette
             geometry.whiteKeys.forEach { key ->
                 val description = noteName(key.note)
                 Box(
@@ -107,16 +121,21 @@ fun Keyboard(
                     modifier = Modifier
                         .offset(x = with(density) { key.left.toDp() })
                         .size(whiteWidth, keyHeight)
-                        .background(if (key.note in sounding) colors.tertiaryContainer else colors.surface)
-                        .border(1.dp, colors.outline)
-                        .keySemantics(description) { onAccessibleTap(key.note) },
+                        // The whole slot is the key for touch and TalkBack; the gap is only drawn.
+                        .keySemantics(description) { onAccessibleTap(key.note) }
+                        .padding(horizontal = 1.5.dp)
+                        .background(if (key.note in sounding) color.copy(alpha = 0.3f).compositeOver(p.ivory) else p.ivory, KeyShape)
+                        .drawBehind {
+                            val edge = 6.dp.toPx()
+                            drawRect(if (key.note in sounding) color else p.ivoryEdge, Offset(0f, size.height - edge), Size(size.width, edge))
+                        },
                 ) {
                     if (key.note % 12 == 0) {
                         Text(
                             text = description.replace(" ", ""),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colors.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 8.dp),
+                            style = LcdSmall.copy(fontSize = 11.sp),
+                            color = Color(0xFF6A6584),
+                            modifier = Modifier.padding(bottom = 12.dp),
                         )
                     }
                 }
@@ -126,10 +145,7 @@ fun Keyboard(
                     modifier = Modifier
                         .offset(x = with(density) { key.left.toDp() })
                         .size(BlackKeyWidth, blackHeight)
-                        .background(
-                            if (key.note in sounding) colors.tertiary else colors.inverseSurface,
-                            RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp),
-                        )
+                        .background(if (key.note in sounding) color else p.ebony, RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
                         .keySemantics(noteName(key.note)) { onAccessibleTap(key.note) },
                 )
             }

@@ -134,7 +134,7 @@ class SynthKitAppTest {
 
         composeRule.onNodeWithContentDescription(string(R.string.drum_kick)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(string(R.string.record)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.phase_no_loop_track)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.phase_no_loop_track)).assertIsDisplayed()
         assertEquals(listOf("128:0"), opened)
         assertEquals(RecordingPlayer.Select(1, 128, 0), player.events.filterIsInstance<RecordingPlayer.Select>().last())
         assertEquals(1, projects.single { it.project.id == "p1" }.project.tracks.size)
@@ -170,13 +170,14 @@ class SynthKitAppTest {
         openProject()
         addTrack(R.string.family_drums_percussion)
 
-        composeRule.onNodeWithContentDescription(string(R.string.change_instrument)).performClick()
+        composeRule.onNodeWithText("Standard 1").performClick()
         composeRule.onNodeWithText(string(R.string.family_keys)).performClick()
         composeRule.onNodeWithText("Acoustic Grand Piano").assertDoesNotExist()
         composeRule.onNodeWithText(string(R.string.family_drums_percussion)).performClick()
         composeRule.onNodeWithText("808/909").performClick()
 
-        composeRule.onNodeWithText(string(R.string.drum_kit, "808/909")).assertIsDisplayed()
+        composeRule.onNodeWithText("808/909").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.drum_kick)).assertIsDisplayed()
     }
 
     @Test

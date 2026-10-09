@@ -42,7 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.bizzeh.synthkit.instruments.Instrument
 import com.bizzeh.synthkit.instruments.InstrumentCatalogue
-import com.bizzeh.synthkit.looper.PhaseStatus
+import com.bizzeh.synthkit.looper.TransportLcd
 import com.bizzeh.synthkit.looper.PlayStopButton
 import com.bizzeh.synthkit.looper.RecordButton
 import com.bizzeh.synthkit.looper.SessionHost
@@ -243,10 +243,9 @@ private fun Navigation(
                 onDismissWarning = onDismissWarning,
                 onBack = ::pop,
                 onChangeInstrument = { stack.add(Route.Browser(project.id, route.trackId)) },
-                kits = catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
-                onKitChange = { session.swapInstrument(route.trackId, it.bank, it.program) },
-                status = { PhaseStatus(looper, inTrack = true) },
             ) {
+                // The track view leaves the tempo to the project screen to fit a 640 dp phone.
+                TransportLcd(looper, inTrack = true, showTempo = false)
                 RecordButton(
                     recording = looper.isRecording && looper.recordingTrackId == route.trackId,
                     enabled = !looper.finishing,
@@ -256,7 +255,6 @@ private fun Navigation(
                     playing = looper.isPlaying,
                     enabled = looper.isPlaying || looper.project.loopBars > 0,
                     onClick = session::playStop,
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
         }

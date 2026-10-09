@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.looper.LooperState
-import com.bizzeh.synthkit.looper.PhaseStatus
+import com.bizzeh.synthkit.looper.phaseText
 import com.bizzeh.synthkit.looper.PlayStopButton
 import com.bizzeh.synthkit.looper.isPlaying
 import com.bizzeh.synthkit.project.ProjectValidation.MAX_TRACKS
@@ -105,7 +105,7 @@ fun ProjectScreen(
             PlayStopButton(playing = state.isPlaying, enabled = state.isPlaying || project.loopBars > 0, onClick = onPlayStop)
         }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(start = 12.dp)) {
-            PhaseStatus(state, Modifier.weight(1f))
+            Text(phaseText(state), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
             OutlinedButton(
                 onClick = onExport,
                 enabled = project.loopBars > 0,

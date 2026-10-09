@@ -3,6 +3,7 @@ package com.bizzeh.synthkit.drums
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertHeightIsAtLeast
@@ -40,7 +41,7 @@ class DrumKitPadsTest {
     private fun show(height: Dp) {
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = height)) {
-                DrumKitPads(player = player, channel = CHANNEL)
+                DrumKitPads(player = player, channel = CHANNEL, color = Color.Cyan)
             }
         }
     }
@@ -67,7 +68,7 @@ class DrumKitPadsTest {
                 .assertHeightIsAtLeast(72.dp)
         }
         composeRule.onNodeWithContentDescription(string(R.string.drum_clap)).assertDoesNotExist()
-        composeRule.onNodeWithText(string(R.string.pad_page, 1, 6)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 6)).assertIsDisplayed()
     }
 
     @Test
@@ -77,7 +78,7 @@ class DrumKitPadsTest {
         swipeToNextPage()
 
         composeRule.onNodeWithContentDescription(string(R.string.drum_clap)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.pad_page, 2, 6)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 2, 6)).assertIsDisplayed()
     }
 
     @Test
@@ -95,7 +96,7 @@ class DrumKitPadsTest {
 
         composeRule.onNodeWithContentDescription(string(R.string.drum_floor_tom)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(string(R.string.drum_splash)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.pad_page, 1, 3)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 3)).assertIsDisplayed()
     }
 
     @Test

@@ -37,8 +37,17 @@ import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.NotePlayer
 import com.bizzeh.synthkit.play.HeldNotes
-import com.bizzeh.synthkit.play.HoldToggle
-import com.bizzeh.synthkit.play.OctaveButtons
+import com.bizzeh.synthkit.ui.studio.LitToggle
+import com.bizzeh.synthkit.ui.studio.Stepper
+import com.bizzeh.synthkit.ui.studio.raised
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import com.bizzeh.synthkit.play.noteName
 import com.bizzeh.synthkit.ui.MinPlayableWidth
 import com.bizzeh.synthkit.ui.MinTouchTarget
@@ -48,7 +57,7 @@ private const val MAX_WHITE_KEYS = 22
 
 /** Keys layout from docs/gm-layouts.md: keyboard, octave buttons, scroll strip and hold. */
 @Composable
-fun KeysLayout(player: NotePlayer, channel: Int, holdByDefault: Boolean, modifier: Modifier = Modifier) {
+fun KeysLayout(player: NotePlayer, channel: Int, holdByDefault: Boolean, color: Color, modifier: Modifier = Modifier) {
     var hold by rememberSaveable { mutableStateOf(holdByDefault) }
     val notes = remember(player, channel) { HeldNotes(player, channel, hold) }
     DisposableEffect(notes) { onDispose { notes.releaseAll() } }
@@ -67,18 +76,21 @@ fun KeysLayout(player: NotePlayer, channel: Int, holdByDefault: Boolean, modifie
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().height(MinTouchTarget),
             ) {
-                OctaveButtons(
-                    label = noteName(KeyboardGeometry.whiteNote(shown)).replace(" ", ""),
+                Stepper(
+                    value = noteName(KeyboardGeometry.whiteNote(shown)).replace(" ", ""),
+                    downDescription = stringResource(R.string.octave_down),
+                    upDescription = stringResource(R.string.octave_up),
                     canGoDown = shown > KeyboardGeometry.LOWEST_WHITE,
                     canGoUp = shown < KeyboardGeometry.clampFirstWhite(Int.MAX_VALUE, whiteCount),
                     onDown = { shiftTo(shown - KeyboardGeometry.WHITES_PER_OCTAVE) },
                     onUp = { shiftTo(shown + KeyboardGeometry.WHITES_PER_OCTAVE) },
                 )
-                HoldToggle(hold = hold, onHoldChange = {
+                LitToggle(label = stringResource(R.string.hold), on = hold, color = color, onChange = {
                     hold = it
                     notes.hold = it
                 })
                 ScrollStrip(
+                    color = color,
                     firstWhite = shown,
                     whiteCount = whiteCount,
                     whiteWidthPx = whiteWidthPx,
@@ -90,6 +102,7 @@ fun KeysLayout(player: NotePlayer, channel: Int, holdByDefault: Boolean, modifie
                 firstWhite = shown,
                 whiteCount = whiteCount,
                 notes = notes,
+                color = color,
                 onAccessibleTap = { playAccessibleNote(player, channel, it) },
                 modifier = Modifier.weight(1f),
             )
@@ -99,16 +112,18 @@ fun KeysLayout(player: NotePlayer, channel: Int, holdByDefault: Boolean, modifie
 
 /**
  * Dragging the strip moves the keyboard one white key per key width dragged.
- * The thumb shows where the visible keys sit in the piano range.
+ * It draws the whole piano in miniature with a frame round the keys in view.
  */
 @Composable
 private fun ScrollStrip(
+    color: Color,
     firstWhite: Int,
     whiteCount: Int,
     whiteWidthPx: Float,
     onShift: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val p = StudioTheme.palette
     var dragged by remember { mutableFloatStateOf(0f) }
     val description = stringResource(R.string.scroll_keyboard)
     val state = rememberDraggableState { delta ->
@@ -121,22 +136,29 @@ private fun ScrollStrip(
         }
     }
     val range = KeyboardGeometry.HIGHEST_WHITE - KeyboardGeometry.LOWEST_WHITE + 1
-    BoxWithConstraints(
+    val start = firstWhite - KeyboardGeometry.LOWEST_WHITE
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .raised(p, 12.dp, fill = p.panel)
             .draggable(state, Orientation.Horizontal)
             .semantics { contentDescription = description },
     ) {
-        val thumbWidth = maxWidth * (whiteCount.toFloat() / range)
-        val thumbOffset = maxWidth * ((firstWhite - KeyboardGeometry.LOWEST_WHITE).toFloat() / range)
-        Box(
-            modifier = Modifier
-                .offset(x = thumbOffset)
-                .width(thumbWidth)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.primary),
-        )
+        Canvas(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            val keyWidth = size.width / range
+            for (key in 0 until range) {
+                drawRect(
+                    color = if (key in start until start + whiteCount) p.text else p.off,
+                    topLeft = Offset(key * keyWidth, 0f),
+                    size = Size(keyWidth - 1f, size.height),
+                )
+            }
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(start * keyWidth - 3.dp.toPx(), -6.dp.toPx()),
+                size = Size(whiteCount * keyWidth + 6.dp.toPx(), size.height + 12.dp.toPx()),
+                cornerRadius = CornerRadius(8.dp.toPx()),
+                style = Stroke(2.dp.toPx()),
+            )
+        }
     }
 }
