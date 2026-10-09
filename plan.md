@@ -62,6 +62,7 @@ Out of scope:
 - **Export encoders** (approved 2026-10-09): WAV written in-app; AAC in MP4 via the platform encoder and `MediaMuxer`; MP3 via LAME 3.100 built from official source as a shared library; FLAC via libFLAC 1.5.0. Each is pinned and its notice shipped (see `.learnings/export-encoders.md`).
 - **minSdk 26** (Android 8), phones and tablets.
 - **Hosting and CI** (decided 2026-10-09): public GitHub repository. GitHub Actions for build and tests is deferred to milestone 5 to save Action minutes; local builds and tests until then. Release bundles are signed with an upload key kept outside the repository; Google Play App Signing holds the app signing key.
+- **Tests** (decided 2026-10-09): JUnit 4 for Kotlin unit tests, Compose UI tests on a device or emulator, GoogleTest for the C++ audio engine on the build host.
 - **Licence of own code: GPL-3.0.** Soundfonts are data and keep their own licences.
 
 ## Data
@@ -98,6 +99,7 @@ Out of scope:
 - App name: "Synth Kit" (decided 2026-10-09), used as the display name in the launcher, Play listing and privacy policy.
 - Package id: `com.bizzeh.synthkit`.
 - Ease of use (decided 2026-10-09): the whole app is built for phones first, not a desktop DAW shrunk down. Any flow is start, play, stop, then tidy; no screen needs a manual. A feature that cannot be made simple on a 5-inch landscape screen is cut or deferred rather than crammed in.
+- Multi-touch (decided 2026-10-09): every instrument reacts to two or more pads, keys or strings touched at the same time. Each finger plays its own note.
 - Playing model (decided 2026-10-09): fixed note velocity when played, with per-track volume; velocity can be edited per note afterwards in the loop editor. Keys sustain while held, drum pads are one-shot.
 - Accessibility and locale (decided 2026-10-09): every control has a TalkBack content description; English (UK) only, with all strings externalised for later translation.
 - Release path (decided 2026-10-09): Play internal testing track first, then production; closed or open testing only if outside testers are wanted.
@@ -114,8 +116,8 @@ Out of scope:
 
 ## Milestones
 
-1. Project skeleton, Oboe audio output, one playable instrument with measured latency.
-2. SF2 playback with GeneralUser GS; all four instrument families with the three layouts in `docs/gm-layouts.md`; latency warning.
+1. Project skeleton, Oboe audio output, one playable instrument with measured latency. The instrument is the GM drum kit on a 4 x 2 pad grid, played through TinySoundFont and GeneralUser GS (SF2 playback moved forward from milestone 2, decided 2026-10-09).
+2. All four instrument families with the three layouts in `docs/gm-layouts.md`; latency warning.
 3. Projects, metronome, looper-flow record and loop with layers, track controls, loop editor.
 4. Export to audio and MIDI.
 5. Licence screen, settings, privacy policy (drafted, hosted and linked in the listing), icon and header image, Play Store listing guide, GitHub Actions CI, internal testing then Play Store release. The icon is needed earlier for the launcher; a placeholder icon is used until it exists.
@@ -125,3 +127,4 @@ Out of scope:
 | Date | Change | Summary |
 |---|---|---|
 | 2026-10-09 | Created | Initial plan from requirements conversation. |
+| 2026-10-09 | Changed | SF2 playback moved into milestone 1 (drum pads); multi-touch made a constraint for every instrument; test frameworks chosen. |
