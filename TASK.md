@@ -69,3 +69,39 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Dismissible banner when the stream is not in low-latency mode or the output device is Bluetooth. Suggests wired headphones or the speaker. Play is never blocked.
   - Re-evaluated when the output device changes.
   - Depends on: TASK-004, TASK-007.
+
+## Milestone 3: projects, metronome, looper, track controls, loop editor
+
+Branch `feat/milestone-3`. Defaults chosen by Claude where the plan is silent are marked "Default".
+
+Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar), so a tempo change keeps the music. The native engine runs a tick clock, plays the loop and the metronome sample-accurately, and records live notes with their clock position minus the output latency, so a take lines up with what the player heard. Kotlin turns recorded notes into takes, snaps the start and rounds the length.
+
+- [ ] TASK-012: Project files and project list
+  - Project, track, take and note model in ticks; JSON through kotlinx-serialization; every loaded file validated (tempo, bars, keys, velocities, ticks, track count); a broken file is skipped and logged, never fatal.
+  - One file per project in app-private storage, written atomically (temporary file, then rename). Autosave after every change.
+  - Project list on launch: new, rename, duplicate, delete (with confirmation). Default: new projects are named "Project 1", "Project 2" and so on, at 120 BPM.
+  - JVM tests for the model, validation and store.
+  - Depends on: TASK-007. Required by: TASK-014.
+- [ ] TASK-013: Native transport, sequencer and metronome
+  - Tick clock at the project tempo; loop playback of every track's notes at their sample position; metronome click (bell on beat 1).
+  - Recording captures live notes with clock position minus output latency into a lock-free queue for Kotlin.
+  - Loop notes reach the audio thread as an immutable snapshot swapped atomically; the audio thread never allocates or frees memory.
+  - Per-channel volume. Each track uses its own MIDI channel.
+  - GoogleTest host tests.
+  - Depends on: TASK-005. Required by: TASK-014.
+- [ ] TASK-014: Project screen and looper flow
+  - Track list with Add track (quick entries and Browse), tempo (40 to 240), metronome-during-playback toggle, Record and Play/Stop.
+  - First take: Record arms the click; recording starts on the first tap and snaps to the nearest click beat; Record again stops, rounds to the nearest whole bar (1 to 8) and the loop plays at once.
+  - Later takes: Record records the selected track while the loop plays; notes wrap to the loop length and overdub; Record again ends the take and the loop keeps playing.
+  - Track controls: undo last take (repeatable back to the first take), mute, solo, volume, clear, delete (with confirmation), instrument swap within kind.
+  - The track's instrument layout is played with a compact transport bar above it.
+  - Depends on: TASK-012, TASK-013. Required by: TASK-015, TASK-016.
+- [ ] TASK-015: Loop editor
+  - Per-track quantise (off, 1/8, 1/16), non-destructive: raw timing is kept.
+  - Step grid with 1/16 columns over the whole loop, scrolling sideways. Rows: one per pad for drum tracks, one per semitone for melodic tracks, scrolling, opened at the track's notes.
+  - Default: tap an empty cell to add a note; tap a note to select it and show a velocity slider and Delete; tap the selected note again to remove it. Drag a note to move it in time and pitch.
+  - Double loop: doubles the loop length (up to 8 bars) and repeats every track's notes.
+  - Depends on: TASK-014.
+- [ ] TASK-016: Track limit on the budget phone
+  - Measure audio callback load and underruns on the Galaxy A03 with 4, 6 and 8 busy tracks; set the shipped limit (design 8, never below 4); record the result in `.learnings/`.
+  - Depends on: TASK-014.
