@@ -1,0 +1,36 @@
+# Gradle and build output
+.gradle/
+build/
+*/build/
+.cxx/
+*.iml
+
+# Android Studio / IntelliJ
+.idea/
+*.hprof
+captures/
+.externalNativeBuild/
+
+# Local machine configuration (SDK paths, secrets)
+local.properties
+*.local.properties
+
+# Release signing: keys and their passwords never enter the repository
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Kotlin
+.kotlin/
+
+# Native build caches
+cmake-build-*/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agent session files
+.claude/settings.local.json

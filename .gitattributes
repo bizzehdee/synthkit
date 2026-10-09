@@ -1,0 +1,19 @@
+# Normalise every text file to LF in the repository and on checkout.
+* text=auto eol=lf
+
+# Windows-only scripts need CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.sf2 binary
+*.jar binary
+*.so binary
+*.aab binary
+*.apk binary
+*.keystore binary
+*.jks binary
