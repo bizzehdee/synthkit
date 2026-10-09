@@ -122,7 +122,7 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
   - WAV: streaming 16-bit PCM writer, header fixed up at the end.
   - MIDI: Type 1 file, a tempo and time-signature track, one track per project track with program change and notes.
   - JVM tests on the bytes. Depends on: TASK-017.
-- [ ] TASK-019: MP3 and FLAC encoders
+- [x] TASK-019: MP3 and FLAC encoders
   - LAME 3.100 and libFLAC 1.5.0 vendored from verified official tarballs, built with CMake. LAME is a separate shared library (LGPL).
   - Streaming native encoders fed from the renderer.
   - Host tests decode the output (FLAC with libFLAC, MP3 frame headers) and check length and format.
