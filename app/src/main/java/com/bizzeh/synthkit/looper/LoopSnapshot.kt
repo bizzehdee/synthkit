@@ -8,17 +8,21 @@ import com.bizzeh.synthkit.project.Track
 fun trackChannel(index: Int): Int = index + 1
 
 object LoopSnapshot {
-    /** Tracks that sound: the soloed ones if any track is soloed, else every unmuted one. */
-    fun audible(project: Project): List<Track> {
+    /**
+     * Tracks that sound: only [focusTrackId] when it names a track, else the
+     * soloed ones if any track is soloed, else every unmuted one.
+     */
+    fun audible(project: Project, focusTrackId: String? = null): List<Track> {
+        project.tracks.firstOrNull { it.id == focusTrackId }?.let { return listOf(it) }
         val soloed = project.tracks.filter { it.solo }
         return if (soloed.isNotEmpty()) soloed else project.tracks.filter { !it.muted }
     }
 
     /** Every audible note as a note on and a note off, quantised for playback. */
-    fun build(project: Project): List<LoopNote> {
+    fun build(project: Project, focusTrackId: String? = null): List<LoopNote> {
         val loopTicks = project.loopTicks
         if (loopTicks == 0) return emptyList()
-        val audible = audible(project).map { it.id }.toSet()
+        val audible = audible(project, focusTrackId).map { it.id }.toSet()
         return project.tracks.withIndex().filter { it.value.id in audible }.flatMap { (index, track) ->
             val channel = trackChannel(index)
             track.notes.flatMap { note ->

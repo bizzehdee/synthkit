@@ -41,6 +41,14 @@ class LoopSnapshotTest {
     }
 
     @Test
+    fun focusPlaysOnlyThatTrackEvenWhenMutedOrAnotherIsSoloed() {
+        val mixed = project.copy(tracks = listOf(drums.copy(solo = true), keys.copy(muted = true)))
+
+        assertEquals(setOf(2), LoopSnapshot.build(mixed, focusTrackId = keys.id).map { it.channel }.toSet())
+        assertEquals(setOf(1), LoopSnapshot.build(mixed, focusTrackId = "gone").map { it.channel }.toSet())
+    }
+
+    @Test
     fun quantiseMovesPlaybackButNotTheStoredNote() {
         val quantised = project.copy(tracks = listOf(drums.copy(quantise = Quantise.SIXTEENTH), keys))
 

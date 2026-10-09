@@ -45,6 +45,7 @@ class LoopEditorScreenTest {
     private var quantise by mutableStateOf(Quantise.OFF)
     private var bars by mutableStateOf(1)
     private var doubled = 0
+    private val auditioned = mutableListOf<Note>()
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
 
@@ -61,14 +62,17 @@ class LoopEditorScreenTest {
                     onQuantise = { quantise = it },
                     onNotes = { notes = it },
                     onDoubleLoop = { doubled++ },
+                    onAudition = { auditioned += it },
                 )
             }
         }
     }
 
+    private fun gridBounds() = composeRule.onNode(hasContentDescription("Step grid", substring = true)).fetchSemanticsNode().boundsInRoot
+
     // Centre of a grid cell; the grid opens at the first drum row (kick) with no scroll.
     private fun cell(column: Int, row: Int): Offset {
-        val grid = composeRule.onNode(hasContentDescription("Step grid", substring = true)).fetchSemanticsNode().boundsInRoot
+        val grid = gridBounds()
         val size = with(composeRule.density) { 48.dp.toPx() }
         return Offset(grid.left + (column + 0.5f) * size, grid.top + (row + 0.5f) * size)
     }
@@ -86,6 +90,7 @@ class LoopEditorScreenTest {
         tap(4, 1)
 
         assertEquals(listOf(Note(480, 38, 100, 120)), notes)
+        assertEquals(notes, auditioned)
     }
 
     @Test
@@ -95,9 +100,34 @@ class LoopEditorScreenTest {
 
         tap(0, 0)
         composeRule.onNodeWithText(string(R.string.velocity)).assertIsDisplayed()
+        assertEquals(listOf(Note(0, 36, 100, 120)), auditioned)
         tap(0, 0)
 
         assertTrue(notes.isEmpty())
+    }
+
+    @Test
+    fun selectingANoteDoesNotMoveTheGrid() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        val before = gridBounds()
+
+        tap(0, 0)
+
+        composeRule.onNodeWithText(string(R.string.velocity)).assertIsDisplayed()
+        assertEquals(before, gridBounds())
+    }
+
+    @Test
+    fun doneHidesTheNoteControlsAndKeepsTheNote() {
+        notes = listOf(Note(0, 36, 100, 120))
+        show()
+        tap(0, 0)
+
+        composeRule.onNodeWithContentDescription(string(R.string.note_done)).performClick()
+
+        composeRule.onNodeWithText(string(R.string.double_loop)).assertIsDisplayed()
+        assertEquals(1, notes.size)
     }
 
     @Test
@@ -116,6 +146,7 @@ class LoopEditorScreenTest {
         composeRule.waitForIdle()
 
         assertEquals(listOf(Note(360, 42, 100, 120)), notes)
+        assertEquals(notes, auditioned)
     }
 
     @Test

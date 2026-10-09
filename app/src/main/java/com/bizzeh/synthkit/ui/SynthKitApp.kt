@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.listSaver
@@ -269,6 +270,10 @@ private fun Navigation(
                 LaunchedEffect(route) { pop() }
                 return
             }
+            DisposableEffect(session, track.id) {
+                session.focusTrack(track.id)
+                onDispose { session.focusTrack(null) }
+            }
             LoopEditorScreen(
                 color = instrumentOf(track)?.let { familyColor(it.family) } ?: StudioTheme.palette.muted,
                 project = looper.project,
@@ -278,6 +283,14 @@ private fun Navigation(
                 onQuantise = { session.setQuantise(track.id, it) },
                 onNotes = { session.replaceNotes(track.id, it) },
                 onDoubleLoop = session::doubleLoop,
+                onAudition = { session.audition(track.id, it.key, it.velocity) },
+                transport = {
+                    PlayStopButton(
+                        playing = looper.isPlaying,
+                        enabled = looper.isPlaying || looper.project.loopBars > 0,
+                        onClick = session::playStop,
+                    )
+                },
             )
         }
         is Route.Export -> ExportRoute(

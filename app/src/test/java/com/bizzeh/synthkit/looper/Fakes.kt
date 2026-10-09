@@ -34,9 +34,10 @@ class FakeTransport : Transport {
 class FakePlayer : InstrumentPlayer {
     val selected = mutableMapOf<Int, Pair<Int, Int>>()
     val silenced = mutableListOf<Int>()
+    val played = mutableListOf<String>()
 
-    override fun noteOn(channel: Int, key: Int, velocity: Float, delayMillis: Float) = true
-    override fun noteOff(channel: Int, key: Int, delayMillis: Float) = true
+    override fun noteOn(channel: Int, key: Int, velocity: Float, delayMillis: Float): Boolean { played += "on $channel $key $velocity"; return true }
+    override fun noteOff(channel: Int, key: Int, delayMillis: Float): Boolean { played += "off $channel $key"; return true }
     override fun selectInstrument(channel: Int, bank: Int, program: Int): Boolean { selected[channel] = bank to program; return true }
     override fun allNotesOff(channel: Int): Boolean { silenced += channel; return true }
 }
