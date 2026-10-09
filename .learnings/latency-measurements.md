@@ -23,3 +23,5 @@ bursts.
   the platform.
 - SoundFont load time: 241 ms (Xperia 1 II), 393 ms (XZ Premium), 518 ms
   (Galaxy A03).
+- Decision (2026-10-09, user): these values are acceptable for now, but need more
+  testing before the buffer size is final.
