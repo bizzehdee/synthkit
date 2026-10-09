@@ -30,12 +30,15 @@ class MainActivity : ComponentActivity() {
                         val state by audio.state.collectAsState()
                         val latency by audio.latency.collectAsState()
                         val libraryState by library.library.collectAsState()
+                        val warning by audio.warning.collectAsState()
                         SynthKitApp(
                             engineState = state,
                             latency = latency.takeIf { BuildConfig.DEBUG },
                             library = libraryState,
                             onToggleFavourite = library::toggleFavourite,
                             onInstrumentOpened = library::opened,
+                            warning = warning,
+                            onDismissWarning = audio::dismissWarning,
                         )
                     }
                 }

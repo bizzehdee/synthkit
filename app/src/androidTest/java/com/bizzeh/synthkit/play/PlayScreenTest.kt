@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.LatencyReport
+import com.bizzeh.synthkit.audio.LatencyWarning
 import com.bizzeh.synthkit.instruments.Instrument
 import com.bizzeh.synthkit.testing.RecordingPlayer
 import com.bizzeh.synthkit.testing.testCatalogue
@@ -45,6 +46,8 @@ class PlayScreenTest {
     private var changes = 0
     private val opened = mutableListOf<String>()
     private val openedFromLayout = mutableListOf<String>()
+    private var warning: LatencyWarning? = null
+    private var dismissals = 0
     private val kits = listOf(catalogue.byId("128:0")!!, catalogue.byId("128:25")!!)
 
     private fun show(instrument: Instrument, latency: LatencyReport? = null) {
@@ -58,6 +61,8 @@ class PlayScreenTest {
                 onOpened = { opened += it.id },
                 kits = kits,
                 onOpenInstrument = { openedFromLayout += it.id },
+                warning = warning,
+                onDismissWarning = { dismissals++ },
             )
         }
         composeRule.waitForIdle()
@@ -115,7 +120,7 @@ class PlayScreenTest {
     fun switchingInstrumentSelectsTheNewOne() {
         var current by mutableStateOf(kit)
         composeRule.setContent {
-            PlayScreen(current, player, null, {}, {}, {}, kits, {})
+            PlayScreen(current, player, null, {}, {}, {}, kits, {}, null, {})
         }
         composeRule.waitForIdle()
 
@@ -132,7 +137,7 @@ class PlayScreenTest {
     fun leavingTheScreenSilencesTheLiveChannel() {
         var shown by mutableStateOf(true)
         composeRule.setContent {
-            if (shown) PlayScreen(kit, player, null, {}, {}, {}, kits, {})
+            if (shown) PlayScreen(kit, player, null, {}, {}, {}, kits, {}, null, {})
         }
         composeRule.waitForIdle()
 
@@ -167,6 +172,33 @@ class PlayScreenTest {
 
         composeRule.onNode(hasText(context.getString(R.string.latency_measuring), substring = true))
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun bluetoothWarningIsShownAndCanBeDismissed() {
+        warning = LatencyWarning.BLUETOOTH
+        show(kit)
+
+        composeRule.onNodeWithText(context.getString(R.string.warning_bluetooth)).assertIsDisplayed()
+        composeRule.onNodeWithText(context.getString(R.string.dismiss)).performClick()
+
+        assertEquals(1, dismissals)
+    }
+
+    @Test
+    fun lowLatencyWarningKeepsThePadsPlayable() {
+        warning = LatencyWarning.NOT_LOW_LATENCY
+        show(kit)
+
+        composeRule.onNodeWithText(context.getString(R.string.warning_not_low_latency)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.drum_kick)).assertIsDisplayed()
+    }
+
+    @Test
+    fun noWarningShowsNoBanner() {
+        show(kit)
+
+        composeRule.onNodeWithText(context.getString(R.string.dismiss)).assertDoesNotExist()
     }
 
     @Test

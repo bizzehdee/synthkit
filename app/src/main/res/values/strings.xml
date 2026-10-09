@@ -87,4 +87,7 @@
         <item>A♯</item>
         <item>B</item>
     </string-array>
+    <string name="warning_bluetooth">Bluetooth audio adds a delay between a tap and its sound. For the best timing, use wired headphones or the speaker.</string>
+    <string name="warning_not_low_latency">This device did not give the app a low-latency audio stream, so sound may lag behind taps. Wired headphones or the speaker may help.</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

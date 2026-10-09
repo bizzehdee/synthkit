@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.audio.LatencyReport
+import com.bizzeh.synthkit.audio.LatencyWarning
 import com.bizzeh.synthkit.browser.BrowserScreen
 import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
@@ -44,6 +45,8 @@ fun SynthKitApp(
     library: Library,
     onToggleFavourite: (String) -> Unit,
     onInstrumentOpened: (String) -> Unit,
+    warning: LatencyWarning?,
+    onDismissWarning: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -63,7 +66,9 @@ fun SynthKitApp(
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
-            is EngineState.Ready -> Navigation(engineState, latency, library, onToggleFavourite, onInstrumentOpened)
+            is EngineState.Ready -> Navigation(
+                engineState, latency, library, onToggleFavourite, onInstrumentOpened, warning, onDismissWarning,
+            )
         }
     }
 }
@@ -75,6 +80,8 @@ private fun Navigation(
     library: Library,
     onToggleFavourite: (String) -> Unit,
     onInstrumentOpened: (String) -> Unit,
+    warning: LatencyWarning?,
+    onDismissWarning: () -> Unit,
 ) {
     val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Home) }
     fun replaceWith(routes: List<Route>) {
@@ -111,6 +118,8 @@ private fun Navigation(
                     onOpened = { onInstrumentOpened(it.id) },
                     kits = engine.catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
                     onOpenInstrument = { replaceWith(Route.openInstrument(it.id)) },
+                    warning = warning,
+                    onDismissWarning = onDismissWarning,
                 )
             }
         }

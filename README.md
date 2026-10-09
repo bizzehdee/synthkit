@@ -9,9 +9,21 @@ keyboards, guitar, bass and more.
 
 ## Status
 
-Synth Kit is in early development. The current build plays one instrument: a
-drum kit on 8 pads. You can tap several pads at the same time. More
-instruments, recording and export are planned.
+Synth Kit is in early development. The current build plays every General MIDI
+instrument in the bundled SoundFont:
+
+- **Keys**: a piano keyboard with octave buttons, a scroll strip and a hold
+  button.
+- **Guitar and bass**: seven chord pads for a key and mode. Tap a pad to strum,
+  or hold it and swipe the strum strip to play string by string.
+- **Drums**: every General MIDI drum sound on pages of pads, with a kit picker.
+- **Pitched percussion and effects**: pads that play one note each.
+
+You can use several fingers at the same time on every instrument. A browser
+lists every instrument by family, with search, favourites and recent
+instruments. A banner warns you when Bluetooth audio or the device adds delay.
+
+Recording, loops and export are planned.
 See [plan.md](plan.md) for the full plan.
 
 ## Requirements

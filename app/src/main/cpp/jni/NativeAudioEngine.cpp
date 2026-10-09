@@ -111,6 +111,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_native
             std::to_string(report.framesPerBurst),
             std::to_string(report.bufferFrames),
             std::to_string(report.underruns),
+            std::to_string(report.deviceId),
     };
     constexpr jsize kCount = sizeof(fields) / sizeof(fields[0]);
     jobjectArray result = env->NewObjectArray(kCount, env->FindClass("java/lang/String"), nullptr);

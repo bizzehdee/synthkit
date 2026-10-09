@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.InstrumentPlayer
 import com.bizzeh.synthkit.audio.LatencyReport
+import com.bizzeh.synthkit.audio.LatencyWarning
 import com.bizzeh.synthkit.chords.ChordsLayout
 import com.bizzeh.synthkit.drums.DrumKitLayout
 import com.bizzeh.synthkit.instruments.Instrument
@@ -51,6 +52,8 @@ fun PlayScreen(
     onOpened: (Instrument) -> Unit,
     kits: List<Instrument>,
     onOpenInstrument: (Instrument) -> Unit,
+    warning: LatencyWarning?,
+    onDismissWarning: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currentOnOpened by rememberUpdatedState(onOpened)
@@ -79,6 +82,7 @@ fun PlayScreen(
                 Text(stringResource(R.string.change_instrument))
             }
         }
+        warning?.let { LatencyWarningBanner(it, onDismissWarning) }
         latency?.let { LatencyReadout(it) }
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             // Keyed by instrument so hold, octave and other layout state start fresh.

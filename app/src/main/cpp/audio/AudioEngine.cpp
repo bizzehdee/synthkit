@@ -76,6 +76,7 @@ LatencyReport AudioEngine::latencyReport() {
     report.sampleRate = stream_->getSampleRate();
     report.framesPerBurst = stream_->getFramesPerBurst();
     report.bufferFrames = stream_->getBufferSizeInFrames();
+    report.deviceId = stream_->getDeviceId();
     const auto underruns = stream_->getXRunCount();
     if (underruns) {
         report.underruns = underruns.value();

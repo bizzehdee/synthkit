@@ -65,7 +65,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Multi-touch on every pad layout.
   - Drum tab test (requested 2026-10-09): a UI test plays the user's two-part drum tab through the pad grid step by step, with simultaneous hits pressed together, and checks the notes. Lanes: C crash 49, HH closed hat 42, Rd ride 51, S snare 38, B kick 36, T high tom 50, F floor tom 43, Hf pedal hat 44. The tab is kept as a test fixture.
   - Depends on: TASK-005, TASK-007.
-- [ ] TASK-011: Latency warning
+- [x] TASK-011: Latency warning
   - Dismissible banner when the stream is not in low-latency mode or the output device is Bluetooth. Suggests wired headphones or the speaker. Play is never blocked.
   - Re-evaluated when the output device changes.
   - Depends on: TASK-004, TASK-007.

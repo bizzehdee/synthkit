@@ -45,6 +45,8 @@ class SynthKitAppTest {
                 library = library,
                 onToggleFavourite = { library = library.toggleFavourite(it) },
                 onInstrumentOpened = { opened += it },
+                warning = null,
+                onDismissWarning = {},
             )
         }
     }

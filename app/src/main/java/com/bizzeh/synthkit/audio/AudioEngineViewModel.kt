@@ -1,6 +1,7 @@
 package com.bizzeh.synthkit.audio
 
 import android.app.Application
+import android.media.AudioManager
 import android.util.Log
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.instruments.InstrumentCatalogue
@@ -22,6 +23,12 @@ class AudioEngineViewModel(application: Application) : AndroidViewModel(applicat
 
     private val mutableLatency = MutableStateFlow<LatencyReport?>(null)
     val latency: StateFlow<LatencyReport?> = mutableLatency.asStateFlow()
+
+    private val mutableWarning = MutableStateFlow<LatencyWarning?>(null)
+    val warning: StateFlow<LatencyWarning?> = mutableWarning.asStateFlow()
+    private val dismissal = WarningDismissal()
+    private var currentWarning: LatencyWarning? = null
+    private val audioManager = application.getSystemService(AudioManager::class.java)
 
     private var engine: AudioEngine? = null
     private var visible = false
@@ -72,9 +79,32 @@ class AudioEngineViewModel(application: Application) : AndroidViewModel(applicat
                 val report = engine.latencyReport()
                 mutableLatency.value = report
                 logWhenStreamChanges(report)
+                updateWarning(LatencyWarnings.evaluate(report, outputKind(report?.deviceId ?: 0)))
                 delay(LATENCY_POLL_MILLIS)
             }
         }
+    }
+
+    fun dismissWarning() {
+        currentWarning?.let(dismissal::dismiss)
+        mutableWarning.value = dismissal.visible(currentWarning)
+    }
+
+    private fun updateWarning(warning: LatencyWarning?) {
+        if (warning != currentWarning) {
+            Log.i(TAG, "event=latency_warning_changed warning=$warning")
+        }
+        currentWarning = warning
+        mutableWarning.value = dismissal.visible(warning)
+    }
+
+    // Without a device id from the stream, a connected Bluetooth output is assumed
+    // to be in use, because Android routes media to it by default.
+    private fun outputKind(deviceId: Int): OutputKind {
+        val outputs = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+        val type = outputs.firstOrNull { it.id == deviceId }?.type
+            ?: return if (outputs.any { LatencyWarnings.isBluetooth(it.type) }) OutputKind.BLUETOOTH else OutputKind.UNKNOWN
+        return if (LatencyWarnings.isBluetooth(type)) OutputKind.BLUETOOTH else OutputKind.OTHER
     }
 
     // Logs the first measured latency of each stream configuration, so a stream

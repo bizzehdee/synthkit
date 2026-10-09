@@ -20,6 +20,8 @@ struct LatencyReport {
     int32_t framesPerBurst = 0;
     int32_t bufferFrames = 0;
     int32_t underruns = 0;
+    // 0 when the platform does not report the output device.
+    int32_t deviceId = 0;
 };
 
 // Owns the Oboe output stream and feeds it from the synth. The stream is
