@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.bizzeh.synthkit.audio.AudioEngineViewModel
 import com.bizzeh.synthkit.browser.LibraryViewModel
+import com.bizzeh.synthkit.export.ExportActions
+import com.bizzeh.synthkit.export.ExportViewModel
 import com.bizzeh.synthkit.looper.SessionViewModel
 import com.bizzeh.synthkit.project.ProjectActions
 import com.bizzeh.synthkit.project.ProjectsViewModel
@@ -24,6 +26,7 @@ class MainActivity : ComponentActivity() {
     private val library: LibraryViewModel by viewModels()
     private val projects: ProjectsViewModel by viewModels()
     private val sessions: SessionViewModel by viewModels()
+    private val exports: ExportViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +40,7 @@ class MainActivity : ComponentActivity() {
                         val libraryState by library.library.collectAsState()
                         val warning by audio.warning.collectAsState()
                         val projectList by projects.projects.collectAsState()
+                        val exportState by exports.state.collectAsState()
                         SynthKitApp(
                             engineState = state,
                             latency = latency.takeIf { BuildConfig.DEBUG },
@@ -54,6 +58,13 @@ class MainActivity : ComponentActivity() {
                                 save = projects::update,
                             ),
                             sessions = sessions,
+                            exportState = exportState,
+                            exportActions = ExportActions(
+                                export = exports::export,
+                                cancel = exports::cancel,
+                                reset = exports::reset,
+                                saveTo = exports::saveTo,
+                            ),
                         )
                     }
                 }

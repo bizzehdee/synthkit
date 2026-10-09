@@ -162,4 +162,26 @@
         <item quantity="one">%d note</item>
         <item quantity="other">%d notes</item>
     </plurals>
+    <string name="export">Export</string>
+    <string name="export_title">Export · %1$s</string>
+    <string name="export_format">Format</string>
+    <string name="export_format_midi">MIDI</string>
+    <string name="export_format_wav">WAV</string>
+    <string name="export_format_mp3">MP3</string>
+    <string name="export_format_flac">FLAC</string>
+    <string name="export_format_aac">MP4</string>
+    <plurals name="export_passes">
+        <item quantity="one">Play the loop %d time</item>
+        <item quantity="other">Play the loop %d times</item>
+    </plurals>
+    <string name="export_passes_down">Fewer times</string>
+    <string name="export_passes_up">More times</string>
+    <string name="export_start">Export</string>
+    <string name="export_running">Exporting %1$d%%</string>
+    <string name="export_done">Exported %1$s</string>
+    <string name="export_failed">The export failed. Try again.</string>
+    <string name="export_save">Save</string>
+    <string name="export_share">Share</string>
+    <string name="export_saved">Saved</string>
+    <string name="export_save_failed">The file could not be saved there.</string>
 </resources>

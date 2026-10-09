@@ -130,7 +130,7 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
 - [x] TASK-020: AAC in MP4
   - Platform AAC encoder through MediaCodec and MediaMuxer, fed from the renderer.
   - Device test reads the file back with MediaExtractor. Depends on: TASK-017.
-- [ ] TASK-021: Export screen
+- [x] TASK-021: Export screen
   - From the project screen: format, loop passes, Export with progress and Cancel, then Save (system file picker) or Share.
   - Export files live in app cache and the previous export is deleted at the next export. No storage permission.
   - Depends on: TASK-018, TASK-019, TASK-020.

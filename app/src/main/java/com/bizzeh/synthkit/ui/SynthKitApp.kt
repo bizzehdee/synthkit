@@ -1,6 +1,19 @@
 package com.bizzeh.synthkit.ui
 
 import androidx.activity.compose.BackHandler
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import com.bizzeh.synthkit.export.CreateExportDocument
+import com.bizzeh.synthkit.export.ExportActions
+import com.bizzeh.synthkit.export.ExportFormat
+import com.bizzeh.synthkit.export.ExportPlan
+import com.bizzeh.synthkit.export.ExportScreen
+import com.bizzeh.synthkit.export.ExportState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +63,7 @@ import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
 import com.bizzeh.synthkit.play.PlayScreen
+import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.ProjectActions
 import com.bizzeh.synthkit.project.ProjectListScreen
 import com.bizzeh.synthkit.project.StoredProject
@@ -71,6 +85,8 @@ fun SynthKitApp(
     projects: List<StoredProject>?,
     projectActions: ProjectActions,
     sessions: SessionHost,
+    exportState: ExportState,
+    exportActions: ExportActions,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -92,7 +108,7 @@ fun SynthKitApp(
             )
             is EngineState.Ready -> Navigation(
                 engineState, latency, library, onToggleFavourite, onInstrumentOpened, warning, onDismissWarning,
-                projects, projectActions, sessions,
+                projects, projectActions, sessions, exportState, exportActions,
             )
         }
     }
@@ -110,6 +126,8 @@ private fun Navigation(
     projects: List<StoredProject>?,
     projectActions: ProjectActions,
     sessions: SessionHost,
+    exportState: ExportState,
+    exportActions: ExportActions,
 ) {
     val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Projects) }
     fun replaceTop(route: Route) {
@@ -169,6 +187,7 @@ private fun Navigation(
             onTempo = session::setTempo,
             onClickOnPlayback = session::setMetronomeOnPlayback,
             onPlayStop = session::playStop,
+            onExport = { stack.add(Route.Export(project.id)) },
             tracks = TrackActions(
                 open = { stack.add(Route.Track(project.id, it)) },
                 setMuted = session::setMuted,
@@ -257,8 +276,69 @@ private fun Navigation(
                 onDoubleLoop = session::doubleLoop,
             )
         }
+        is Route.Export -> ExportRoute(
+            project = looper.project,
+            engine = engine,
+            state = exportState,
+            actions = exportActions,
+            onBack = {
+                exportActions.cancel()
+                exportActions.reset()
+                pop()
+            },
+        )
         Route.Projects -> Unit
     }
+}
+
+@Composable
+private fun ExportRoute(
+    project: Project,
+    engine: EngineState.Ready,
+    state: ExportState,
+    actions: ExportActions,
+    onBack: () -> Unit,
+) {
+    val context = LocalContext.current
+    var format by rememberSaveable { mutableStateOf(ExportFormat.WAV) }
+    var passes by rememberSaveable { mutableIntStateOf(ExportPlan.DEFAULT_PASSES) }
+    var message by remember { mutableStateOf<String?>(null) }
+    val saved = stringResource(R.string.export_saved)
+    val saveFailed = stringResource(R.string.export_save_failed)
+    val save = rememberLauncherForActivityResult(CreateExportDocument()) { uri ->
+        uri?.let { actions.saveTo(it) { ok -> message = if (ok) saved else saveFailed } }
+    }
+    BackHandler(onBack = onBack)
+    ExportScreen(
+        projectName = project.name,
+        state = state,
+        format = format,
+        passes = passes,
+        onFormat = { format = it },
+        onPasses = { passes = it.coerceIn(ExportPlan.MIN_PASSES, ExportPlan.MAX_PASSES) },
+        onExport = {
+            message = null
+            actions.export(project, format, passes, engine.openExport) { bank, program ->
+                engine.catalogue.byId("$bank:$program")?.name.orEmpty()
+            }
+        },
+        onCancel = actions.cancel,
+        onSave = {
+            (state as? ExportState.Done)?.let { save.launch(it.format.mimeType to it.file.name) }
+        },
+        onShare = {
+            (state as? ExportState.Done)?.let { done ->
+                val uri = FileProvider.getUriForFile(context, "${context.packageName}.exports", done.file)
+                val send = Intent(Intent.ACTION_SEND)
+                    .setType(done.format.mimeType)
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                context.startActivity(Intent.createChooser(send, null))
+            }
+        },
+        onBack = onBack,
+        message = message,
+    )
 }
 
 // The session reads recorded notes and the clock this often while a project is open.
