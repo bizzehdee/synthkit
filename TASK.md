@@ -76,7 +76,7 @@ Branch `feat/milestone-3`. Defaults chosen by Claude where the plan is silent ar
 
 Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar), so a tempo change keeps the music. The native engine runs a tick clock, plays the loop and the metronome sample-accurately, and records live notes with their clock position minus the output latency, so a take lines up with what the player heard. Kotlin turns recorded notes into takes, snaps the start and rounds the length.
 
-- [ ] TASK-012: Project files and project list
+- [x] TASK-012: Project files and project list
   - Project, track, take and note model in ticks; JSON through kotlinx-serialization; every loaded file validated (tempo, bars, keys, velocities, ticks, track count); a broken file is skipped and logged, never fatal.
   - One file per project in app-private storage, written atomically (temporary file, then rename). Autosave after every change.
   - Project list on launch: new, rename, duplicate, delete (with confirmation). Default: new projects are named "Project 1", "Project 2" and so on, at 120 BPM.

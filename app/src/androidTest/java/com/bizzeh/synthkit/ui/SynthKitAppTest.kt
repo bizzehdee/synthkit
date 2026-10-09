@@ -14,6 +14,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.browser.Library
+import com.bizzeh.synthkit.project.Project
+import com.bizzeh.synthkit.project.ProjectActions
+import com.bizzeh.synthkit.project.StoredProject
 import com.bizzeh.synthkit.testing.RecordingPlayer
 import com.bizzeh.synthkit.testing.testCatalogue
 import org.junit.Assert.assertEquals
@@ -30,6 +33,13 @@ class SynthKitAppTest {
     private val ready = EngineState.Ready(player, testCatalogue())
     private var library by mutableStateOf(Library())
     private val opened = mutableListOf<String>()
+    private var projects by mutableStateOf(listOf(StoredProject(Project(id = "p1", name = "Song"), 0)))
+    private val actions = ProjectActions(
+        create = { Project(id = "p2", name = "Project 2").also { projects = projects + StoredProject(it, 1) } },
+        rename = { _, _ -> },
+        duplicate = {},
+        delete = {},
+    )
 
     private fun string(id: Int, vararg args: Any) = composeRule.activity.getString(id, *args)
 
@@ -47,8 +57,15 @@ class SynthKitAppTest {
                 onInstrumentOpened = { opened += it },
                 warning = null,
                 onDismissWarning = {},
+                projects = projects,
+                projectActions = actions,
             )
         }
+    }
+
+    private fun showProject() {
+        show()
+        composeRule.onNodeWithText("Song").performClick()
     }
 
     @Test
@@ -66,8 +83,27 @@ class SynthKitAppTest {
     }
 
     @Test
-    fun homeShowsTheFourQuickEntriesAndBrowse() {
+    fun launchShowsTheProjectList() {
         show()
+
+        composeRule.onNodeWithText(string(R.string.projects_title)).assertIsDisplayed()
+        composeRule.onNodeWithText("Song").assertIsDisplayed()
+    }
+
+    @Test
+    fun newProjectOpensItAtOnce() {
+        show()
+
+        composeRule.onNodeWithText(string(R.string.project_new)).performClick()
+
+        composeRule.onNodeWithText(string(R.string.home_browse)).assertIsDisplayed()
+        pressBack()
+        composeRule.onNodeWithText("Project 2").assertIsDisplayed()
+    }
+
+    @Test
+    fun projectShowsTheFourQuickEntriesAndBrowse() {
+        showProject()
 
         listOf(R.string.family_keys, R.string.family_guitar_bass, R.string.family_drums_percussion, R.string.family_synth)
             .forEach { label ->
@@ -78,8 +114,8 @@ class SynthKitAppTest {
     }
 
     @Test
-    fun drumsQuickEntryOpensTheStandardKitAndBackReturnsHome() {
-        show()
+    fun drumsQuickEntryOpensTheStandardKitAndBackReturnsToTheProject() {
+        showProject()
 
         composeRule.onNodeWithContentDescription(
             string(R.string.home_open_family, string(R.string.family_drums_percussion)),
@@ -93,7 +129,7 @@ class SynthKitAppTest {
 
     @Test
     fun guitarQuickEntryOpensNylonGuitar() {
-        show()
+        showProject()
 
         composeRule.onNodeWithContentDescription(
             string(R.string.home_open_family, string(R.string.family_guitar_bass)),
@@ -105,7 +141,7 @@ class SynthKitAppTest {
 
     @Test
     fun browserSearchOpensTheChosenInstrument() {
-        show()
+        showProject()
 
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
         composeRule.onNodeWithText(string(R.string.browser_search)).performTextInput("808")
@@ -117,7 +153,7 @@ class SynthKitAppTest {
 
     @Test
     fun browserFamilySectionListsItsInstruments() {
-        show()
+        showProject()
 
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
         composeRule.onNodeWithText(string(R.string.family_brass_winds)).performClick()
@@ -127,7 +163,7 @@ class SynthKitAppTest {
 
     @Test
     fun favouriteToggleAddsTheInstrumentToFavourites() {
-        show()
+        showProject()
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
 
         composeRule.onNodeWithContentDescription(string(R.string.favourite_add, "Acoustic Grand Piano")).performClick()
@@ -140,7 +176,7 @@ class SynthKitAppTest {
 
     @Test
     fun emptyFavouritesAndRecentsExplainThemselves() {
-        show()
+        showProject()
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
 
         composeRule.onNodeWithText(string(R.string.browser_favourites)).performClick()
@@ -152,7 +188,7 @@ class SynthKitAppTest {
     @Test
     fun recentsListOpenedInstrumentsNewestFirst() {
         library = Library(recents = listOf("0:40", "128:25"))
-        show()
+        showProject()
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
 
         composeRule.onNodeWithText(string(R.string.browser_recents)).performClick()
@@ -163,7 +199,7 @@ class SynthKitAppTest {
 
     @Test
     fun searchWithNoMatchSaysSo() {
-        show()
+        showProject()
         composeRule.onNodeWithText(string(R.string.home_browse)).performClick()
 
         composeRule.onNodeWithText(string(R.string.browser_search)).performTextInput("zzzz")
@@ -173,7 +209,7 @@ class SynthKitAppTest {
 
     @Test
     fun changeInstrumentFromPlayOpensTheBrowserAndBackReturnsToPlay() {
-        show()
+        showProject()
         composeRule.onNodeWithContentDescription(
             string(R.string.home_open_family, string(R.string.family_drums_percussion)),
         ).performClick()

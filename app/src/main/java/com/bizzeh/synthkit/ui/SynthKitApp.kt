@@ -32,6 +32,9 @@ import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
 import com.bizzeh.synthkit.play.PlayScreen
+import com.bizzeh.synthkit.project.ProjectActions
+import com.bizzeh.synthkit.project.ProjectListScreen
+import com.bizzeh.synthkit.project.StoredProject
 
 private val BackStackSaver = listSaver<SnapshotStateList<Route>, String>(
     save = { stack -> stack.map(Route::encode) },
@@ -47,6 +50,8 @@ fun SynthKitApp(
     onInstrumentOpened: (String) -> Unit,
     warning: LatencyWarning?,
     onDismissWarning: () -> Unit,
+    projects: List<StoredProject>?,
+    projectActions: ProjectActions,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -68,6 +73,7 @@ fun SynthKitApp(
             )
             is EngineState.Ready -> Navigation(
                 engineState, latency, library, onToggleFavourite, onInstrumentOpened, warning, onDismissWarning,
+                projects, projectActions,
             )
         }
     }
@@ -82,8 +88,10 @@ private fun Navigation(
     onInstrumentOpened: (String) -> Unit,
     warning: LatencyWarning?,
     onDismissWarning: () -> Unit,
+    projects: List<StoredProject>?,
+    projectActions: ProjectActions,
 ) {
-    val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Home) }
+    val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Projects) }
     fun replaceWith(routes: List<Route>) {
         stack.clear()
         stack.addAll(routes)
@@ -91,23 +99,31 @@ private fun Navigation(
 
     BackHandler(enabled = stack.size > 1) { stack.removeAt(stack.lastIndex) }
 
+    fun openInstrument(id: String) = replaceWith(Route.openInstrument(stack, id))
+
     when (val route = stack.last()) {
-        Route.Home -> HomeScreen(
-            onOpenFamily = { family ->
-                engine.catalogue.quickEntry(family)?.let { replaceWith(Route.openInstrument(it.id)) }
-            },
+        Route.Projects -> ProjectListScreen(
+            projects = projects,
+            onOpen = { stack.add(Route.Project(it)) },
+            onCreate = { stack.add(Route.Project(projectActions.create().id)) },
+            onRename = projectActions.rename,
+            onDuplicate = projectActions.duplicate,
+            onDelete = projectActions.delete,
+        )
+        is Route.Project -> HomeScreen(
+            onOpenFamily = { family -> engine.catalogue.quickEntry(family)?.let { openInstrument(it.id) } },
             onBrowse = { stack.add(Route.Browser) },
         )
         Route.Browser -> BrowserScreen(
             catalogue = engine.catalogue,
             library = library,
-            onOpen = { replaceWith(Route.openInstrument(it.id)) },
+            onOpen = { openInstrument(it.id) },
             onToggleFavourite = onToggleFavourite,
         )
         is Route.Play -> {
             val instrument = engine.catalogue.byId(route.instrumentId)
             if (instrument == null) {
-                LaunchedEffect(route) { replaceWith(listOf(Route.Home)) }
+                LaunchedEffect(route) { replaceWith(listOf(Route.Projects)) }
             } else {
                 PlayScreen(
                     instrument = instrument,
@@ -117,7 +133,7 @@ private fun Navigation(
                     onChangeInstrument = { stack.add(Route.Browser) },
                     onOpened = { onInstrumentOpened(it.id) },
                     kits = engine.catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
-                    onOpenInstrument = { replaceWith(Route.openInstrument(it.id)) },
+                    onOpenInstrument = { openInstrument(it.id) },
                     warning = warning,
                     onDismissWarning = onDismissWarning,
                 )

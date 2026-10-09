@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.bizzeh.synthkit.audio.AudioEngineViewModel
 import com.bizzeh.synthkit.browser.LibraryViewModel
+import com.bizzeh.synthkit.project.ProjectActions
+import com.bizzeh.synthkit.project.ProjectsViewModel
 import com.bizzeh.synthkit.ui.LandscapeOnly
 import com.bizzeh.synthkit.ui.SynthKitApp
 import com.bizzeh.synthkit.ui.theme.SynthKitTheme
@@ -19,6 +21,7 @@ import com.bizzeh.synthkit.ui.theme.SynthKitTheme
 class MainActivity : ComponentActivity() {
     private val audio: AudioEngineViewModel by viewModels()
     private val library: LibraryViewModel by viewModels()
+    private val projects: ProjectsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +34,7 @@ class MainActivity : ComponentActivity() {
                         val latency by audio.latency.collectAsState()
                         val libraryState by library.library.collectAsState()
                         val warning by audio.warning.collectAsState()
+                        val projectList by projects.projects.collectAsState()
                         SynthKitApp(
                             engineState = state,
                             latency = latency.takeIf { BuildConfig.DEBUG },
@@ -39,6 +43,13 @@ class MainActivity : ComponentActivity() {
                             onInstrumentOpened = library::opened,
                             warning = warning,
                             onDismissWarning = audio::dismissWarning,
+                            projects = projectList,
+                            projectActions = ProjectActions(
+                                create = projects::create,
+                                rename = projects::rename,
+                                duplicate = projects::duplicate,
+                                delete = projects::delete,
+                            ),
                         )
                     }
                 }
