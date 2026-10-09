@@ -1,13 +1,15 @@
 package com.bizzeh.synthkit.drums
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -40,7 +42,7 @@ class DrumKitPadsTest {
 
     private fun show(height: Dp) {
         composeRule.setContent {
-            Box(modifier = Modifier.size(width = 640.dp, height = height)) {
+            Box(modifier = Modifier.requiredSize(width = 640.dp, height = height)) {
                 DrumKitPads(player = player, channel = CHANNEL, color = Color.Cyan)
             }
         }
@@ -49,8 +51,8 @@ class DrumKitPadsTest {
     private fun centre(name: String): Offset =
         composeRule.onNodeWithContentDescription(name).fetchSemanticsNode().boundsInRoot.center
 
-    private fun swipeToNextPage() {
-        composeRule.onRoot().performTouchInput { swipeLeft() }
+    private fun nextPage() {
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page_next)).performClick()
         composeRule.waitForIdle()
     }
 
@@ -72,22 +74,37 @@ class DrumKitPadsTest {
     }
 
     @Test
-    fun swipingShowsTheNextPage() {
+    fun nextAndPreviousButtonsChangeThePage() {
         show(PHONE_HEIGHT)
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page_previous)).assertIsNotEnabled()
 
-        swipeToNextPage()
+        nextPage()
 
         composeRule.onNodeWithContentDescription(string(R.string.drum_clap)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(string(R.string.pad_page, 2, 6)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page_previous)).performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 6)).assertIsDisplayed()
+    }
+
+    @Test
+    fun swipingAcrossThePadsDoesNotChangeThePage() {
+        show(PHONE_HEIGHT)
+
+        composeRule.onRoot().performTouchInput { swipeLeft() }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 6)).assertIsDisplayed()
     }
 
     @Test
     fun lastPageHoldsTheHighestGmPercussionNote() {
         show(PHONE_HEIGHT)
 
-        repeat(5) { swipeToNextPage() }
+        repeat(5) { nextPage() }
 
         composeRule.onNodeWithContentDescription("Open Triangle").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page_next)).assertIsNotEnabled()
     }
 
     @Test
@@ -96,7 +113,7 @@ class DrumKitPadsTest {
 
         composeRule.onNodeWithContentDescription(string(R.string.drum_floor_tom)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(string(R.string.drum_splash)).assertIsDisplayed()
-        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 3)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.pad_page, 1, 3)).assertExists()
     }
 
     @Test
@@ -112,6 +129,24 @@ class DrumKitPadsTest {
 
         assertEquals(listOf(RecordingPlayer.On(CHANNEL, 38, FIXED_VELOCITY, 0f)), onDown)
         assertEquals(onDown, player.events)
+    }
+
+    @Test
+    fun aTapThatSlidesALittleDoesNotMoveThePads() {
+        show(PHONE_HEIGHT)
+        val snare = centre(string(R.string.drum_snare))
+        val slide = with(composeRule.density) { 30.dp.toPx() }
+
+        composeRule.onRoot().performTouchInput {
+            down(0, snare)
+            moveTo(0, snare - Offset(slide / 2, 0f))
+            moveTo(0, snare - Offset(slide, 0f))
+        }
+        composeRule.waitForIdle()
+        val during = centre(string(R.string.drum_snare))
+        composeRule.onRoot().performTouchInput { up(0) }
+
+        assertEquals(snare, during)
     }
 
     @Test
@@ -160,7 +195,10 @@ class DrumKitPadsTest {
         private const val CHANNEL = 0
         private val PHONE_HEIGHT = 300.dp
 
-        /** Fits four 72 dp rows plus the page label, and the shortest test phone. */
-        val TALL_HEIGHT = 352.dp
+        /**
+         * Fits four 72 dp rows plus the page bar. It is taller than the Galaxy A03
+         * window, so tests lay it out with requiredSize and the page bar falls off-screen.
+         */
+        val TALL_HEIGHT = 368.dp
     }
 }

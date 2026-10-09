@@ -1,7 +1,7 @@
 package com.bizzeh.synthkit.tabs
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
@@ -45,7 +45,7 @@ class DrumTabPadsTest {
     private fun playThroughPads(name: String) {
         // Tall enough for the 4 x 4 first page, which holds every note the tabs use.
         composeRule.setContent {
-            Box(modifier = Modifier.size(width = 640.dp, height = DrumKitPadsTest.TALL_HEIGHT)) {
+            Box(modifier = Modifier.requiredSize(width = 640.dp, height = DrumKitPadsTest.TALL_HEIGHT)) {
                 DrumKitPads(player = player, channel = 0, color = Color.Cyan)
             }
         }

@@ -134,6 +134,7 @@ Out of scope:
 | 2026-10-09 | Changed | Studio-hardware redesign before milestone 5: brand colours only (dynamic colour dropped), family colours, bundled Archivo and JetBrains Mono, diagnostics panel. |
 | 2026-10-09 | Changed | Loop editor: note controls swap into the top bar so the grid does not move; added, selected and moved notes play; play/stop button plays only the edited track; playback position line; tap a row name to hear it. |
 | 2026-10-09 | Changed | Loop editor: note length drawn and set by dragging the right edge, melodic tracks only. Settings: theme choice (System, Light, Dark) and a gear button on the project list. |
+| 2026-10-09 | Changed | Drum kit pages change with previous and next arrows; swiping across the pads no longer changes the page. |
 | 2026-10-09 | Changed | Milestone 4 built: export marked built. |
 | 2026-10-09 | Changed | Milestone 4 planned with export defaults. |
 | 2026-10-09 | Changed | Milestone 3 built: projects, record and loop, loop editor, metronome and quantise marked built. |
