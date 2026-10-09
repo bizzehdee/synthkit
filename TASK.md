@@ -127,7 +127,7 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
   - Streaming native encoders fed from the renderer.
   - Host tests decode the output (FLAC with libFLAC, MP3 frame headers) and check length and format.
   - Licence notices added. Depends on: TASK-017.
-- [ ] TASK-020: AAC in MP4
+- [x] TASK-020: AAC in MP4
   - Platform AAC encoder through MediaCodec and MediaMuxer, fed from the renderer.
   - Device test reads the file back with MediaExtractor. Depends on: TASK-017.
 - [ ] TASK-021: Export screen
