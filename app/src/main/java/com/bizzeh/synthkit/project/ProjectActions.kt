@@ -6,4 +6,6 @@ class ProjectActions(
     val rename: (String, String) -> Unit,
     val duplicate: (String) -> Unit,
     val delete: (String) -> Unit,
+    /** Saves a changed project. */
+    val save: (Project) -> Unit,
 )

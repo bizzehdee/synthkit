@@ -1,5 +1,6 @@
 package com.bizzeh.synthkit.play
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,7 +19,6 @@ import com.bizzeh.synthkit.instruments.Instrument
 import com.bizzeh.synthkit.testing.RecordingPlayer
 import com.bizzeh.synthkit.testing.testCatalogue
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,119 +32,81 @@ class PlayScreenTest {
     private val catalogue = testCatalogue()
     private val kit = catalogue.byId("128:0")!!
     private val player = RecordingPlayer()
-    private val report = LatencyReport(
-        outputLatencyMs = 11.25,
-        audioApi = "AAudio",
-        performanceMode = "LowLatency",
-        sharingMode = "Exclusive",
-        sampleRate = 48000,
-        framesPerBurst = 96,
-        bufferFrames = 192,
-        underruns = 0,
-    )
+    private val report = LatencyReport(11.25, "AAudio", "LowLatency", "Exclusive", 48000, 96, 192, 0)
+    private val kits = listOf(catalogue.byId("128:0")!!, catalogue.byId("128:25")!!)
     private var backs = 0
     private var changes = 0
-    private val opened = mutableListOf<String>()
-    private val openedFromLayout = mutableListOf<String>()
-    private var warning: LatencyWarning? = null
     private var dismissals = 0
-    private val kits = listOf(catalogue.byId("128:0")!!, catalogue.byId("128:25")!!)
+    private val kitChanges = mutableListOf<String>()
 
-    private fun show(instrument: Instrument, latency: LatencyReport? = null) {
+    private fun show(instrument: Instrument, latency: LatencyReport? = null, warning: LatencyWarning? = null) {
         composeRule.setContent {
             PlayScreen(
                 instrument = instrument,
+                channel = CHANNEL,
                 player = player,
                 latency = latency,
-                onBack = { backs++ },
-                onChangeInstrument = { changes++ },
-                onOpened = { opened += it.id },
-                kits = kits,
-                onOpenInstrument = { openedFromLayout += it.id },
                 warning = warning,
                 onDismissWarning = { dismissals++ },
-            )
+                onBack = { backs++ },
+                onChangeInstrument = { changes++ },
+                kits = kits,
+                onKitChange = { kitChanges += it.id },
+            ) { Text("transport slot") }
         }
         composeRule.waitForIdle()
     }
 
     @Test
-    fun openingSelectsTheInstrumentOnTheLiveChannelAndReportsIt() {
+    fun drumKitShowsThePadsNameAndTransport() {
         show(kit)
 
-        assertEquals(listOf(RecordingPlayer.Select(LIVE_CHANNEL, 128, 0)), player.events)
-        assertEquals(listOf("128:0"), opened)
         composeRule.onNodeWithText("Standard 1").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.drum_kick)).assertIsDisplayed()
+        composeRule.onNodeWithText("transport slot").assertIsDisplayed()
     }
 
     @Test
-    fun drumKitShowsTheDrumPads() {
+    fun padsPlayOnTheTracksChannel() {
         show(kit)
 
-        composeRule.onNodeWithContentDescription(context.getString(R.string.drum_kick)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.drum_kick)).performClick()
+
+        assertEquals(CHANNEL, player.ons.single().channel)
     }
 
     @Test
-    fun kitPickerOpensTheChosenKit() {
+    fun eachLayoutShowsForItsInstrument() {
+        var shown by mutableStateOf(catalogue.byId("0:47")!!)
+        composeRule.setContent { PlayScreen(shown, CHANNEL, player, null, null, {}, {}, {}, kits, {}) }
+
+        composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
+        shown = catalogue.byId("0:24")!!
+        composeRule.onNodeWithContentDescription("C major").assertIsDisplayed()
+        shown = catalogue.byId("0:0")!!
+        composeRule.onNodeWithText(context.getString(R.string.hold)).assertIsDisplayed()
+    }
+
+    @Test
+    fun kitPickerSwapsTheKit() {
         show(kit)
 
         composeRule.onNodeWithText(context.getString(R.string.drum_kit, "Standard 1")).performClick()
         composeRule.onNodeWithText("808/909").performClick()
 
-        assertEquals(listOf("128:25"), openedFromLayout)
+        assertEquals(listOf("128:25"), kitChanges)
     }
 
     @Test
-    fun pitchedPercussionShowsChromaticPads() {
-        show(catalogue.byId("0:47")!!)
-
-        composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
-    }
-
-    @Test
-    fun guitarShowsChordPads() {
-        show(catalogue.byId("0:24")!!)
-
-        composeRule.onNodeWithContentDescription("C major").assertIsDisplayed()
-    }
-
-    @Test
-    fun pianoShowsTheKeyboard() {
-        show(catalogue.byId("0:0")!!)
-
-        composeRule.onNodeWithContentDescription("C 3").assertIsDisplayed()
-        composeRule.onNodeWithText(context.getString(R.string.hold)).assertIsDisplayed()
-    }
-
-    @Test
-    fun switchingInstrumentSelectsTheNewOne() {
-        var current by mutableStateOf(kit)
-        composeRule.setContent {
-            PlayScreen(current, player, null, {}, {}, {}, kits, {}, null, {})
-        }
-        composeRule.waitForIdle()
-
-        current = catalogue.byId("128:25")!!
-        composeRule.waitForIdle()
-
-        assertEquals(
-            listOf(RecordingPlayer.Select(LIVE_CHANNEL, 128, 0), RecordingPlayer.Select(LIVE_CHANNEL, 128, 25)),
-            player.events.filterIsInstance<RecordingPlayer.Select>(),
-        )
-    }
-
-    @Test
-    fun leavingTheScreenSilencesTheLiveChannel() {
+    fun leavingTheScreenSilencesTheTracksChannel() {
         var shown by mutableStateOf(true)
-        composeRule.setContent {
-            if (shown) PlayScreen(kit, player, null, {}, {}, {}, kits, {}, null, {})
-        }
+        composeRule.setContent { if (shown) PlayScreen(kit, CHANNEL, player, null, null, {}, {}, {}, kits, {}) }
         composeRule.waitForIdle()
 
         shown = false
         composeRule.waitForIdle()
 
-        assertTrue(player.events.last() == RecordingPlayer.AllOff(LIVE_CHANNEL))
+        assertEquals(RecordingPlayer.AllOff(CHANNEL), player.events.last())
     }
 
     @Test
@@ -152,32 +114,15 @@ class PlayScreenTest {
         show(kit)
 
         composeRule.onNodeWithContentDescription(context.getString(R.string.back)).performClick()
-        composeRule.onNodeWithText(context.getString(R.string.change_instrument)).performClick()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.change_instrument)).performClick()
 
         assertEquals(1, backs)
         assertEquals(1, changes)
     }
 
     @Test
-    fun latencyReportIsShownWhenGiven() {
-        show(kit, report)
-
-        composeRule.onNode(hasText("11.3 ms", substring = true)).assertIsDisplayed()
-        composeRule.onNode(hasText("burst 96", substring = true)).assertIsDisplayed()
-    }
-
-    @Test
-    fun unmeasuredLatencySaysMeasuring() {
-        show(kit, report.copy(outputLatencyMs = null))
-
-        composeRule.onNode(hasText(context.getString(R.string.latency_measuring), substring = true))
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun bluetoothWarningIsShownAndCanBeDismissed() {
-        warning = LatencyWarning.BLUETOOTH
-        show(kit)
+    fun warningIsShownAndCanBeDismissed() {
+        show(kit, warning = LatencyWarning.BLUETOOTH)
 
         composeRule.onNodeWithText(context.getString(R.string.warning_bluetooth)).assertIsDisplayed()
         composeRule.onNodeWithText(context.getString(R.string.dismiss)).performClick()
@@ -186,25 +131,28 @@ class PlayScreenTest {
     }
 
     @Test
-    fun lowLatencyWarningKeepsThePadsPlayable() {
-        warning = LatencyWarning.NOT_LOW_LATENCY
-        show(kit)
+    fun latencyReportIsShownWhenGiven() {
+        show(kit, latency = report)
 
-        composeRule.onNodeWithText(context.getString(R.string.warning_not_low_latency)).assertIsDisplayed()
-        composeRule.onNodeWithContentDescription(context.getString(R.string.drum_kick)).assertIsDisplayed()
+        composeRule.onNode(hasText("11.3 ms", substring = true)).assertIsDisplayed()
     }
 
     @Test
-    fun noWarningShowsNoBanner() {
-        show(kit)
+    fun unmeasuredLatencySaysMeasuring() {
+        show(kit, latency = report.copy(outputLatencyMs = null))
 
-        composeRule.onNodeWithText(context.getString(R.string.dismiss)).assertDoesNotExist()
+        composeRule.onNode(hasText(context.getString(R.string.latency_measuring), substring = true)).assertIsDisplayed()
     }
 
     @Test
-    fun noReportShowsNoReadout() {
+    fun noReportAndNoWarningShowNeither() {
         show(kit)
 
         composeRule.onNode(hasText("burst", substring = true)).assertDoesNotExist()
+        composeRule.onNodeWithText(context.getString(R.string.dismiss)).assertDoesNotExist()
+    }
+
+    private companion object {
+        const val CHANNEL = 3
     }
 }

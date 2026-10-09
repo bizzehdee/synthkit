@@ -1,14 +1,22 @@
 package com.bizzeh.synthkit.ui
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class RouteTest {
+    private val routes = listOf(
+        Route.Projects,
+        Route.Project("p-1"),
+        Route.AddTrack("p-1"),
+        Route.Browser("p-1"),
+        Route.Browser("p-1", "t-2"),
+        Route.Track("p-1", "t-2"),
+    )
+
     @Test
     fun everyRouteSurvivesEncoding() {
-        listOf(Route.Projects, Route.Browser, Route.Project("p-1"), Route.Play("128:25")).forEach { route ->
-            assertEquals(route, Route.decode(route.encode()))
-        }
+        routes.forEach { assertEquals(it, Route.decode(it.encode())) }
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -16,26 +24,14 @@ class RouteTest {
         Route.decode("settings")
     }
 
-    @Test
-    fun openingAnInstrumentKeepsTheOpenProjectUnderneath() {
-        val stack = listOf(Route.Projects, Route.Project("p"), Route.Browser)
-
-        assertEquals(
-            listOf(Route.Projects, Route.Project("p"), Route.Play("0:24")),
-            Route.openInstrument(stack, "0:24"),
-        )
+    @Test(expected = IllegalArgumentException::class)
+    fun malformedRouteIsRejected() {
+        Route.decode("track/only-one-id")
     }
 
     @Test
-    fun openingAnInstrumentReplacesAnEarlierInstrument() {
-        val stack = listOf(Route.Projects, Route.Project("p"), Route.Play("0:0"), Route.Browser)
-
-        assertEquals(Route.Play("0:24"), Route.openInstrument(stack, "0:24").last())
-        assertEquals(3, Route.openInstrument(stack, "0:24").size)
-    }
-
-    @Test
-    fun openingAnInstrumentWithoutAProjectStartsFromTheList() {
-        assertEquals(listOf(Route.Projects, Route.Play("0:0")), Route.openInstrument(listOf(Route.Browser), "0:0"))
+    fun everyScreenButTheListBelongsToAProject() {
+        assertNull(Route.Projects.projectId)
+        routes.drop(1).forEach { assertEquals("p-1", it.projectId) }
     }
 }

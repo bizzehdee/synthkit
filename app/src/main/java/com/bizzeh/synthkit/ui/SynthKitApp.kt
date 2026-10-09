@@ -24,6 +24,23 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.bizzeh.synthkit.instruments.Instrument
+import com.bizzeh.synthkit.instruments.InstrumentCatalogue
+import com.bizzeh.synthkit.looper.PhaseStatus
+import com.bizzeh.synthkit.looper.PlayStopButton
+import com.bizzeh.synthkit.looper.RecordButton
+import com.bizzeh.synthkit.looper.SessionHost
+import com.bizzeh.synthkit.looper.isPlaying
+import com.bizzeh.synthkit.looper.isRecording
+import com.bizzeh.synthkit.looper.trackChannel
+import com.bizzeh.synthkit.project.ProjectScreen
+import com.bizzeh.synthkit.project.ProjectValidation
+import com.bizzeh.synthkit.project.Track
+import com.bizzeh.synthkit.project.TrackActions
+import kotlinx.coroutines.delay
 import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.audio.LatencyWarning
@@ -52,6 +69,7 @@ fun SynthKitApp(
     onDismissWarning: () -> Unit,
     projects: List<StoredProject>?,
     projectActions: ProjectActions,
+    sessions: SessionHost,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -73,7 +91,7 @@ fun SynthKitApp(
             )
             is EngineState.Ready -> Navigation(
                 engineState, latency, library, onToggleFavourite, onInstrumentOpened, warning, onDismissWarning,
-                projects, projectActions,
+                projects, projectActions, sessions,
             )
         }
     }
@@ -90,19 +108,24 @@ private fun Navigation(
     onDismissWarning: () -> Unit,
     projects: List<StoredProject>?,
     projectActions: ProjectActions,
+    sessions: SessionHost,
 ) {
     val stack = rememberSaveable(saver = BackStackSaver) { mutableStateListOf<Route>(Route.Projects) }
-    fun replaceWith(routes: List<Route>) {
-        stack.clear()
-        stack.addAll(routes)
+    fun replaceTop(route: Route) {
+        stack[stack.lastIndex] = route
+    }
+    fun pop() {
+        if (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
-    BackHandler(enabled = stack.size > 1) { stack.removeAt(stack.lastIndex) }
+    BackHandler(enabled = stack.size > 1) { pop() }
 
-    fun openInstrument(id: String) = replaceWith(Route.openInstrument(stack, id))
+    val route = stack.last()
+    val projectId = route.projectId
+    LaunchedEffect(projectId) { if (projectId == null) sessions.close() }
 
-    when (val route = stack.last()) {
-        Route.Projects -> ProjectListScreen(
+    if (route == Route.Projects) {
+        ProjectListScreen(
             projects = projects,
             onOpen = { stack.add(Route.Project(it)) },
             onCreate = { stack.add(Route.Project(projectActions.create().id)) },
@@ -110,34 +133,115 @@ private fun Navigation(
             onDuplicate = projectActions.duplicate,
             onDelete = projectActions.delete,
         )
-        is Route.Project -> HomeScreen(
-            onOpenFamily = { family -> engine.catalogue.quickEntry(family)?.let { openInstrument(it.id) } },
-            onBrowse = { stack.add(Route.Browser) },
+        return
+    }
+
+    val project = projects?.firstOrNull { it.project.id == projectId }?.project
+    if (project == null) {
+        LaunchedEffect(route) {
+            stack.clear()
+            stack.add(Route.Projects)
+        }
+        return
+    }
+    val session = remember(project.id) { sessions.open(project, engine.transport, engine.player, projectActions.save) }
+    LaunchedEffect(session) {
+        while (true) {
+            session.poll()
+            delay(POLL_MILLIS)
+        }
+    }
+    val looper by session.state.collectAsState()
+    val catalogue = engine.catalogue
+    fun instrumentOf(track: Track) = catalogue.byId("${track.bank}:${track.program}")
+    fun addTrack(instrument: Instrument) {
+        session.addTrack(instrument.bank, instrument.program)?.let { replaceTop(Route.Track(project.id, it)) }
+    }
+
+    when (route) {
+        is Route.Project -> ProjectScreen(
+            state = looper,
+            instrumentName = { instrumentOf(it)?.name.orEmpty() },
+            canAddTrack = looper.project.tracks.size < ProjectValidation.MAX_TRACKS,
+            onBack = ::pop,
+            onAddTrack = { stack.add(Route.AddTrack(project.id)) },
+            onTempo = session::setTempo,
+            onClickOnPlayback = session::setMetronomeOnPlayback,
+            onPlayStop = session::playStop,
+            tracks = TrackActions(
+                open = { stack.add(Route.Track(project.id, it)) },
+                setMuted = session::setMuted,
+                setSolo = session::setSolo,
+                setVolume = session::setVolume,
+                undo = session::undoTake,
+                clear = session::clearTrack,
+                changeInstrument = { stack.add(Route.Browser(project.id, it)) },
+                delete = session::deleteTrack,
+            ),
         )
-        Route.Browser -> BrowserScreen(
-            catalogue = engine.catalogue,
-            library = library,
-            onOpen = { openInstrument(it.id) },
-            onToggleFavourite = onToggleFavourite,
+        is Route.AddTrack -> HomeScreen(
+            title = stringResource(R.string.add_track),
+            onOpenFamily = { family -> catalogue.quickEntry(family)?.let(::addTrack) },
+            onBrowse = { stack.add(Route.Browser(project.id)) },
+            onBack = ::pop,
         )
-        is Route.Play -> {
-            val instrument = engine.catalogue.byId(route.instrumentId)
+        is Route.Browser -> {
+            val swapping = looper.project.tracks.firstOrNull { it.id == route.swapTrackId }
+            val drums = swapping?.bank == InstrumentCatalogue.DRUM_KIT_BANK
+            BrowserScreen(
+                catalogue = catalogue,
+                library = library,
+                onOpen = { chosen ->
+                    if (swapping == null) {
+                        // Browser was opened from Add track; the new track replaces both screens.
+                        pop()
+                        addTrack(chosen)
+                    } else {
+                        session.swapInstrument(swapping.id, chosen.bank, chosen.program)
+                        pop()
+                    }
+                },
+                onToggleFavourite = onToggleFavourite,
+                filter = { swapping == null || (it.bank == InstrumentCatalogue.DRUM_KIT_BANK) == drums },
+            )
+        }
+        is Route.Track -> {
+            val index = looper.project.tracks.indexOfFirst { it.id == route.trackId }
+            val instrument = looper.project.tracks.getOrNull(index)?.let(::instrumentOf)
             if (instrument == null) {
-                LaunchedEffect(route) { replaceWith(listOf(Route.Projects)) }
-            } else {
-                PlayScreen(
-                    instrument = instrument,
-                    player = engine.player,
-                    latency = latency,
-                    onBack = { stack.removeAt(stack.lastIndex) },
-                    onChangeInstrument = { stack.add(Route.Browser) },
-                    onOpened = { onInstrumentOpened(it.id) },
-                    kits = engine.catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
-                    onOpenInstrument = { openInstrument(it.id) },
-                    warning = warning,
-                    onDismissWarning = onDismissWarning,
+                LaunchedEffect(route) { pop() }
+                return
+            }
+            LaunchedEffect(instrument.id) { onInstrumentOpened(instrument.id) }
+            PlayScreen(
+                instrument = instrument,
+                channel = trackChannel(index),
+                player = engine.player,
+                latency = latency,
+                warning = warning,
+                onDismissWarning = onDismissWarning,
+                onBack = ::pop,
+                onChangeInstrument = { stack.add(Route.Browser(project.id, route.trackId)) },
+                kits = catalogue.instruments.filter { it.layout == PlayLayout.DrumKit },
+                onKitChange = { session.swapInstrument(route.trackId, it.bank, it.program) },
+                status = { PhaseStatus(looper, inTrack = true) },
+            ) {
+                RecordButton(
+                    recording = looper.isRecording && looper.recordingTrackId == route.trackId,
+                    enabled = !looper.finishing,
+                    onClick = { session.record(route.trackId) },
+                )
+                PlayStopButton(
+                    playing = looper.isPlaying,
+                    enabled = looper.isPlaying || looper.project.loopBars > 0,
+                    onClick = session::playStop,
+                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
         }
+        Route.Projects -> Unit
     }
 }
+
+// The session reads recorded notes and the clock this often while a project is open.
+private const val POLL_MILLIS = 15L

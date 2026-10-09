@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.bizzeh.synthkit.audio.AudioEngineViewModel
 import com.bizzeh.synthkit.browser.LibraryViewModel
+import com.bizzeh.synthkit.looper.SessionViewModel
 import com.bizzeh.synthkit.project.ProjectActions
 import com.bizzeh.synthkit.project.ProjectsViewModel
 import com.bizzeh.synthkit.ui.LandscapeOnly
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
     private val audio: AudioEngineViewModel by viewModels()
     private val library: LibraryViewModel by viewModels()
     private val projects: ProjectsViewModel by viewModels()
+    private val sessions: SessionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,9 @@ class MainActivity : ComponentActivity() {
                                 rename = projects::rename,
                                 duplicate = projects::duplicate,
                                 delete = projects::delete,
+                                save = projects::update,
                             ),
+                            sessions = sessions,
                         )
                     }
                 }

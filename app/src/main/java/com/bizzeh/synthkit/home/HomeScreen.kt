@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,12 +34,25 @@ import com.bizzeh.synthkit.ui.MinTouchTarget
 val QuickEntryFamilies = listOf(Family.KEYS, Family.GUITAR_BASS, Family.DRUMS_PERCUSSION, Family.SYNTH)
 
 @Composable
-fun HomeScreen(onOpenFamily: (Family) -> Unit, onBrowse: () -> Unit, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    title: String,
+    onOpenFamily: (Family) -> Unit,
+    onBrowse: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            onBack?.let {
+                IconButton(onClick = it) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                }
+            }
+            Text(text = title, style = MaterialTheme.typography.headlineMedium)
+        }
         Row(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),

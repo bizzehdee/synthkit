@@ -108,4 +108,40 @@
     <string name="projects_empty">No projects yet. Tap New project to start.</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="add_track">Add track</string>
+    <plurals name="track_limit">
+        <item quantity="one">A project can hold %d track.</item>
+        <item quantity="other">A project can hold up to %d tracks.</item>
+    </plurals>
+    <string name="tempo_value">%1$d BPM</string>
+    <string name="tempo_down">Slower</string>
+    <string name="tempo_up">Faster</string>
+    <string name="click_on_playback">Click</string>
+    <string name="record">Record</string>
+    <string name="stop_recording">Stop recording</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="phase_stopped">Stopped</string>
+    <string name="phase_no_loop">Open a track and press Record to start.</string>
+    <string name="phase_no_loop_track">Press Record, then play to start the loop.</string>
+    <string name="phase_armed">Play a note to start recording</string>
+    <string name="phase_recording_first">Recording · bar %1$d</string>
+    <string name="phase_playing">Bar %1$d of %2$d</string>
+    <string name="phase_overdubbing">Recording · bar %1$d of %2$d</string>
+    <string name="phase_finishing">Saving take</string>
+    <string name="track_mute">Mute</string>
+    <string name="track_solo">Solo</string>
+    <string name="track_volume">Volume for %1$s</string>
+    <string name="track_actions">Actions for %1$s</string>
+    <string name="track_undo">Undo last take</string>
+    <string name="track_clear">Clear</string>
+    <string name="track_change_instrument">Change instrument</string>
+    <string name="track_delete">Delete track</string>
+    <string name="track_delete_confirm">Delete the %1$s track? This cannot be undone.</string>
+    <string name="track_clear_confirm">Clear every take on the %1$s track?</string>
+    <string name="no_tracks">No tracks yet. Tap Add track to pick an instrument.</string>
+    <plurals name="take_count">
+        <item quantity="one">%d take</item>
+        <item quantity="other">%d takes</item>
+    </plurals>
 </resources>

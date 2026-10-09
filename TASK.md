@@ -89,7 +89,7 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
   - Per-channel volume. Each track uses its own MIDI channel.
   - GoogleTest host tests.
   - Depends on: TASK-005. Required by: TASK-014.
-- [ ] TASK-014: Project screen and looper flow
+- [x] TASK-014: Project screen and looper flow
   - Track list with Add track (quick entries and Browse), tempo (40 to 240), metronome-during-playback toggle, Record and Play/Stop.
   - First take: Record arms the click; recording starts on the first tap and snaps to the nearest click beat; Record again stops, rounds to the nearest whole bar (1 to 8) and the loop plays at once.
   - Later takes: Record records the selected track while the loop plays; notes wrap to the loop length and overdub; Record again ends the take and the loop keeps playing.

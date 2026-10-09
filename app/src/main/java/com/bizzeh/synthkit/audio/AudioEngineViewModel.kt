@@ -48,7 +48,7 @@ class AudioEngineViewModel(application: Application) : AndroidViewModel(applicat
             }
             val (loadedEngine, catalogue) = loaded
             engine = loadedEngine
-            mutableState.value = EngineState.Ready(loadedEngine, catalogue)
+            mutableState.value = EngineState.Ready(loadedEngine, loadedEngine, catalogue)
             if (visible) startEngine(loadedEngine)
         }
     }
