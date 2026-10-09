@@ -53,4 +53,28 @@
         <item>A sharp</item>
         <item>B</item>
     </string-array>
+    <string name="chord_key">Key: %1$s</string>
+    <string name="mode_major">Major</string>
+    <string name="mode_minor">Minor</string>
+    <string name="strum_strip">Strum strip. Hold a chord and swipe across to play string by string.</string>
+    <string name="chord_label_major">%1$s</string>
+    <string name="chord_label_minor">%1$sm</string>
+    <string name="chord_label_diminished">%1$sdim</string>
+    <string name="chord_spoken_major">%1$s major</string>
+    <string name="chord_spoken_minor">%1$s minor</string>
+    <string name="chord_spoken_diminished">%1$s diminished</string>
+    <string-array name="pitch_class_short_names">
+        <item>C</item>
+        <item>C♯</item>
+        <item>D</item>
+        <item>D♯</item>
+        <item>E</item>
+        <item>F</item>
+        <item>F♯</item>
+        <item>G</item>
+        <item>G♯</item>
+        <item>A</item>
+        <item>A♯</item>
+        <item>B</item>
+    </string-array>
 </resources>

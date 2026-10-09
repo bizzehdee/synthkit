@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.InstrumentPlayer
 import com.bizzeh.synthkit.audio.LatencyReport
+import com.bizzeh.synthkit.chords.ChordsLayout
 import com.bizzeh.synthkit.drums.DrumPadGrid
 import com.bizzeh.synthkit.drums.FirstPageDrumPads
 import com.bizzeh.synthkit.instruments.Instrument
@@ -83,7 +84,8 @@ fun PlayScreen(
                 when (val layout = instrument.layout) {
                     PlayLayout.DrumKit -> DrumPadGrid(pads = FirstPageDrumPads, player = player, channel = LIVE_CHANNEL)
                     is PlayLayout.Keys -> KeysLayout(player, LIVE_CHANNEL, layout.holdByDefault)
-                    is PlayLayout.Chords, PlayLayout.ChromaticPads -> Unit
+                    is PlayLayout.Chords -> ChordsLayout(player, LIVE_CHANNEL, layout.bassRoots)
+                    PlayLayout.ChromaticPads -> Unit
                 }
             }
         }

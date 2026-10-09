@@ -54,7 +54,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - White keys at least 48 dp wide and 72 dp tall, black keys about 30 dp wide. Octave shift buttons and a scroll strip. Hold toggle with sustain-pedal behaviour; replaying a held note restarts it.
   - Multi-touch. Notes sound while held. Default: a finger that slides onto another key keeps its first note.
   - Depends on: TASK-005, TASK-007.
-- [ ] TASK-009: Chords layout
+- [x] TASK-009: Chords layout
   - Key and mode (major or minor) pickers, seven diatonic triad pads (I to vii).
   - Tap: short automatic strum. Holding a pad and swiping the strum strip plays string by string at the swipe speed. Default: six-string voicing from standard tuning (E A D G B E), each string taking the nearest chord tone at or above its open note; strum spacing 12 ms; chord notes stop when the pad is released.
   - Bass programs: the pad plays the chord root in a low octave, with octave shift.
