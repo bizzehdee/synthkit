@@ -74,4 +74,5 @@ effects, including Gunshot, are kept under their standard GM names.
 | 2026-10-09 | Synth effects are chromatic pads. |
 | 2026-10-09 | First drum page order accepted. |
 | 2026-10-09 | Non-GM kits (GS programs 56 and 127) are not listed. |
+| 2026-10-09 | Sound effect pads (121-128) sound while held, not one-shot: several GM effect samples loop and would never stop without a note-off. |
 | 2026-10-09 | Bass pads play chord roots. Tap strums, strip strums manually. Triads only. Hold is sustain-pedal style. |

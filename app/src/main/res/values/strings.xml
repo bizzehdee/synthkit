@@ -15,4 +15,11 @@
     <string name="latency_readout">Output latency %1$s · %2$s · %3$s · %4$s · %5$d Hz · burst %6$d · buffer %7$d · underruns %8$d</string>
     <string name="latency_value_ms">%1$.1f ms</string>
     <string name="latency_measuring">measuring</string>
+    <string name="family_keys">Keys</string>
+    <string name="family_guitar_bass">Guitar/Bass</string>
+    <string name="family_drums_percussion">Drums/Percussion</string>
+    <string name="family_strings_orchestra">Strings/Orchestra</string>
+    <string name="family_brass_winds">Brass/Winds</string>
+    <string name="family_synth">Synth</string>
+    <string name="family_world_misc">World/Misc</string>
 </resources>
