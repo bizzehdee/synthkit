@@ -9,8 +9,9 @@ keyboards, guitar, bass and more.
 
 ## Status
 
-Synth Kit is in early development. The current build cannot play sounds yet.
-Instruments, recording and export are planned.
+Synth Kit is in early development. The current build plays one instrument: a
+drum kit on 8 pads. You can tap several pads at the same time. More
+instruments, recording and export are planned.
 See [plan.md](plan.md) for the full plan.
 
 ## Requirements

@@ -2,4 +2,14 @@
 <resources>
     <string name="app_name">Synth Kit</string>
     <string name="rotate_to_landscape">Turn your device to landscape to play.</string>
+    <string name="loading_sounds">Loading sounds</string>
+    <string name="sounds_failed">The sounds could not be loaded. Close the app and open it again.</string>
+    <string name="drum_kick">Kick</string>
+    <string name="drum_snare">Snare</string>
+    <string name="drum_closed_hat">Closed hi-hat</string>
+    <string name="drum_open_hat">Open hi-hat</string>
+    <string name="drum_low_tom">Low tom</string>
+    <string name="drum_high_tom">High tom</string>
+    <string name="drum_crash">Crash</string>
+    <string name="drum_ride">Ride</string>
 </resources>

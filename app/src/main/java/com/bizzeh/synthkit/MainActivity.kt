@@ -4,18 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.bizzeh.synthkit.audio.AudioEngineViewModel
+import com.bizzeh.synthkit.drums.DrumScreen
 import com.bizzeh.synthkit.ui.LandscapeOnly
 import com.bizzeh.synthkit.ui.theme.SynthKitTheme
 
 class MainActivity : ComponentActivity() {
+    private val audio: AudioEngineViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -23,15 +25,21 @@ class MainActivity : ComponentActivity() {
             SynthKitTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LandscapeOnly {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                style = MaterialTheme.typography.headlineMedium,
-                            )
-                        }
+                        val state by audio.state.collectAsState()
+                        DrumScreen(state = state)
                     }
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        audio.onVisible()
+    }
+
+    override fun onStop() {
+        audio.onHidden()
+        super.onStop()
     }
 }

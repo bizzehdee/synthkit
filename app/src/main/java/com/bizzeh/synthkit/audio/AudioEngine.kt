@@ -7,14 +7,14 @@ import android.content.res.AssetManager
  * time; the native side hands them to the audio thread through a single-producer
  * queue.
  */
-class AudioEngine private constructor(private var handle: Long) : AutoCloseable {
+class AudioEngine private constructor(private var handle: Long) : NotePlayer, AutoCloseable {
 
     fun start(): Boolean = nativeStart(checkOpen())
 
     fun stop() = nativeStop(checkOpen())
 
     /** Returns false when the note is out of range or the note queue is full. */
-    fun noteOn(channel: Int, key: Int, velocity: Float): Boolean =
+    override fun noteOn(channel: Int, key: Int, velocity: Float): Boolean =
         nativeNoteOn(checkOpen(), channel, key, velocity)
 
     fun noteOff(channel: Int, key: Int): Boolean = nativeNoteOff(checkOpen(), channel, key)

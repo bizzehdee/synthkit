@@ -19,7 +19,7 @@ Source of scope: `plan.md`. One commit per task, on branch `feat/milestone-1`.
   - Origin, version and licence recorded for every vendored file.
   - GoogleTest host tests for the queue and the synth renderer, run from `verify`.
   - Depends on: TASK-001. Required by: TASK-003, TASK-004.
-- [ ] TASK-003: Drum pad instrument
+- [x] TASK-003: Drum pad instrument
   - 4 x 2 pad grid on the GM drum channel, first-page order from `docs/gm-layouts.md`.
   - Multi-touch: two or more pads pressed at the same time each play.
   - Sound starts on finger down, not on release. Fixed velocity. One-shot.
