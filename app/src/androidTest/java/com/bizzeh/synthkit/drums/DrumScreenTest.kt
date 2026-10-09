@@ -10,6 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.audio.LatencyReport
+import com.bizzeh.synthkit.testing.RecordingNotePlayer
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +21,7 @@ class DrumScreenTest {
     val composeRule = createComposeRule()
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val ready = EngineState.Ready { _, _, _ -> true }
+    private val ready = EngineState.Ready(RecordingNotePlayer())
     private val report = LatencyReport(
         outputLatencyMs = 11.25,
         audioApi = "AAudio",

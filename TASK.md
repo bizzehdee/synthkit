@@ -34,7 +34,7 @@ Source of scope: `plan.md`. One commit per task, on branch `feat/milestone-1`.
 
 Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent are marked "Default".
 
-- [ ] TASK-005: Synth events for every layout
+- [x] TASK-005: Synth events for every layout
   - The engine accepts program change (bank and program, bank 128 for kits) and note off, besides note on.
   - Events may carry a delay in frames, applied sample-accurately on the audio thread (used for strums now, the looper later).
   - The engine lists the SoundFont's presets (bank, program, name) after loading.

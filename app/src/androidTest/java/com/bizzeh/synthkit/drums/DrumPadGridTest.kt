@@ -18,7 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.bizzeh.synthkit.audio.NotePlayer
+import com.bizzeh.synthkit.testing.RecordingNotePlayer
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -30,13 +30,7 @@ class DrumPadGridTest {
     val composeRule = createComposeRule()
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val played = mutableListOf<Note>()
-    private val player = NotePlayer { channel, key, velocity ->
-        played += Note(channel, key, velocity)
-        true
-    }
-
-    private data class Note(val channel: Int, val key: Int, val velocity: Float)
+    private val player = RecordingNotePlayer()
 
     // About the size of a 5-inch phone in landscape, the smallest screen the app targets.
     private fun showGridOnSmallPhone() {
@@ -73,7 +67,7 @@ class DrumPadGridTest {
         pad(snare).performTouchInput { down(center) }
         composeRule.waitForIdle()
 
-        assertEquals(listOf(Note(DRUM_CHANNEL, 38, DRUM_VELOCITY)), played)
+        assertEquals(listOf(RecordingNotePlayer.On(DRUM_CHANNEL, 38, DRUM_VELOCITY, 0f)), player.events)
     }
 
     @Test
@@ -90,7 +84,7 @@ class DrumPadGridTest {
         }
         composeRule.waitForIdle()
 
-        assertEquals(listOf(36, 42), played.map { it.key })
+        assertEquals(listOf(36, 42), player.ons.map { it.key })
     }
 
     @Test
@@ -107,7 +101,7 @@ class DrumPadGridTest {
         }
         composeRule.waitForIdle()
 
-        assertEquals(listOf(49, 49), played.map { it.key })
+        assertEquals(listOf(49, 49), player.ons.map { it.key })
     }
 
     @Test
@@ -117,7 +111,7 @@ class DrumPadGridTest {
         pad(FirstPageDrumPads[0]).performClick()
         composeRule.waitForIdle()
 
-        assertEquals(1, played.size)
+        assertEquals(1, player.ons.size)
     }
 
     @Test
@@ -126,6 +120,6 @@ class DrumPadGridTest {
 
         pad(FirstPageDrumPads[7]).performSemanticsAction(SemanticsActions.OnClick)
 
-        assertEquals(listOf(51), played.map { it.key })
+        assertEquals(listOf(51), player.ons.map { it.key })
     }
 }

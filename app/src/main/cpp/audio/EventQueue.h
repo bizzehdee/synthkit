@@ -7,20 +7,25 @@
 
 namespace synthkit {
 
-struct NoteEvent {
+struct SynthEvent {
+    enum class Type : uint8_t { NoteOn, NoteOff, AllNotesOff, Program };
+
+    Type type;
     uint8_t channel;
-    uint8_t key;
-    // 0 means note off.
+    // Key for note events, program number for Program.
+    uint8_t value;
+    uint16_t bank;
     float velocity;
+    float delayMillis;
 };
 
-// Lock-free ring buffer that hands note events to the audio thread without
+// Lock-free ring buffer that hands synth events to the audio thread without
 // blocking it. Safe for exactly one producer thread and one consumer thread.
-class NoteQueue {
+class EventQueue {
 public:
     static constexpr size_t kCapacity = 256;
 
-    bool push(const NoteEvent& event) {
+    bool push(const SynthEvent& event) {
         const size_t head = head_.load(std::memory_order_relaxed);
         const size_t next = (head + 1) % kSlots;
         if (next == tail_.load(std::memory_order_acquire)) {
@@ -31,7 +36,7 @@ public:
         return true;
     }
 
-    bool pop(NoteEvent& event) {
+    bool pop(SynthEvent& event) {
         const size_t tail = tail_.load(std::memory_order_relaxed);
         if (tail == head_.load(std::memory_order_acquire)) {
             return false;
@@ -45,7 +50,7 @@ private:
     // One slot stays empty so that a full queue and an empty queue differ.
     static constexpr size_t kSlots = kCapacity + 1;
 
-    std::array<NoteEvent, kSlots> slots_{};
+    std::array<SynthEvent, kSlots> slots_{};
     std::atomic<size_t> head_{0};
     std::atomic<size_t> tail_{0};
 };
