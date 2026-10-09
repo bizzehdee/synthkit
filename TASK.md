@@ -113,7 +113,7 @@ Branch `feat/milestone-4`. Defaults chosen by Claude where the plan is silent ar
 
 Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kbit/s; FLAC level 5; loop passes 1 to 16, default 2, used by every format; audio adds a 2-second release tail. MIDI drum tracks use channel 10 with the kit as a GS program change; melodic tracks use channels 1 to 9 and 11 to 16.
 
-- [ ] TASK-017: Offline renderer
+- [x] TASK-017: Offline renderer
   - Renders the project's notes for N passes plus the tail, in blocks, on a worker thread, while live audio keeps playing.
   - Uses a TinySoundFont copy of an idle template made at load, so the 32 MB SoundFont is not loaded twice and the live instance is never read concurrently.
   - Streams: memory use does not grow with export length.

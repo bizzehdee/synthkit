@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(synthkit_host_tests LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -20,6 +20,8 @@ add_executable(synthkit_host_tests
         EventQueueTest.cpp
         SoundFontSynthTest.cpp
         SequencerTest.cpp
+        OfflineRendererTest.cpp
+        ${MAIN_CPP}/audio/OfflineRenderer.cpp
         ${MAIN_CPP}/audio/SoundFontSynth.cpp
         ${MAIN_CPP}/audio/Sequencer.cpp
         ${MAIN_CPP}/audio/TinySoundFont.cpp)

@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "EventQueue.h"
+#include "OfflineRenderer.h"
+#include "SharedFont.h"
 #include "Sequencer.h"
 
 struct tsf;
@@ -74,6 +76,12 @@ public:
     // Voices sounding at the end of the last rendered block; safe from any thread.
     int32_t activeVoices() const { return activeVoices_.load(std::memory_order_relaxed); }
 
+    // Opens an export on its own SoundFont copy; safe from any thread while
+    // live audio plays. Returns nullptr if the spec is invalid.
+    std::unique_ptr<OfflineRenderer> openExport(const ExportSpec& spec) const {
+        return OfflineRenderer::create(shared_, kMaxVoices, spec);
+    }
+
     // Preset data is fixed after loading, so this is safe from any thread.
     std::vector<PresetInfo> presets() const;
 
@@ -86,7 +94,7 @@ private:
         SynthEvent event;
     };
 
-    explicit SoundFontSynth(tsf* font);
+    SoundFontSynth(tsf* font, std::shared_ptr<SharedFont> shared);
     bool enqueue(const SynthEvent& event);
     bool control(SynthEvent::Type type, uint8_t value = 0, uint16_t bank = 0, float velocity = 0.0f,
                  int64_t position = 0, int32_t length = 0);
@@ -95,6 +103,7 @@ private:
     void apply(const SynthEvent& event);
 
     tsf* font_;
+    std::shared_ptr<SharedFont> shared_;
     EventQueue queue_;
     Sequencer sequencer_;
     std::atomic<int32_t> activeVoices_{0};

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(synthkit LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+# C++20 defines left shifts of negative values, which TinySoundFont uses when
+# reading coarse sample offsets; in C++17 they are undefined behaviour.
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(oboe REQUIRED CONFIG)
@@ -9,6 +11,7 @@ find_package(oboe REQUIRED CONFIG)
 add_library(synthkit SHARED
         audio/AssetSoundFont.cpp
         audio/AudioEngine.cpp
+        audio/OfflineRenderer.cpp
         audio/Sequencer.cpp
         audio/SoundFontSynth.cpp
         audio/TinySoundFont.cpp
