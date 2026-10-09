@@ -1,6 +1,10 @@
 package com.bizzeh.synthkit.browser
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import com.bizzeh.synthkit.ui.theme.familyColor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -140,6 +144,12 @@ private fun InstrumentRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
     ) {
+        Box(
+            Modifier
+                .padding(start = 16.dp)
+                .size(10.dp)
+                .background(familyColor(instrument.family), CircleShape),
+        )
         Text(
             text = instrument.name,
             style = MaterialTheme.typography.bodyLarge,
@@ -157,7 +167,7 @@ private fun InstrumentRow(
             Icon(
                 imageVector = if (favourite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = description,
-                tint = if (favourite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (favourite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

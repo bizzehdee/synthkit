@@ -89,11 +89,9 @@
     <string name="warning_bluetooth">Bluetooth audio adds a delay between a tap and its sound. For the best timing, use wired headphones or the speaker.</string>
     <string name="warning_not_low_latency">This device did not give the app a low-latency audio stream, so sound may lag behind taps. Wired headphones or the speaker may help.</string>
     <string name="dismiss">Dismiss</string>
-    <string name="projects_title">Projects</string>
     <string name="project_new">New project</string>
     <string name="project_default_name">Project %1$d</string>
     <string name="project_copy_name">%1$s (copy)</string>
-    <string name="project_summary">%1$d BPM · %2$s</string>
     <plurals name="track_count">
         <item quantity="one">%d track</item>
         <item quantity="other">%d tracks</item>
@@ -200,4 +198,10 @@
     <string name="project_eyebrow">Project</string>
     <string name="tempo_edit">Tempo %1$d BPM. Double-tap to set it.</string>
     <string name="track_recording">Recording</string>
+    <string name="project_meta">%1$d BPM · %2$s · %3$s</string>
+    <plurals name="bar_count">
+        <item quantity="one">%d bar</item>
+        <item quantity="other">%d bars</item>
+    </plurals>
+    <string name="project_no_loop">no loop yet</string>
 </resources>

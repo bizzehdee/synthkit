@@ -42,10 +42,13 @@ import com.bizzeh.synthkit.project.Project
 import com.bizzeh.synthkit.project.Quantise
 import com.bizzeh.synthkit.project.Track
 import com.bizzeh.synthkit.ui.MinTouchTarget
+import com.bizzeh.synthkit.ui.studio.PanelIconButton
+import androidx.compose.ui.graphics.Color
 import kotlin.math.roundToInt
 
 @Composable
 fun LoopEditorScreen(
+    color: Color,
     project: Project,
     track: Track,
     instrumentName: String,
@@ -67,9 +70,7 @@ fun LoopEditorScreen(
 
     Column(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-            }
+            PanelIconButton(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), onBack)
             Text(
                 stringResource(R.string.editor_title, instrumentName),
                 style = MaterialTheme.typography.titleMedium,
@@ -116,6 +117,7 @@ fun LoopEditorScreen(
             }
         }
         StepGridCanvas(
+            noteColor = color,
             rows = rows,
             rowLabel = { key ->
                 if (drums) {

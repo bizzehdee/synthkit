@@ -31,6 +31,7 @@ class ProjectListScreenTest {
         composeRule.setContent {
             ProjectListScreen(
                 projects = projects,
+                familyOf = { null },
                 onOpen = { calls += "open $it" },
                 onCreate = { calls += "create" },
                 onRename = { id, name -> calls += "rename $id $name" },
@@ -54,7 +55,7 @@ class ProjectListScreenTest {
     fun projectRowShowsNameTempoAndTracksAndOpens() {
         show(listOf(song))
 
-        composeRule.onNodeWithText(string(R.string.project_summary, 96, "0 tracks")).assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.project_meta, 96, "0 tracks", string(R.string.project_no_loop))).assertIsDisplayed()
         composeRule.onNodeWithText("Song").performClick()
 
         assertEquals(listOf("open p1"), calls)

@@ -153,7 +153,7 @@ Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-1
   - LCD with tempo stepper, beat lights and bar; lit Click; Play/Stop; Export.
   - Track rows: family tab and icon tile, name, loop note preview with playhead, square M and S, fader, More; dashed Add track row.
   - Depends on: TASK-022.
-- [ ] TASK-025: Project list and remaining screens
+- [x] TASK-025: Project list and remaining screens
   - Project list: brand mark, amber New project, cards with a preview of each project's tracks.
   - Add track, browser, loop editor, export screen and dialogs in the same look.
   - Depends on: TASK-022.

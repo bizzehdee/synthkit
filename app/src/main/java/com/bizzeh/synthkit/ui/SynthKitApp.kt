@@ -64,6 +64,8 @@ import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
 import com.bizzeh.synthkit.play.PlayScreen
 import com.bizzeh.synthkit.project.Project
+import com.bizzeh.synthkit.ui.theme.StudioTheme
+import com.bizzeh.synthkit.ui.theme.familyColor
 import com.bizzeh.synthkit.project.ProjectActions
 import com.bizzeh.synthkit.project.ProjectListScreen
 import com.bizzeh.synthkit.project.StoredProject
@@ -146,6 +148,7 @@ private fun Navigation(
     if (route == Route.Projects) {
         ProjectListScreen(
             projects = projects,
+            familyOf = { track -> engine.catalogue.byId("${track.bank}:${track.program}")?.family },
             onOpen = { stack.add(Route.Project(it)) },
             onCreate = { stack.add(Route.Project(projectActions.create().id)) },
             onRename = projectActions.rename,
@@ -206,6 +209,7 @@ private fun Navigation(
             onOpenFamily = { family -> catalogue.quickEntry(family)?.let(::addTrack) },
             onBrowse = { stack.add(Route.Browser(project.id)) },
             onBack = ::pop,
+            quickName = { catalogue.quickEntry(it)?.name },
         )
         is Route.Browser -> {
             val swapping = looper.project.tracks.firstOrNull { it.id == route.swapTrackId }
@@ -266,6 +270,7 @@ private fun Navigation(
                 return
             }
             LoopEditorScreen(
+                color = instrumentOf(track)?.let { familyColor(it.family) } ?: StudioTheme.palette.muted,
                 project = looper.project,
                 track = track,
                 instrumentName = instrumentOf(track)?.name.orEmpty(),

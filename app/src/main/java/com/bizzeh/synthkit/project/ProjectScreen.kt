@@ -376,38 +376,12 @@ private fun NoteTile(color: Color) {
     }
 }
 
-/** The track's notes across the loop, bar lines, and the playhead at beat resolution. */
+/** The track's notes with the playhead at beat resolution, as the bar and beat are all the state carries. */
 @Composable
 private fun LanePreview(track: Track, state: LooperState, color: Color, modifier: Modifier) {
-    val p = StudioTheme.palette
-    val loopTicks = state.project.loopTicks
     val beats = state.project.loopBars * BEATS_PER_BAR
     val playhead = state.beat?.takeIf { state.isPlaying && beats > 0 }?.let { (state.bar * BEATS_PER_BAR + it).toFloat() / beats }
-    Canvas(modifier.background(p.text.copy(alpha = 0.05f), RoundedCornerShape(8.dp)).clip(RoundedCornerShape(8.dp))) {
-        if (loopTicks == 0) return@Canvas
-        for (bar in 1 until state.project.loopBars) {
-            val x = size.width * bar / state.project.loopBars
-            drawLine(p.line, Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
-        }
-        val keys = track.notes.map { it.key }
-        val low = keys.minOrNull() ?: 0
-        val span = ((keys.maxOrNull() ?: 0) - low).coerceAtLeast(1)
-        val noteHeight = size.height * 0.3f
-        track.notes.forEach { note ->
-            val start = LoopMath.quantise(note.tick, track.quantise.gridTicks, loopTicks).toFloat() / loopTicks
-            val width = (note.lengthTicks.toFloat() / loopTicks).coerceAtLeast(0.006f)
-            val y = (size.height - noteHeight) * (1f - (note.key - low).toFloat() / span)
-            drawRoundRect(
-                color.copy(alpha = if (track.muted) 0.35f else 0.9f),
-                Offset(size.width * start, y),
-                Size((size.width * width).coerceAtMost(size.width * (1f - start)), noteHeight),
-                CornerRadius(2.dp.toPx()),
-            )
-        }
-        playhead?.let {
-            drawLine(p.amber, Offset(size.width * it, 0f), Offset(size.width * it, size.height), 2.dp.toPx())
-        }
-    }
+    NotePreview(track, state.project.loopBars, color, modifier, playhead)
 }
 
 @Composable

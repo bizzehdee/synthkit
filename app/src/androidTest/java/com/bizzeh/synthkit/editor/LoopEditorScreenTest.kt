@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
@@ -52,6 +53,7 @@ class LoopEditorScreenTest {
             val track = Track("t", 128, 0, takes = if (notes.isEmpty()) emptyList() else listOf(Take(notes)), quantise = quantise)
             Box(Modifier.size(640.dp, 340.dp)) {
                 LoopEditorScreen(
+                    color = Color.Cyan,
                     project = Project(id = "p", name = "P", loopBars = bars, tracks = listOf(track)),
                     track = track,
                     instrumentName = "Standard 1",

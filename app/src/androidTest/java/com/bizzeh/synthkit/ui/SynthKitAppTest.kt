@@ -100,7 +100,7 @@ class SynthKitAppTest {
     fun launchShowsTheProjectList() {
         show()
 
-        composeRule.onNodeWithText(string(R.string.projects_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.app_name)).assertIsDisplayed()
         composeRule.onNodeWithText("Song").assertIsDisplayed()
     }
 
