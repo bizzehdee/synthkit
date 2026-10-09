@@ -12,6 +12,7 @@ class RouteTest {
         Route.Browser("p-1"),
         Route.Browser("p-1", "t-2"),
         Route.Track("p-1", "t-2"),
+        Route.Editor("p-1", "t-2"),
     )
 
     @Test

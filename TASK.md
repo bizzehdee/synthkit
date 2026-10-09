@@ -96,11 +96,12 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
   - Track controls: undo last take (repeatable back to the first take), mute, solo, volume, clear, delete (with confirmation), instrument swap within kind.
   - The track's instrument layout is played with a compact transport bar above it.
   - Depends on: TASK-012, TASK-013. Required by: TASK-015, TASK-016.
-- [ ] TASK-015: Loop editor
+- [x] TASK-015: Loop editor
   - Per-track quantise (off, 1/8, 1/16), non-destructive: raw timing is kept.
   - Step grid with 1/16 columns over the whole loop, scrolling sideways. Rows: one per pad for drum tracks, one per semitone for melodic tracks, scrolling, opened at the track's notes.
   - Default: tap an empty cell to add a note; tap a note to select it and show a velocity slider and Delete; tap the selected note again to remove it. Drag a note to move it in time and pitch.
   - Double loop: doubles the loop length (up to 8 bars) and repeats every track's notes.
+  - Known limit: TalkBack reads a description of the grid, but cannot yet add, select or move notes cell by cell.
   - Depends on: TASK-014.
 - [ ] TASK-016: Track limit on the budget phone
   - Measure audio callback load and underruns on the Galaxy A03 with 4, 6 and 8 busy tracks; set the shipped limit (design 8, never below 4); record the result in `.learnings/`.

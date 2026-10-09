@@ -61,6 +61,7 @@ class TrackActions(
     val clear: (String) -> Unit,
     val changeInstrument: (String) -> Unit,
     val delete: (String) -> Unit,
+    val edit: (String) -> Unit,
 )
 
 @Composable
@@ -119,6 +120,7 @@ fun ProjectScreen(
                 TrackRow(
                     track = track,
                     name = instrumentName(track),
+                    canEdit = project.loopBars > 0,
                     recording = state.recordingTrackId == track.id,
                     actions = tracks,
                     onDelete = { confirmDelete = track.id },
@@ -151,6 +153,7 @@ fun ProjectScreen(
 private fun TrackRow(
     track: Track,
     name: String,
+    canEdit: Boolean,
     recording: Boolean,
     actions: TrackActions,
     onDelete: () -> Unit,
@@ -200,6 +203,14 @@ private fun TrackRow(
                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.track_actions, name))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.track_edit)) },
+                    enabled = canEdit,
+                    onClick = {
+                        menu = false
+                        actions.edit(track.id)
+                    },
+                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.track_undo)) },
                     enabled = track.takes.isNotEmpty(),

@@ -144,4 +144,22 @@
         <item quantity="one">%d take</item>
         <item quantity="other">%d takes</item>
     </plurals>
+    <string name="track_edit">Edit loop</string>
+    <string name="editor_title">Edit loop · %1$s</string>
+    <string name="quantise_off">Off</string>
+    <string name="quantise_eighth">1/8</string>
+    <string name="quantise_sixteenth">1/16</string>
+    <string name="quantise">Quantise</string>
+    <string name="double_loop">Double loop</string>
+    <string name="velocity">Velocity</string>
+    <string name="note_delete">Delete note</string>
+    <string name="grid_description">Step grid: %1$s, %2$s. Tap an empty step to add a note; tap a note to select it.</string>
+    <plurals name="grid_steps">
+        <item quantity="one">%d step</item>
+        <item quantity="other">%d steps</item>
+    </plurals>
+    <plurals name="grid_notes">
+        <item quantity="one">%d note</item>
+        <item quantity="other">%d notes</item>
+    </plurals>
 </resources>

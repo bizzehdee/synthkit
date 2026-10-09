@@ -12,6 +12,7 @@ sealed interface Route {
     /** Picks an instrument for a new track, or for [swapTrackId] when it is set. */
     data class Browser(val projectId: String, val swapTrackId: String? = null) : Route
     data class Track(val projectId: String, val trackId: String) : Route
+    data class Editor(val projectId: String, val trackId: String) : Route
 
     fun encode(): String = when (this) {
         Projects -> PROJECTS
@@ -19,6 +20,7 @@ sealed interface Route {
         is AddTrack -> "add-track/$projectId"
         is Browser -> listOfNotNull("browser", projectId, swapTrackId).joinToString("/")
         is Track -> "track/$projectId/$trackId"
+        is Editor -> "editor/$projectId/$trackId"
     }
 
     companion object {
@@ -32,6 +34,7 @@ sealed interface Route {
                 parts[0] == "add-track" && parts.size == 2 -> AddTrack(parts[1])
                 parts[0] == "browser" && parts.size in 2..3 -> Browser(parts[1], parts.getOrNull(2))
                 parts[0] == "track" && parts.size == 3 -> Track(parts[1], parts[2])
+                parts[0] == "editor" && parts.size == 3 -> Editor(parts[1], parts[2])
                 else -> throw IllegalArgumentException("Unknown route: $value")
             }
         }
@@ -46,4 +49,5 @@ val Route.projectId: String?
         is Route.AddTrack -> projectId
         is Route.Browser -> projectId
         is Route.Track -> projectId
+        is Route.Editor -> projectId
     }

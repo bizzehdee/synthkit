@@ -45,6 +45,7 @@ import com.bizzeh.synthkit.audio.EngineState
 import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.audio.LatencyWarning
 import com.bizzeh.synthkit.browser.BrowserScreen
+import com.bizzeh.synthkit.editor.LoopEditorScreen
 import com.bizzeh.synthkit.browser.Library
 import com.bizzeh.synthkit.home.HomeScreen
 import com.bizzeh.synthkit.instruments.PlayLayout
@@ -177,6 +178,7 @@ private fun Navigation(
                 clear = session::clearTrack,
                 changeInstrument = { stack.add(Route.Browser(project.id, it)) },
                 delete = session::deleteTrack,
+                edit = { stack.add(Route.Editor(project.id, it)) },
             ),
         )
         is Route.AddTrack -> HomeScreen(
@@ -238,6 +240,22 @@ private fun Navigation(
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
+        }
+        is Route.Editor -> {
+            val track = looper.project.tracks.firstOrNull { it.id == route.trackId }
+            if (track == null || looper.project.loopBars == 0) {
+                LaunchedEffect(route) { pop() }
+                return
+            }
+            LoopEditorScreen(
+                project = looper.project,
+                track = track,
+                instrumentName = instrumentOf(track)?.name.orEmpty(),
+                onBack = ::pop,
+                onQuantise = { session.setQuantise(track.id, it) },
+                onNotes = { session.replaceNotes(track.id, it) },
+                onDoubleLoop = session::doubleLoop,
+            )
         }
         Route.Projects -> Unit
     }

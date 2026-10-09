@@ -34,6 +34,7 @@ class ProjectScreenTest {
         clear = { calls += "clear $it" },
         changeInstrument = { calls += "change $it" },
         delete = { calls += "delete $it" },
+        edit = { calls += "edit $it" },
     )
 
     private fun string(id: Int, vararg args: Any) = context.getString(id, *args)
@@ -79,8 +80,9 @@ class ProjectScreenTest {
         composeRule.onNodeWithText(string(R.string.track_solo)).performClick()
         menu(R.string.track_undo)
         menu(R.string.track_change_instrument)
+        menu(R.string.track_edit)
 
-        assertEquals(listOf("open t1", "mute t1 true", "solo t1 true", "undo t1", "change t1"), calls)
+        assertEquals(listOf("open t1", "mute t1 true", "solo t1 true", "undo t1", "change t1", "edit t1"), calls)
     }
 
     @Test
