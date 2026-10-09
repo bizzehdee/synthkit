@@ -103,6 +103,6 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
   - Double loop: doubles the loop length (up to 8 bars) and repeats every track's notes.
   - Known limit: TalkBack reads a description of the grid, but cannot yet add, select or move notes cell by cell.
   - Depends on: TASK-014.
-- [ ] TASK-016: Track limit on the budget phone
+- [x] TASK-016: Track limit on the budget phone
   - Measure audio callback load and underruns on the Galaxy A03 with 4, 6 and 8 busy tracks; set the shipped limit (design 8, never below 4); record the result in `.learnings/`.
   - Depends on: TASK-014.

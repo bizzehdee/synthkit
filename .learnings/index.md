@@ -11,3 +11,4 @@
 - [short-landscape-menus.md](short-landscape-menus.md): long dropdown menus scroll and hide items on landscape phones. Read before adding a menu or picker.
 - [sequencer-timing.md](sequencer-timing.md): why the sequencer clock counts frames, and why host tests use Clang for sanitizers. Read before changing transport timing or the host test build.
 - [viewmodel-clear-order-and-polling.md](viewmodel-clear-order-and-polling.md): view model clear order, how often polled state may change, and portrait test activities. Read before adding a view model, polling, or a crowded top bar.
+- [track-limit.md](track-limit.md): measured audio load by track and voice count on the three phones, and why 8 tracks and 96 voices. Read before changing the track or voice limit.

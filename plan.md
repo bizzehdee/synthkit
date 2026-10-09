@@ -93,6 +93,7 @@ Out of scope:
 - Audience is 11+, which includes minors: no personal data, ads or accounts (see `.learnings/play-families-policy.md`). Any later data, network or social feature needs a fresh child-safety review first.
 - Fallback colours for Android 8-11 (dynamic colour needs Android 12, from memory): deep indigo/violet with a warm amber accent, with full light and dark schemes (decided 2026-10-09).
 - Latency measurement (decided 2026-10-09): Oboe-reported latency on every build, plus a physical loopback test on 2-3 real devices. Available test devices (user-owned): Sony Xperia 1 II (confirmed), Sony Xperia XZ Premium, Google Pixel 10, Google Pixel 11, Samsung Galaxy A03 (old budget phone, used for budget testing, added 2026-10-09). Tablet layouts are tested on the Android emulator (decided 2026-10-09; emulator audio latency is not representative, so tablets are checked for layout only). The user will source a budget phone for low-end measurements; until then limits are provisional.
+- Track limit (measured 2026-10-09): 8 tracks and 96 synth voices; no underruns on the Galaxy A03 budget phone with 8 busy tracks (see `.learnings/track-limit.md`).
 - Latency status (decided 2026-10-09): milestone 1 output latency is accepted as it is (9.5 ms on the Xperia 1 II, 23.0 ms on the XZ Premium, 29.5 ms on the Galaxy A03, see `.learnings/latency-measurements.md`), but it needs more testing, including the physical loopback test, before the buffer size is final.
 - Children's Code (decided 2026-10-09): design to its spirit (no data, no network, no ads, no nudges, neutral wording) with no legal review. Whether it formally applies to a no-data app is unconfirmed.
 - Privacy policy (decided 2026-10-09): the master text is a raw markdown file in this repository, republished as a page on the user's own website, whose URL goes in the Play listing. Publisher is an individual named with a contact email; the values are recorded in `docs/privacy-policy.md` (supplied 2026-10-09), never in this plan.
@@ -113,7 +114,6 @@ Out of scope:
 | Question | Owner |
 |---|---|
 | Budget phone: the user will buy a new sub-GBP-100 Android 13+ phone (decided 2026-10-09); model and date still open. Track limits are provisional until measured on it. A Samsung Galaxy A03 is available for budget testing meanwhile (2026-10-09). | User |
-| Number of layered tracks in v1: design for 8, ship the number measured on the budget phone, never below 4 (decided 2026-10-09). Measured in milestone 2 or 3. | Claude measures, User confirms |
 | The Play listing text: Claude drafts `docs/play-listing.md` in milestone 5 once screenshots exist, the user approves in conversation (decided 2026-10-09). | User |
 
 ## Milestones
@@ -131,6 +131,7 @@ Out of scope:
 | 2026-10-09 | Created | Initial plan from requirements conversation. |
 | 2026-10-09 | Changed | SF2 playback moved into milestone 1 (drum pads); multi-touch made a constraint for every instrument; test frameworks chosen; rotate message for large screens that ignore the landscape lock. |
 | 2026-10-09 | Changed | Galaxy A03 added as a budget test phone; milestone 1 latency accepted pending more testing. |
+| 2026-10-09 | Changed | Track limit set to 8 after measuring on the Galaxy A03; open question closed. |
 | 2026-10-09 | Changed | Milestone 3 planned: project list replaces the home screen on launch; kotlinx-serialization approved for project files; metronome uses SoundFont click sounds. |
 | 2026-10-09 | Changed | Milestone 2 built: four families, three layouts, browser and latency warning marked built. |
 | 2026-10-09 | Changed | Instrument browser placed in milestone 2; loop start snaps to the nearest click beat; loop editor rows and velocity editing decided. |

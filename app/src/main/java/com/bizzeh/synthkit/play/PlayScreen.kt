@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.R
+import kotlin.math.roundToInt
 import com.bizzeh.synthkit.audio.InstrumentPlayer
 import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.audio.LatencyWarning
@@ -114,6 +115,9 @@ private fun LatencyReadout(report: LatencyReport) {
             report.framesPerBurst,
             report.bufferFrames,
             report.underruns,
+            (report.loadAverage * 100).roundToInt(),
+            (report.loadPeak * 100).roundToInt(),
+            report.voices,
         ),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

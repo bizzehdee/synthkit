@@ -257,6 +257,7 @@ void SoundFontSynth::render(float* stereoOut, int32_t frameCount) {
         rendered += segment;
         frameClock_ += static_cast<uint64_t>(segment);
     }
+    activeVoices_.store(tsf_active_voice_count(font_), std::memory_order_relaxed);
 }
 
 }  // namespace synthkit

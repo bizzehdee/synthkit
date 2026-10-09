@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -28,7 +29,7 @@ public:
     static constexpr int kMidiChannels = 16;
     static constexpr int kDrumChannel = 9;
     static constexpr int kDrumBank = 128;
-    static constexpr int kMaxVoices = 64;
+    static constexpr int kMaxVoices = 96;
     static constexpr size_t kMaxScheduledEvents = 256;
     static constexpr int kMinTempo = 40;
     static constexpr int kMaxTempo = 240;
@@ -70,6 +71,9 @@ public:
     bool popRecorded(RecordedEvent& event) { return sequencer_.popRecorded(event); }
     double clockTicks() const { return sequencer_.clockTicks(); }
 
+    // Voices sounding at the end of the last rendered block; safe from any thread.
+    int32_t activeVoices() const { return activeVoices_.load(std::memory_order_relaxed); }
+
     // Preset data is fixed after loading, so this is safe from any thread.
     std::vector<PresetInfo> presets() const;
 
@@ -93,6 +97,7 @@ private:
     tsf* font_;
     EventQueue queue_;
     Sequencer sequencer_;
+    std::atomic<int32_t> activeVoices_{0};
     uint64_t blockStartFrame_ = 0;
     int32_t sampleRate_ = 0;
     uint64_t frameClock_ = 0;
