@@ -35,7 +35,11 @@ Steps:
    `sdk.dir=/path/to/android-sdk`
 2. Build the app: `./gradlew assembleDebug`
 3. Run the tests that need no device: `./gradlew verify`
-4. Run the tests on a connected device: `./gradlew connectedDebugAndroidTest`
+4. Run the tests on a connected device: `./gradlew connectedDebugAndroidTest`.
+   Keep the device screen on during the run (developer option "Stay awake").
+   UI tests fail if the screen turns off.
+
+Debug builds show the measured audio output latency above the instrument.
 
 ## Licence
 

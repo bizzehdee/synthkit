@@ -19,6 +19,9 @@ class AudioEngine private constructor(private var handle: Long) : NotePlayer, Au
 
     fun noteOff(channel: Int, key: Int): Boolean = nativeNoteOff(checkOpen(), channel, key)
 
+    /** Null when no stream is running. */
+    fun latencyReport(): LatencyReport? = LatencyReport.fromNative(nativeLatencyReport(checkOpen()))
+
     override fun close() {
         if (handle != 0L) {
             nativeDestroy(handle)
@@ -48,5 +51,6 @@ class AudioEngine private constructor(private var handle: Long) : NotePlayer, Au
         @JvmStatic private external fun nativeStop(handle: Long)
         @JvmStatic private external fun nativeNoteOn(handle: Long, channel: Int, key: Int, velocity: Float): Boolean
         @JvmStatic private external fun nativeNoteOff(handle: Long, channel: Int, key: Int): Boolean
+        @JvmStatic private external fun nativeLatencyReport(handle: Long): Array<String>
     }
 }

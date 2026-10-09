@@ -49,6 +49,8 @@ android {
     buildFeatures {
         compose = true
         prefab = true
+        // The latency readout is shown in debug builds only.
+        buildConfig = true
     }
 
     compileOptions {

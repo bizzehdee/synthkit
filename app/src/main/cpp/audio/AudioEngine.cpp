@@ -59,6 +59,30 @@ bool AudioEngine::openAndStartLocked() {
     return true;
 }
 
+LatencyReport AudioEngine::latencyReport() {
+    std::lock_guard<std::mutex> guard(lock_);
+    LatencyReport report;
+    if (!stream_ || !playing_) {
+        return report;
+    }
+    report.running = true;
+    const auto latency = stream_->calculateLatencyMillis();
+    if (latency) {
+        report.outputLatencyMs = latency.value();
+    }
+    report.audioApi = stream_->getAudioApi();
+    report.performanceMode = stream_->getPerformanceMode();
+    report.sharingMode = stream_->getSharingMode();
+    report.sampleRate = stream_->getSampleRate();
+    report.framesPerBurst = stream_->getFramesPerBurst();
+    report.bufferFrames = stream_->getBufferSizeInFrames();
+    const auto underruns = stream_->getXRunCount();
+    if (underruns) {
+        report.underruns = underruns.value();
+    }
+    return report;
+}
+
 void AudioEngine::closeLocked() {
     if (stream_) {
         stream_->stop();

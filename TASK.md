@@ -25,7 +25,7 @@ Source of scope: `plan.md`. One commit per task, on branch `feat/milestone-1`.
   - Sound starts on finger down, not on release. Fixed velocity. One-shot.
   - Pads at least 48 dp wide and 72 dp tall. Each pad has a TalkBack description.
   - Depends on: TASK-001, TASK-002.
-- [ ] TASK-004: Latency readout and measurement
+- [x] TASK-004: Latency readout and measurement
   - On-screen readout and logcat line: Oboe-reported output latency, audio API, performance mode, sharing mode, sample rate, burst and buffer size.
   - Measured on every attached test phone. Results recorded in `.learnings/`.
   - Depends on: TASK-002, TASK-003.

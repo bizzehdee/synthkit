@@ -1,6 +1,7 @@
 #include <jni.h>
 
 #include <memory>
+#include <string>
 
 #include <android/asset_manager_jni.h>
 
@@ -61,6 +62,34 @@ JNIEXPORT jboolean JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_nativeNote
 JNIEXPORT jboolean JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_nativeNoteOff(
         JNIEnv* /*env*/, jclass /*clazz*/, jlong handle, jint channel, jint key) {
     return engine(handle).synth().noteOff(channel, key) ? JNI_TRUE : JNI_FALSE;
+}
+
+// Field order must match LatencyReport.fromNative in Kotlin.
+JNIEXPORT jobjectArray JNICALL Java_com_bizzeh_synthkit_audio_AudioEngine_nativeLatencyReport(
+        JNIEnv* env, jclass /*clazz*/, jlong handle) {
+    const synthkit::LatencyReport report = engine(handle).latencyReport();
+    const std::string fields[] = {
+            report.running ? "1" : "0",
+            std::to_string(report.outputLatencyMs),
+            oboe::convertToText(report.audioApi),
+            oboe::convertToText(report.performanceMode),
+            oboe::convertToText(report.sharingMode),
+            std::to_string(report.sampleRate),
+            std::to_string(report.framesPerBurst),
+            std::to_string(report.bufferFrames),
+            std::to_string(report.underruns),
+    };
+    constexpr jsize kCount = sizeof(fields) / sizeof(fields[0]);
+    jobjectArray result = env->NewObjectArray(kCount, env->FindClass("java/lang/String"), nullptr);
+    if (result == nullptr) {
+        return nullptr;
+    }
+    for (jsize i = 0; i < kCount; ++i) {
+        jstring field = env->NewStringUTF(fields[i].c_str());
+        env->SetObjectArrayElement(result, i, field);
+        env->DeleteLocalRef(field);
+    }
+    return result;
 }
 
 }  // extern "C"

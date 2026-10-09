@@ -26,7 +26,11 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LandscapeOnly {
                         val state by audio.state.collectAsState()
-                        DrumScreen(state = state)
+                        val latency by audio.latency.collectAsState()
+                        DrumScreen(
+                            state = state,
+                            latency = latency.takeIf { BuildConfig.DEBUG },
+                        )
                     }
                 }
             }

@@ -6,3 +6,5 @@
 - [play-store-assets.md](play-store-assets.md): verified Play icon and feature graphic dimensions, formats and size limits. Read before exporting store artwork.
 - [large-screen-orientation.md](large-screen-orientation.md): Android 16+ ignores the landscape lock on screens 600 dp or wider, and the rotate-message decision. Read before changing orientation handling or targetSdk.
 - [tinysoundfont-realtime.md](tinysoundfont-realtime.md): what TinySoundFont allocates and when, voice stealing, and load cost. Read before changing the synth or calling tsf from a new thread.
+- [latency-measurements.md](latency-measurements.md): Oboe-reported output latency and SoundFont load time per test phone. Read before changing buffer sizes or judging the 20 ms target.
+- [device-test-screen-timeout.md](device-test-screen-timeout.md): why device UI tests fail with "No compose hierarchies found", and how to keep the screen on. Read before running or debugging connected tests.

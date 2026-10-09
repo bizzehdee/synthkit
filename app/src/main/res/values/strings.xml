@@ -12,4 +12,7 @@
     <string name="drum_high_tom">High tom</string>
     <string name="drum_crash">Crash</string>
     <string name="drum_ride">Ride</string>
+    <string name="latency_readout">Output latency %1$s · %2$s · %3$s · %4$s · %5$d Hz · burst %6$d · buffer %7$d · underruns %8$d</string>
+    <string name="latency_value_ms">%1$.1f ms</string>
+    <string name="latency_measuring">measuring</string>
 </resources>
