@@ -4,7 +4,7 @@ Source of scope: `plan.md`. One commit per task, on branch `feat/milestone-1`.
 
 ## Milestone 1: skeleton, low-latency audio, one playable instrument
 
-- [ ] TASK-001: Android project skeleton
+- [x] TASK-001: Android project skeleton
   - Gradle wrapper, version catalogue, single `:app` module, package `com.bizzeh.synthkit`, minSdk 26.
   - Kotlin + Jetpack Compose, Material 3 theme: dynamic colour on Android 12+, indigo/violet and amber fallback, light and dark.
   - Landscape only. No INTERNET permission. All strings in resources.

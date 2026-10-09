@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder until the milestone 5 icon exists: a 2 x 2 pad grid inside the
+     adaptive-icon safe zone (the central 66 of 108 units). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/launcher_pad"
+        android:pathData="M36,36h16v16h-16z M56,36h16v16h-16z M36,56h16v16h-16z M56,56h16v16h-16z" />
+</vector>

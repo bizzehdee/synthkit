@@ -83,7 +83,7 @@ Out of scope:
 - No personal data collected or transmitted.
 - Play Console target age groups declared: 13-15, 16-17 and 18+ (decided 2026-10-09). The listing, icon and in-app wording must not be child-oriented, because that can override the declaration.
 - Screens: primarily phones of 5-6.5 inches, also usable on 8-11 inch tablets.
-- Orientation: landscape only (decided 2026-10-09).
+- Orientation: landscape only (decided 2026-10-09). Android 16+ ignores the lock on screens 600 dp or wider, so a portrait window there shows only a message asking the user to rotate the device (decided 2026-10-09, see `.learnings/large-screen-orientation.md`).
 - Touch targets: minimum 48 dp for every interactive control (decided 2026-10-09). One agreed exception: black piano keys may be about 30 dp wide so nearly two octaves fit on a 5-inch phone (decided 2026-10-09).
 - UI: intuitive and uncluttered, yet every needed control reachable; no control or text so small it is hard to use.
 - Themes: both light and dark mode (decided 2026-10-09).
@@ -127,4 +127,4 @@ Out of scope:
 | Date | Change | Summary |
 |---|---|---|
 | 2026-10-09 | Created | Initial plan from requirements conversation. |
-| 2026-10-09 | Changed | SF2 playback moved into milestone 1 (drum pads); multi-touch made a constraint for every instrument; test frameworks chosen. |
+| 2026-10-09 | Changed | SF2 playback moved into milestone 1 (drum pads); multi-touch made a constraint for every instrument; test frameworks chosen; rotate message for large screens that ignore the landscape lock. |
