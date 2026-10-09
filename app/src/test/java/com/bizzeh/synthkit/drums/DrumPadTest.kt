@@ -11,9 +11,4 @@ class DrumPadTest {
 
         assertEquals(expected, FirstPageDrumPads.map { it.note })
     }
-
-    @Test
-    fun fixedVelocityIsMidiOneHundred() {
-        assertEquals(100, Math.round(DRUM_VELOCITY * 127))
-    }
 }

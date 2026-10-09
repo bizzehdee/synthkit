@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.audio.NotePlayer
+import com.bizzeh.synthkit.play.FIXED_VELOCITY
 import com.bizzeh.synthkit.ui.MinPlayableHeight
 import com.bizzeh.synthkit.ui.MinPlayableWidth
 
@@ -51,7 +52,7 @@ fun DrumPadGrid(pads: List<DrumPad>, player: NotePlayer, channel: Int, modifier:
                 row.forEach { pad ->
                     DrumPadButton(
                         pad = pad,
-                        onHit = { player.noteOn(channel, pad.note, DRUM_VELOCITY) },
+                        onHit = { player.noteOn(channel, pad.note, FIXED_VELOCITY) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }

@@ -50,7 +50,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Browser: seven family tabs, search by name, favourites (star toggle) and a recents row. Favourites and recents persist in app-private storage. Default: recents keep the last 8 instruments.
   - Choosing an instrument opens its layout. Default: a quick entry opens the first program of its tab (Acoustic Grand Piano, Acoustic Guitar (nylon), Standard 1 kit, Lead 1 (square)).
   - Depends on: TASK-006. Required by: TASK-008, TASK-009, TASK-010, TASK-011.
-- [ ] TASK-008: Keys layout
+- [x] TASK-008: Keys layout
   - White keys at least 48 dp wide and 72 dp tall, black keys about 30 dp wide. Octave shift buttons and a scroll strip. Hold toggle with sustain-pedal behaviour; replaying a held note restarts it.
   - Multi-touch. Notes sound while held. Default: a finger that slides onto another key keeps its first note.
   - Depends on: TASK-005, TASK-007.
@@ -63,6 +63,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Drum kits: GM percussion notes 35 to 81, first page in the agreed order, 4 x 2 on small screens and 4 x 4 where space allows, further pages swiped sideways. Kit picker.
   - Melodic pads (timpani, synth effects, percussive): chromatic from a root with octave shift, sounding while held. Sound effects 121 to 128 also sound while held, because several of their samples loop (see `docs/gm-layouts.md`).
   - Multi-touch on every pad layout.
+  - Drum tab test (requested 2026-10-09): a UI test plays the user's two-part drum tab through the pad grid step by step, with simultaneous hits pressed together, and checks the notes. Lanes: C crash 49, HH closed hat 42, Rd ride 51, S snare 38, B kick 36, T high tom 50, F floor tom 43, Hf pedal hat 44. The tab is kept as a test fixture.
   - Depends on: TASK-005, TASK-007.
 - [ ] TASK-011: Latency warning
   - Dismissible banner when the stream is not in low-latency mode or the output device is Bluetooth. Suggests wired headphones or the speaker. Play is never blocked.

@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import com.bizzeh.synthkit.audio.LatencyReport
 import com.bizzeh.synthkit.drums.DrumPadGrid
 import com.bizzeh.synthkit.drums.FirstPageDrumPads
 import com.bizzeh.synthkit.instruments.Instrument
+import com.bizzeh.synthkit.keys.KeysLayout
 import com.bizzeh.synthkit.instruments.PlayLayout
 
 /** The live instrument plays on one channel; recorded tracks will use the others. */
@@ -76,9 +78,13 @@ fun PlayScreen(
         }
         latency?.let { LatencyReadout(it) }
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            when (instrument.layout) {
-                PlayLayout.DrumKit -> DrumPadGrid(pads = FirstPageDrumPads, player = player, channel = LIVE_CHANNEL)
-                is PlayLayout.Keys, is PlayLayout.Chords, PlayLayout.ChromaticPads -> Unit
+            // Keyed by instrument so hold, octave and other layout state start fresh.
+            key(instrument.id) {
+                when (val layout = instrument.layout) {
+                    PlayLayout.DrumKit -> DrumPadGrid(pads = FirstPageDrumPads, player = player, channel = LIVE_CHANNEL)
+                    is PlayLayout.Keys -> KeysLayout(player, LIVE_CHANNEL, layout.holdByDefault)
+                    is PlayLayout.Chords, PlayLayout.ChromaticPads -> Unit
+                }
             }
         }
     }

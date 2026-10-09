@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.bizzeh.synthkit.play.FIXED_VELOCITY
 import com.bizzeh.synthkit.testing.RecordingPlayer
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -67,7 +68,7 @@ class DrumPadGridTest {
         pad(snare).performTouchInput { down(center) }
         composeRule.waitForIdle()
 
-        assertEquals(listOf(RecordingPlayer.On(CHANNEL, 38, DRUM_VELOCITY, 0f)), player.events)
+        assertEquals(listOf(RecordingPlayer.On(CHANNEL, 38, FIXED_VELOCITY, 0f)), player.events)
     }
 
     @Test
