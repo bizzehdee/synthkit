@@ -118,7 +118,7 @@ Default export settings: 44.1 kHz stereo, 16-bit; MP3 192 kbit/s CBR; AAC 192 kb
   - Uses a TinySoundFont copy of an idle template made at load, so the 32 MB SoundFont is not loaded twice and the live instance is never read concurrently.
   - Streams: memory use does not grow with export length.
   - GoogleTest host tests. Depends on: TASK-013. Required by: TASK-018 to TASK-021.
-- [ ] TASK-018: WAV and MIDI writers
+- [x] TASK-018: WAV and MIDI writers
   - WAV: streaming 16-bit PCM writer, header fixed up at the end.
   - MIDI: Type 1 file, a tempo and time-signature track, one track per project track with program change and notes.
   - JVM tests on the bytes. Depends on: TASK-017.
