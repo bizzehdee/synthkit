@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(googletest)
 set(MAIN_CPP ${CMAKE_CURRENT_SOURCE_DIR}/../../main/cpp)
 
 add_executable(synthkit_host_tests
-        NoteQueueTest.cpp
+        EventQueueTest.cpp
         SoundFontSynthTest.cpp
         ${MAIN_CPP}/audio/SoundFontSynth.cpp
         ${MAIN_CPP}/audio/TinySoundFont.cpp)

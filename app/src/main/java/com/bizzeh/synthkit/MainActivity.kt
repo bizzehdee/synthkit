@@ -11,12 +11,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.bizzeh.synthkit.audio.AudioEngineViewModel
-import com.bizzeh.synthkit.drums.DrumScreen
+import com.bizzeh.synthkit.browser.LibraryViewModel
 import com.bizzeh.synthkit.ui.LandscapeOnly
+import com.bizzeh.synthkit.ui.SynthKitApp
 import com.bizzeh.synthkit.ui.theme.SynthKitTheme
 
 class MainActivity : ComponentActivity() {
     private val audio: AudioEngineViewModel by viewModels()
+    private val library: LibraryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,9 +29,16 @@ class MainActivity : ComponentActivity() {
                     LandscapeOnly {
                         val state by audio.state.collectAsState()
                         val latency by audio.latency.collectAsState()
-                        DrumScreen(
-                            state = state,
+                        val libraryState by library.library.collectAsState()
+                        val warning by audio.warning.collectAsState()
+                        SynthKitApp(
+                            engineState = state,
                             latency = latency.takeIf { BuildConfig.DEBUG },
+                            library = libraryState,
+                            onToggleFavourite = library::toggleFavourite,
+                            onInstrumentOpened = library::opened,
+                            warning = warning,
+                            onDismissWarning = audio::dismissWarning,
                         )
                     }
                 }

@@ -34,18 +34,18 @@ Out of scope:
 
 | Feature | What it does | Status |
 |---|---|---|
-| Drums/percussion | Several kits, pad grid on GM drum notes | planned |
-| Keyboards | Piano, e-piano, organ, synth; on-screen keys with octave shift buttons, a scroll strip and a sustain-style hold toggle (decided 2026-10-09) | planned |
-| Guitar/bass | Acoustic, electric, bass. Chord pads only (decided 2026-10-09, replacing the earlier two-layout choice): seven diatonic triad pads for a chosen key and mode; tap plays a quick auto-strummed chord, swiping the strip while holding a pad strums string by string. Bass pads play the chord roots in a low octave. Layout detail in `docs/gm-layouts.md` | planned |
-| Misc instruments | Strings, brass, mallets, world; generic pad/key layout | planned |
-| Instrument browser | Every General MIDI program and drum kit in GeneralUser GS, grouped into a few family tabs, with search, favourites and a recents row; the four families are the quick entry points | planned |
+| Drums/percussion | Several kits, pad grid on GM drum notes | built |
+| Keyboards | Piano, e-piano, organ, synth; on-screen keys with octave shift buttons, a scroll strip and a sustain-style hold toggle (decided 2026-10-09) | built |
+| Guitar/bass | Acoustic, electric, bass. Chord pads only (decided 2026-10-09, replacing the earlier two-layout choice): seven diatonic triad pads for a chosen key and mode; tap plays a quick auto-strummed chord, swiping the strip while holding a pad strums string by string. Bass pads play the chord roots in a low octave. Layout detail in `docs/gm-layouts.md` | built |
+| Misc instruments | Strings, brass, mallets, world; generic pad/key layout | built |
+| Instrument browser | Every General MIDI program and drum kit in GeneralUser GS, grouped into a few family tabs, with search, favourites and a recents row; the four families are the quick entry points | built |
 | Built-in synth | Synthesised sounds alongside the SoundFonts | dropped (2026-10-09; GM synth programs cover v1) |
 | Projects | Project list on launch: new, rename, duplicate, delete. Each project autosaves on every change (decided 2026-10-09) | planned |
-| Record and loop | Looper-pedal flow for every instrument (decided 2026-10-09, replacing fixed-bars-first): set tempo, press Start, play; recording and the clock begin on the first tap and you hear yourself as you play; press Stop and the take is rounded to the nearest whole bar (1 to 8) and becomes the project loop, playing immediately. Workflow: each track holds one instrument; add a track, pick its instrument (any family), press Start and play while the other tracks loop underneath (mute any you do not want to hear, or all of them); Stop ends the take. Later takes wrap to the loop length and overdub. Repeat for as many tracks as the device allows. Per track: undo last take, mute, solo, volume, clear, delete, and instrument swap within kind (drum kit to drum kit, melodic to melodic) | planned |
-| Loop editor | Tidy a recorded track afterwards: quantise (off, 1/8, 1/16) applied non-destructively with raw timing kept; a step grid (rows per pad or pitch, 1/16 columns) to tap hits in or out; touch-friendly drag to move a note and set its velocity; and a double-loop action that doubles the project loop length (up to 8 bars), repeating every existing track's content so a longer part can be recorded over it (decided 2026-10-09) | planned |
+| Record and loop | Looper-pedal flow for every instrument (decided 2026-10-09, replacing fixed-bars-first): set tempo, press Start, play; recording and the clock begin on the first tap and you hear yourself as you play; press Stop and the take is rounded to the nearest whole bar (1 to 8) and becomes the project loop, playing immediately. Workflow: each track holds one instrument; add a track, pick its instrument (any family), press Start and play while the other tracks loop underneath (mute any you do not want to hear, or all of them); Stop ends the take. The metronome clicks while armed; the take's start snaps to the click beat nearest the first tap, so the loop lines up with the beat the player heard (decided 2026-10-09). Later takes wrap to the loop length and overdub. Repeat for as many tracks as the device allows. Per track: undo last take, mute, solo, volume, clear, delete, and instrument swap within kind (drum kit to drum kit, melodic to melodic) | planned |
+| Loop editor | Tidy a recorded track afterwards: quantise (off, 1/8, 1/16) applied non-destructively with raw timing kept; a step grid (rows per pad, or one row per semitone for melodic tracks, scrollable and opened at the track's notes; 1/16 columns) to tap hits in or out; drag to move a note in time and pitch; tap a note to select it and show a velocity slider (decided 2026-10-09); and a double-loop action that doubles the project loop length (up to 8 bars), repeating every existing track's content so a longer part can be recorded over it (decided 2026-10-09) | planned |
 | Metronome and quantise | Tempo 40-240 BPM, 4/4 only; click runs while armed and recording, toggle for playback. Quantise is per track and applied in the loop editor (see Loop editor), not forced at record time (decided 2026-10-09) | planned |
 | Export | Save or share files as MIDI (type 1), WAV, MP3, FLAC and audio-only MP4 (AAC). Audio is a mixdown of a user-chosen number of loop passes; MIDI has one track per layer plus tempo and program (decided 2026-10-09) | planned |
-| Latency warning | Dismissible banner when the audio stream is not low-latency or the output is Bluetooth, suggesting wired or speaker; play is never blocked (decided 2026-10-09) | planned |
+| Latency warning | Dismissible banner when the audio stream is not low-latency or the output is Bluetooth, suggesting wired or speaker; play is never blocked (decided 2026-10-09) | built |
 | Licence screen | In-app notices for Oboe, TinySoundFont, LAME, libFLAC, GeneralUser GS and Material icons | planned |
 | Settings | Haptic feedback on taps (on by default), metronome during playback, quantise | planned |
 | Privacy policy | Policy text for the Play listing and in-app, stating that the app collects no data, uses no network and has no ads or accounts | planned |
@@ -118,7 +118,7 @@ Out of scope:
 ## Milestones
 
 1. Project skeleton, Oboe audio output, one playable instrument with measured latency. The instrument is the GM drum kit on a 4 x 2 pad grid, played through TinySoundFont and GeneralUser GS (SF2 playback moved forward from milestone 2, decided 2026-10-09).
-2. All four instrument families with the three layouts in `docs/gm-layouts.md`; latency warning.
+2. All four instrument families with the three layouts in `docs/gm-layouts.md`; instrument browser with search, favourites and recents (decided 2026-10-09); latency warning.
 3. Projects, metronome, looper-flow record and loop with layers, track controls, loop editor.
 4. Export to audio and MIDI.
 5. Licence screen, settings, privacy policy (drafted, hosted and linked in the listing), icon and header image, Play Store listing guide, GitHub Actions CI, internal testing then Play Store release. The icon is needed earlier for the launcher; a placeholder icon is used until it exists.
@@ -130,3 +130,5 @@ Out of scope:
 | 2026-10-09 | Created | Initial plan from requirements conversation. |
 | 2026-10-09 | Changed | SF2 playback moved into milestone 1 (drum pads); multi-touch made a constraint for every instrument; test frameworks chosen; rotate message for large screens that ignore the landscape lock. |
 | 2026-10-09 | Changed | Galaxy A03 added as a budget test phone; milestone 1 latency accepted pending more testing. |
+| 2026-10-09 | Changed | Milestone 2 built: four families, three layouts, browser and latency warning marked built. |
+| 2026-10-09 | Changed | Instrument browser placed in milestone 2; loop start snaps to the nearest click beat; loop editor rows and velocity editing decided. |

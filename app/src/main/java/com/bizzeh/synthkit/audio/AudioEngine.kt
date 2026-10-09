@@ -7,17 +7,29 @@ import android.content.res.AssetManager
  * time; the native side hands them to the audio thread through a single-producer
  * queue.
  */
-class AudioEngine private constructor(private var handle: Long) : NotePlayer, AutoCloseable {
+class AudioEngine private constructor(private var handle: Long) : InstrumentPlayer, AutoCloseable {
 
     fun start(): Boolean = nativeStart(checkOpen())
 
     fun stop() = nativeStop(checkOpen())
 
-    /** Returns false when the note is out of range or the note queue is full. */
-    override fun noteOn(channel: Int, key: Int, velocity: Float): Boolean =
-        nativeNoteOn(checkOpen(), channel, key, velocity)
+    /** Returns false when the note is out of range or the event queue is full. */
+    override fun noteOn(channel: Int, key: Int, velocity: Float, delayMillis: Float): Boolean =
+        nativeNoteOn(checkOpen(), channel, key, velocity, delayMillis)
 
-    fun noteOff(channel: Int, key: Int): Boolean = nativeNoteOff(checkOpen(), channel, key)
+    override fun noteOff(channel: Int, key: Int, delayMillis: Float): Boolean =
+        nativeNoteOff(checkOpen(), channel, key, delayMillis)
+
+    override fun allNotesOff(channel: Int): Boolean = nativeAllNotesOff(checkOpen(), channel)
+
+    /** Returns false when the SoundFont has no such preset. */
+    fun programChange(channel: Int, bank: Int, program: Int): Boolean =
+        nativeProgramChange(checkOpen(), channel, bank, program)
+
+    override fun selectInstrument(channel: Int, bank: Int, program: Int): Boolean =
+        allNotesOff(channel) && programChange(channel, bank, program)
+
+    fun presets(): List<Preset> = Preset.fromNative(nativePresets(checkOpen()))
 
     /** Null when no stream is running. */
     fun latencyReport(): LatencyReport? = LatencyReport.fromNative(nativeLatencyReport(checkOpen()))
@@ -49,8 +61,17 @@ class AudioEngine private constructor(private var handle: Long) : NotePlayer, Au
         @JvmStatic private external fun nativeDestroy(handle: Long)
         @JvmStatic private external fun nativeStart(handle: Long): Boolean
         @JvmStatic private external fun nativeStop(handle: Long)
-        @JvmStatic private external fun nativeNoteOn(handle: Long, channel: Int, key: Int, velocity: Float): Boolean
-        @JvmStatic private external fun nativeNoteOff(handle: Long, channel: Int, key: Int): Boolean
+        @JvmStatic private external fun nativeNoteOn(
+            handle: Long,
+            channel: Int,
+            key: Int,
+            velocity: Float,
+            delayMillis: Float,
+        ): Boolean
+        @JvmStatic private external fun nativeNoteOff(handle: Long, channel: Int, key: Int, delayMillis: Float): Boolean
+        @JvmStatic private external fun nativeAllNotesOff(handle: Long, channel: Int): Boolean
+        @JvmStatic private external fun nativeProgramChange(handle: Long, channel: Int, bank: Int, program: Int): Boolean
+        @JvmStatic private external fun nativePresets(handle: Long): Array<String>
         @JvmStatic private external fun nativeLatencyReport(handle: Long): Array<String>
     }
 }

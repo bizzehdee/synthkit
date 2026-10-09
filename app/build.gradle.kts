@@ -16,6 +16,8 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Listening tests play audio for a person; they run only when started by name.
+        testInstrumentationRunnerArguments["notAnnotation"] = "com.bizzeh.synthkit.testing.ManualOnly"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -77,6 +79,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.oboe)
     debugImplementation(libs.androidx.compose.ui.tooling)
 

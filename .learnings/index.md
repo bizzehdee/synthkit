@@ -8,3 +8,4 @@
 - [tinysoundfont-realtime.md](tinysoundfont-realtime.md): what TinySoundFont allocates and when, voice stealing, and load cost. Read before changing the synth or calling tsf from a new thread.
 - [latency-measurements.md](latency-measurements.md): Oboe-reported output latency and SoundFont load time per test phone. Read before changing buffer sizes or judging the 20 ms target.
 - [device-test-screen-timeout.md](device-test-screen-timeout.md): why device UI tests fail with "No compose hierarchies found", and how to keep the screen on. Read before running or debugging connected tests.
+- [short-landscape-menus.md](short-landscape-menus.md): long dropdown menus scroll and hide items on landscape phones. Read before adding a menu or picker.

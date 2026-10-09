@@ -12,7 +12,82 @@
     <string name="drum_high_tom">High tom</string>
     <string name="drum_crash">Crash</string>
     <string name="drum_ride">Ride</string>
+    <string name="drum_clap">Clap</string>
+    <string name="drum_cowbell">Cowbell</string>
+    <string name="drum_tambourine">Tambourine</string>
+    <string name="drum_electric_snare">Electric snare</string>
+    <string name="drum_side_stick">Side stick</string>
+    <string name="drum_floor_tom">Floor tom</string>
+    <string name="drum_pedal_hat">Pedal hi-hat</string>
+    <string name="drum_splash">Splash</string>
+    <string name="drum_kit">Kit: %1$s</string>
+    <string name="pad_page">Page %1$d of %2$d</string>
     <string name="latency_readout">Output latency %1$s · %2$s · %3$s · %4$s · %5$d Hz · burst %6$d · buffer %7$d · underruns %8$d</string>
     <string name="latency_value_ms">%1$.1f ms</string>
     <string name="latency_measuring">measuring</string>
+    <string name="family_keys">Keys</string>
+    <string name="family_guitar_bass">Guitar/Bass</string>
+    <string name="family_drums_percussion">Drums/Percussion</string>
+    <string name="family_strings_orchestra">Strings/Orchestra</string>
+    <string name="family_brass_winds">Brass/Winds</string>
+    <string name="family_synth">Synth</string>
+    <string name="family_world_misc">World/Misc</string>
+    <string name="home_browse">Browse</string>
+    <string name="home_open_family">Play %1$s</string>
+    <string name="back">Back</string>
+    <string name="change_instrument">Instruments</string>
+    <string name="browser_search">Search instruments</string>
+    <string name="browser_recents">Recent</string>
+    <string name="browser_favourites">Favourites</string>
+    <string name="browser_no_recents">No recent instruments yet.</string>
+    <string name="browser_no_favourites">No favourites yet. Tap the heart next to an instrument to add it.</string>
+    <string name="browser_no_results">No instruments match your search.</string>
+    <string name="favourite_add">Add %1$s to favourites</string>
+    <string name="favourite_remove">Remove %1$s from favourites</string>
+    <string name="octave_down">Octave down</string>
+    <string name="octave_up">Octave up</string>
+    <string name="hold">Hold</string>
+    <string name="scroll_keyboard">Scroll keyboard</string>
+    <string name="note_name">%1$s %2$d</string>
+    <string-array name="pitch_class_names">
+        <item>C</item>
+        <item>C sharp</item>
+        <item>D</item>
+        <item>D sharp</item>
+        <item>E</item>
+        <item>F</item>
+        <item>F sharp</item>
+        <item>G</item>
+        <item>G sharp</item>
+        <item>A</item>
+        <item>A sharp</item>
+        <item>B</item>
+    </string-array>
+    <string name="chord_key">Key: %1$s</string>
+    <string name="mode_major">Major</string>
+    <string name="mode_minor">Minor</string>
+    <string name="strum_strip">Strum strip. Hold a chord and swipe across to play string by string.</string>
+    <string name="chord_label_major">%1$s</string>
+    <string name="chord_label_minor">%1$sm</string>
+    <string name="chord_label_diminished">%1$sdim</string>
+    <string name="chord_spoken_major">%1$s major</string>
+    <string name="chord_spoken_minor">%1$s minor</string>
+    <string name="chord_spoken_diminished">%1$s diminished</string>
+    <string-array name="pitch_class_short_names">
+        <item>C</item>
+        <item>C♯</item>
+        <item>D</item>
+        <item>D♯</item>
+        <item>E</item>
+        <item>F</item>
+        <item>F♯</item>
+        <item>G</item>
+        <item>G♯</item>
+        <item>A</item>
+        <item>A♯</item>
+        <item>B</item>
+    </string-array>
+    <string name="warning_bluetooth">Bluetooth audio adds a delay between a tap and its sound. For the best timing, use wired headphones or the speaker.</string>
+    <string name="warning_not_low_latency">This device did not give the app a low-latency audio stream, so sound may lag behind taps. Wired headphones or the speaker may help.</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

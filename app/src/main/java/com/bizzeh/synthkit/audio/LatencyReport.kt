@@ -11,9 +11,11 @@ data class LatencyReport(
     val framesPerBurst: Int,
     val bufferFrames: Int,
     val underruns: Int,
+    /** 0 when the platform does not report the output device. */
+    val deviceId: Int = 0,
 ) {
     companion object {
-        private const val FIELD_COUNT = 9
+        private const val FIELD_COUNT = 10
 
         /** Parses the fields from the native engine. Returns null when no stream is running. */
         fun fromNative(fields: Array<String>): LatencyReport? {
@@ -28,6 +30,7 @@ data class LatencyReport(
                 framesPerBurst = fields[6].toInt(),
                 bufferFrames = fields[7].toInt(),
                 underruns = fields[8].toInt(),
+                deviceId = fields[9].toInt(),
             )
         }
     }

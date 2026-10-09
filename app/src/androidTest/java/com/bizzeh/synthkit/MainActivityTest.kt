@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -14,14 +15,17 @@ class MainActivityTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
 
+    private fun string(id: Int, vararg args: Any) = composeRule.activity.getString(id, *args)
+
     @Test
-    fun launchLoadsSoundsAndShowsDrumPads() {
-        val kick = composeRule.activity.getString(R.string.drum_kick)
+    fun appLoadsSoundsAndPlaysDrumsFromTheHomeScreen() {
+        val drums = string(R.string.home_open_family, string(R.string.family_drums_percussion))
 
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodes(hasContentDescription(kick)).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodes(hasContentDescription(drums)).fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithContentDescription(drums).performClick()
 
-        composeRule.onNodeWithContentDescription(kick).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.drum_kick)).assertIsDisplayed()
     }
 }

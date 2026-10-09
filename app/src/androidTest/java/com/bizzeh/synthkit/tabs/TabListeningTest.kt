@@ -1,0 +1,84 @@
+package com.bizzeh.synthkit.tabs
+
+import android.os.SystemClock
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.bizzeh.synthkit.audio.AudioEngine
+import com.bizzeh.synthkit.testing.ManualOnly
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+
+/**
+ * Plays the tab fixtures aloud through the real engine for a person to listen
+ * to. Run one by name with am instrument; Gradle runs skip it.
+ */
+@ManualOnly
+@RunWith(AndroidJUnit4::class)
+class TabListeningTest {
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private lateinit var engine: AudioEngine
+
+    @Before
+    fun startEngine() {
+        engine = requireNotNull(AudioEngine.load(instrumentation.targetContext.assets))
+        check(engine.start())
+    }
+
+    @After
+    fun stopEngine() {
+        if (::engine.isInitialized) engine.close()
+    }
+
+    private fun fixture(name: String) = instrumentation.context.assets.open(name).bufferedReader().readText()
+
+    @Test
+    fun drumTab1() = playDrums("drum-tab-1.txt")
+
+    @Test
+    fun drumTab2() = playDrums("drum-tab-2.txt")
+
+    @Test
+    fun guitarTab1() = playStrings("guitar-tab-1.txt", program = OVERDRIVEN_GUITAR)
+
+    @Test
+    fun bassTab1() = playStrings("bass-tab-1.txt", program = FINGER_BASS)
+
+    private fun playDrums(name: String) {
+        engine.selectInstrument(CHANNEL, 128, 0)
+        play(Tab.drums(fixture(name), Tab::gmDrum), oneShot = true)
+    }
+
+    private fun playStrings(name: String, program: Int) {
+        engine.selectInstrument(CHANNEL, 0, program)
+        play(Tab.strings(fixture(name)), oneShot = false)
+    }
+
+    // Sends each note shortly before it is due, with the remaining time as its
+    // delay, so the engine places it on the exact frame.
+    private fun play(notes: List<TabNote>, oneShot: Boolean, stepMillis: Long = SIXTEENTH_AT_120_BPM) {
+        val start = SystemClock.uptimeMillis() + LEAD_MILLIS
+        notes.forEach { note ->
+            val due = start + note.step * stepMillis
+            val wait = due - LOOKAHEAD_MILLIS - SystemClock.uptimeMillis()
+            if (wait > 0) SystemClock.sleep(wait)
+            val delay = (due - SystemClock.uptimeMillis()).coerceAtLeast(0).toFloat()
+            engine.noteOn(CHANNEL, note.note, note.velocity * 0.8f, delay)
+            if (!oneShot) engine.noteOff(CHANNEL, note.note, delay + note.lengthSteps * stepMillis - 5)
+        }
+        val end = start + ((notes.maxOfOrNull { it.step + it.lengthSteps } ?: 0) * stepMillis)
+        SystemClock.sleep((end - SystemClock.uptimeMillis()).coerceAtLeast(0) + TAIL_MILLIS)
+    }
+
+    private companion object {
+        const val CHANNEL = 0
+        const val OVERDRIVEN_GUITAR = 29
+        const val FINGER_BASS = 33
+        // The tabs are written for 120 BPM; each column is one 16th note.
+        const val SIXTEENTH_AT_120_BPM = 125L
+        const val LEAD_MILLIS = 300L
+        const val LOOKAHEAD_MILLIS = 40L
+        const val TAIL_MILLIS = 1500L
+    }
+}

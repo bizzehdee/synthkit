@@ -70,6 +70,30 @@ class AudioEngineTest {
     }
 
     @Test
+    fun presetsListTheGmProgramsAndDrumKits() {
+        val presets = engine.presets()
+
+        assertTrue(presets.count { it.bank == 0 } == 128)
+        assertTrue(presets.any { it.bank == 128 && it.program == 0 })
+    }
+
+    @Test
+    fun programChangeAcceptsExistingPresetsOnly() {
+        assertTrue(engine.programChange(0, 0, 24))
+        assertTrue(engine.programChange(0, 128, 0))
+        assertFalse(engine.programChange(0, 77, 3))
+    }
+
+    @Test
+    fun startedEngineAcceptsDelayedNotesAndNoteOffs() {
+        assertTrue(engine.start())
+
+        assertTrue(engine.noteOn(0, 60, VELOCITY, delayMillis = 12f))
+        assertTrue(engine.noteOff(0, 60, delayMillis = 200f))
+        assertTrue(engine.allNotesOff(0))
+    }
+
+    @Test
     fun outOfRangeNoteIsRejected() {
         assertFalse(engine.noteOn(DRUM_CHANNEL, 128, VELOCITY))
     }

@@ -57,6 +57,9 @@ effects, including Gunshot, are kept under their standard GM names.
 - Further pages hold the remaining GM percussion notes, swiped sideways.
 - Kits to list: whichever GM-compatible kits the bundled SoundFont provides. The list is
   built from the file at start-up, not hard-coded.
+- GeneralUser GS v2.0.3 has 13 kits in bank 128. The GS standard SFX kit (program 56)
+  and CM-64/32L kit (program 127) do not use the GM percussion map, so the GM pad labels
+  would be wrong for them. They are left out of the list (decided 2026-10-09).
 
 ## Decisions log
 
@@ -70,4 +73,8 @@ effects, including Gunshot, are kept under their standard GM names.
 | 2026-10-09 | No breath or expression control for winds and brass. |
 | 2026-10-09 | Synth effects are chromatic pads. |
 | 2026-10-09 | First drum page order accepted. |
+| 2026-10-09 | Non-GM kits (GS programs 56 and 127) are not listed. |
+| 2026-10-09 | GM has no rimshot note: the 4 x 4 "rimshot" slot plays Electric Snare (40). The two spare pads are Pedal Hi-Hat (44) and Splash (55). Floor tom is High Floor Tom (43). Every other GM percussion note follows on later pages in note order. |
+| 2026-10-09 | Chromatic pads are 6 x 2 (one octave) on a phone and 6 x 4 where space allows, so octave shift has no gaps. Drum pages are 4 x 4 when the pad area is at least 312 dp tall, otherwise 4 x 2. |
+| 2026-10-09 | Sound effect pads (121-128) sound while held, not one-shot: several GM effect samples loop and would never stop without a note-off. |
 | 2026-10-09 | Bass pads play chord roots. Tap strums, strip strums manually. Triads only. Hold is sustain-pedal style. |
