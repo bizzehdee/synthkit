@@ -22,4 +22,16 @@
     <string name="family_brass_winds">Brass/Winds</string>
     <string name="family_synth">Synth</string>
     <string name="family_world_misc">World/Misc</string>
+    <string name="home_browse">Browse</string>
+    <string name="home_open_family">Play %1$s</string>
+    <string name="back">Back</string>
+    <string name="change_instrument">Instruments</string>
+    <string name="browser_search">Search instruments</string>
+    <string name="browser_recents">Recent</string>
+    <string name="browser_favourites">Favourites</string>
+    <string name="browser_no_recents">No recent instruments yet.</string>
+    <string name="browser_no_favourites">No favourites yet. Tap the heart next to an instrument to add it.</string>
+    <string name="browser_no_results">No instruments match your search.</string>
+    <string name="favourite_add">Add %1$s to favourites</string>
+    <string name="favourite_remove">Remove %1$s from favourites</string>
 </resources>

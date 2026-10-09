@@ -7,7 +7,7 @@ import android.content.res.AssetManager
  * time; the native side hands them to the audio thread through a single-producer
  * queue.
  */
-class AudioEngine private constructor(private var handle: Long) : NotePlayer, AutoCloseable {
+class AudioEngine private constructor(private var handle: Long) : InstrumentPlayer, AutoCloseable {
 
     fun start(): Boolean = nativeStart(checkOpen())
 
@@ -20,11 +20,14 @@ class AudioEngine private constructor(private var handle: Long) : NotePlayer, Au
     override fun noteOff(channel: Int, key: Int, delayMillis: Float): Boolean =
         nativeNoteOff(checkOpen(), channel, key, delayMillis)
 
-    fun allNotesOff(channel: Int): Boolean = nativeAllNotesOff(checkOpen(), channel)
+    override fun allNotesOff(channel: Int): Boolean = nativeAllNotesOff(checkOpen(), channel)
 
     /** Returns false when the SoundFont has no such preset. */
     fun programChange(channel: Int, bank: Int, program: Int): Boolean =
         nativeProgramChange(checkOpen(), channel, bank, program)
+
+    override fun selectInstrument(channel: Int, bank: Int, program: Int): Boolean =
+        allNotesOff(channel) && programChange(channel, bank, program)
 
     fun presets(): List<Preset> = Preset.fromNative(nativePresets(checkOpen()))
 

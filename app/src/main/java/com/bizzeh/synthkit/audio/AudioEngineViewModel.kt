@@ -2,6 +2,8 @@ package com.bizzeh.synthkit.audio
 
 import android.app.Application
 import android.util.Log
+import com.bizzeh.synthkit.R
+import com.bizzeh.synthkit.instruments.InstrumentCatalogue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -28,15 +30,19 @@ class AudioEngineViewModel(application: Application) : AndroidViewModel(applicat
 
     init {
         viewModelScope.launch {
-            val loaded = withContext(Dispatchers.Default) { AudioEngine.load(application.assets) }
+            val gmNames = application.resources.getStringArray(R.array.gm_program_names).toList()
+            val loaded = withContext(Dispatchers.Default) {
+                AudioEngine.load(application.assets)?.let { it to InstrumentCatalogue.build(it.presets(), gmNames) }
+            }
             if (loaded == null) {
                 Log.e(TAG, "event=engine_load_failed")
                 mutableState.value = EngineState.Failed
                 return@launch
             }
-            engine = loaded
-            mutableState.value = EngineState.Ready(loaded)
-            if (visible) startEngine(loaded)
+            val (loadedEngine, catalogue) = loaded
+            engine = loadedEngine
+            mutableState.value = EngineState.Ready(loadedEngine, catalogue)
+            if (visible) startEngine(loadedEngine)
         }
     }
 

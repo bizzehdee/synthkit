@@ -5,8 +5,6 @@ import com.bizzeh.synthkit.R
 
 data class DrumPad(@param:StringRes val label: Int, val note: Int)
 
-const val DRUM_CHANNEL = 9
-
 /** The playing model uses one fixed velocity: MIDI 100 of 127. */
 const val DRUM_VELOCITY = 100f / 127f
 

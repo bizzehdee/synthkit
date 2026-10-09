@@ -31,14 +31,14 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.bizzeh.synthkit.audio.NotePlayer
+import com.bizzeh.synthkit.ui.MinPlayableHeight
+import com.bizzeh.synthkit.ui.MinPlayableWidth
 
 private const val COLUMNS = 4
 private val PadSpacing = 8.dp
-private val MinPadWidth = 48.dp
-private val MinPadHeight = 72.dp
 
 @Composable
-fun DrumPadGrid(pads: List<DrumPad>, player: NotePlayer, modifier: Modifier = Modifier) {
+fun DrumPadGrid(pads: List<DrumPad>, player: NotePlayer, channel: Int, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(PadSpacing),
@@ -51,7 +51,7 @@ fun DrumPadGrid(pads: List<DrumPad>, player: NotePlayer, modifier: Modifier = Mo
                 row.forEach { pad ->
                     DrumPadButton(
                         pad = pad,
-                        onHit = { player.noteOn(DRUM_CHANNEL, pad.note, DRUM_VELOCITY) },
+                        onHit = { player.noteOn(channel, pad.note, DRUM_VELOCITY) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }
@@ -70,7 +70,7 @@ private fun DrumPadButton(pad: DrumPad, onHit: () -> Unit, modifier: Modifier = 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .sizeIn(minWidth = MinPadWidth, minHeight = MinPadHeight)
+            .sizeIn(minWidth = MinPlayableWidth, minHeight = MinPlayableHeight)
             .clip(RoundedCornerShape(12.dp))
             .background(if (pressed) colors.tertiary else colors.primaryContainer)
             // Sound starts on finger down, not on release. Each finger that lands

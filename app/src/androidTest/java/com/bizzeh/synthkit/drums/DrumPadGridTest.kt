@@ -18,7 +18,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.bizzeh.synthkit.testing.RecordingNotePlayer
+import com.bizzeh.synthkit.testing.RecordingPlayer
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -30,13 +30,13 @@ class DrumPadGridTest {
     val composeRule = createComposeRule()
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val player = RecordingNotePlayer()
+    private val player = RecordingPlayer()
 
     // About the size of a 5-inch phone in landscape, the smallest screen the app targets.
     private fun showGridOnSmallPhone() {
         composeRule.setContent {
             Box(modifier = Modifier.size(width = 640.dp, height = 360.dp)) {
-                DrumPadGrid(pads = FirstPageDrumPads, player = player)
+                DrumPadGrid(pads = FirstPageDrumPads, player = player, channel = CHANNEL)
             }
         }
     }
@@ -67,7 +67,7 @@ class DrumPadGridTest {
         pad(snare).performTouchInput { down(center) }
         composeRule.waitForIdle()
 
-        assertEquals(listOf(RecordingNotePlayer.On(DRUM_CHANNEL, 38, DRUM_VELOCITY, 0f)), player.events)
+        assertEquals(listOf(RecordingPlayer.On(CHANNEL, 38, DRUM_VELOCITY, 0f)), player.events)
     }
 
     @Test
@@ -121,5 +121,9 @@ class DrumPadGridTest {
         pad(FirstPageDrumPads[7]).performSemanticsAction(SemanticsActions.OnClick)
 
         assertEquals(listOf(51), player.ons.map { it.key })
+    }
+
+    private companion object {
+        const val CHANNEL = 0
     }
 }

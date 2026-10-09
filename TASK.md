@@ -45,7 +45,7 @@ Branch `feat/milestone-2`. Defaults chosen by Claude where the plan is silent ar
   - Drum kits from SoundFont bank 128, except GS programs 56 and 127.
   - JVM unit tests for the mapping.
   - Depends on: TASK-005. Required by: TASK-007.
-- [ ] TASK-007: Home screen, instrument screen and browser
+- [x] TASK-007: Home screen, instrument screen and browser
   - Home: four quick entries (Keys, Guitar/Bass, Drums/Percussion, Synth) and a Browse entry.
   - Browser: seven family tabs, search by name, favourites (star toggle) and a recents row. Favourites and recents persist in app-private storage. Default: recents keep the last 8 instruments.
   - Choosing an instrument opens its layout. Default: a quick entry opens the first program of its tab (Acoustic Grand Piano, Acoustic Guitar (nylon), Standard 1 kit, Lead 1 (square)).
