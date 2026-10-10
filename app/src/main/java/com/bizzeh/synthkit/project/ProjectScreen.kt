@@ -62,6 +62,7 @@ import com.bizzeh.synthkit.R
 import com.bizzeh.synthkit.instruments.Family
 import com.bizzeh.synthkit.looper.LoopMath
 import com.bizzeh.synthkit.looper.LooperState
+import com.bizzeh.synthkit.looper.Phase
 import com.bizzeh.synthkit.looper.PlayStopButton
 import com.bizzeh.synthkit.looper.isPlaying
 import com.bizzeh.synthkit.looper.isRecording
@@ -323,7 +324,7 @@ private fun TrackRow(
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.track_edit)) },
-                    enabled = state.project.loopBars > 0,
+                    enabled = state.project.loopBars > 0 || state.phase == Phase.STOPPED,
                     onClick = {
                         menu = false
                         actions.edit(track.id)

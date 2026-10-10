@@ -217,7 +217,10 @@ private fun Navigation(
                 clear = session::clearTrack,
                 changeInstrument = { stack.add(Route.Browser(project.id, it)) },
                 delete = session::deleteTrack,
-                edit = { stack.add(Route.Editor(project.id, it)) },
+                edit = {
+                    session.ensureLoop()
+                    stack.add(Route.Editor(project.id, it))
+                },
             ),
         )
         is Route.AddTrack -> HomeScreen(

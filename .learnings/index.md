@@ -13,3 +13,4 @@
 - [viewmodel-clear-order-and-polling.md](viewmodel-clear-order-and-polling.md): view model clear order, how often polled state may change, and portrait test activities. Read before adding a view model, polling, or a crowded top bar.
 - [track-limit.md](track-limit.md): measured audio load by track and voice count on the three phones, and why 8 tracks and 96 voices. Read before changing the track or voice limit.
 - [pager-steals-pad-slides.md](pager-steals-pad-slides.md): why drum pads scrolled when tapped, and the 4-row test window on the Galaxy A03. Read before putting pads in a scrolling container.
+- [jdk-17-toolchain.md](jdk-17-toolchain.md): the build uses whatever JDK 17+ launches Gradle; why the toolchain pin was removed. Read before running Gradle on a new machine or adding a CI JDK.

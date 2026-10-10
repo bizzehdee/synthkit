@@ -245,6 +245,36 @@ class LooperSessionTest {
     }
 
     @Test
+    fun ensureLoopGivesAnEmptyProjectAOneBarLoopToEdit() {
+        val track = session.addTrack(128, 0)!!
+
+        session.ensureLoop()
+        session.replaceNotes(track, listOf(Note(0, 36, 90, 120)))
+
+        assertEquals(1, project.loopBars)
+        assertEquals(listOf(Note(0, 36, 90, 120)), saved.last().tracks[0].notes)
+    }
+
+    @Test
+    fun ensureLoopLeavesAnArmedFirstTakeAlone() {
+        val track = session.addTrack(0, 0)!!
+        session.record(track)
+
+        session.ensureLoop()
+
+        assertEquals(0, project.loopBars)
+    }
+
+    @Test
+    fun ensureLoopKeepsTheRecordedLoopLength() {
+        recordFirstTake()
+
+        session.ensureLoop()
+
+        assertEquals(2, project.loopBars)
+    }
+
+    @Test
     fun quantiseAndNoteEditsAreSaved() {
         val track = recordFirstTake()
 

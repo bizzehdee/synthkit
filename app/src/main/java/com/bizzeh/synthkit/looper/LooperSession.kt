@@ -318,6 +318,12 @@ class LooperSession(
         player.noteOff(channel, note.key, millis)
     }
 
+    /** Gives a project with no take yet a one-bar loop, so a track can be edited before anything is recorded. */
+    fun ensureLoop() {
+        if (project.loopBars > 0 || mutableState.value.phase != Phase.STOPPED) return
+        change(project.copy(loopBars = 1))
+    }
+
     /** Doubles the loop up to 8 bars, repeating every track's notes in the new half. */
     fun doubleLoop() {
         val bars = project.loopBars
