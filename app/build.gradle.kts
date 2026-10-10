@@ -62,14 +62,6 @@ android {
     }
 }
 
-// Pin the compiler rather than inheriting the daemon's JVM, which may be a JRE
-// with no compiler or a Java version AGP does not support.
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
