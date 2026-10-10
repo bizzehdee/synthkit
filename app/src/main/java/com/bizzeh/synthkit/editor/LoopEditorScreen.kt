@@ -57,6 +57,7 @@ fun LoopEditorScreen(
     onQuantise: (Quantise) -> Unit,
     onNotes: (List<Note>) -> Unit,
     onDoubleLoop: () -> Unit,
+    onAddBar: () -> Unit,
     onAudition: (Note) -> Unit,
     modifier: Modifier = Modifier,
     playhead: (() -> Int?)? = null,
@@ -110,6 +111,11 @@ fun LoopEditorScreen(
                     enabled = project.loopBars * 2 <= Project.MAX_LOOP_BARS,
                     modifier = Modifier.heightIn(min = MinTouchTarget),
                 ) { Text(stringResource(R.string.double_loop)) }
+                OutlinedButton(
+                    onClick = onAddBar,
+                    enabled = project.loopBars < Project.MAX_LOOP_BARS,
+                    modifier = Modifier.heightIn(min = MinTouchTarget),
+                ) { Text(stringResource(R.string.add_bar)) }
             } else {
                 Text(stringResource(R.string.velocity), style = MaterialTheme.typography.labelLarge)
                 val velocityLabel = stringResource(R.string.velocity)

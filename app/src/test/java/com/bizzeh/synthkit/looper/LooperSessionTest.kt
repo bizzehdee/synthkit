@@ -245,6 +245,31 @@ class LooperSessionTest {
     }
 
     @Test
+    fun addBarAppendsAnEmptyBarAndKeepsEveryNote() {
+        recordFirstTake()
+        val before = project.tracks[0].notes
+
+        session.addBar()
+
+        assertEquals(3, project.loopBars)
+        assertEquals(before, project.tracks[0].notes)
+        assertEquals(Triple(480L, 3 * 1920, true), transport.loop)
+        assertEquals(project, saved.last())
+    }
+
+    @Test
+    fun addBarStopsAtEightBarsAndNeedsALoop() {
+        session.addTrack(128, 0)
+        session.addBar()
+        assertEquals(0, project.loopBars)
+
+        session.ensureLoop()
+        repeat(10) { session.addBar() }
+
+        assertEquals(Project.MAX_LOOP_BARS, project.loopBars)
+    }
+
+    @Test
     fun ensureLoopGivesAnEmptyProjectAOneBarLoopToEdit() {
         val track = session.addTrack(128, 0)!!
 

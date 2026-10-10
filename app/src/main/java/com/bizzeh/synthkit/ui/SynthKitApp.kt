@@ -305,6 +305,7 @@ private fun Navigation(
                 onQuantise = { session.setQuantise(track.id, it) },
                 onNotes = { session.replaceNotes(track.id, it) },
                 onDoubleLoop = session::doubleLoop,
+                onAddBar = session::addBar,
                 onAudition = { session.audition(track.id, it) },
                 playhead = if (looper.isPlaying) session::playheadTick else null,
                 transport = {

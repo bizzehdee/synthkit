@@ -161,6 +161,7 @@
     <string name="quantise_sixteenth">1/16</string>
     <string name="quantise">Quantise</string>
     <string name="double_loop">Double loop</string>
+    <string name="add_bar">Add bar</string>
     <string name="velocity">Velocity</string>
     <string name="note_delete">Delete note</string>
     <string name="note_done">Done editing note</string>

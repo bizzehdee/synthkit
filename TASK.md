@@ -102,7 +102,7 @@ Timing model: notes are stored in ticks (480 per quarter note, 1920 per 4/4 bar)
   - Default: tap an empty cell to add a note; tap a note to select it and show a velocity slider and Delete; tap the selected note again to remove it. Drag a note to move it in time and pitch.
   - Double loop: doubles the loop length (up to 8 bars) and repeats every track's notes.
   - Known limit: TalkBack reads a description of the grid, but cannot yet add, select or move notes cell by cell.
-  - Depends on: TASK-014.
+  - Depends on: TASK-014. Required by: TASK-034.
 - [x] TASK-016: Track limit on the budget phone
   - Measure audio callback load and underruns on the Galaxy A03 with 4, 6 and 8 busy tracks; set the shipped limit (design 8, never below 4); record the result in `.learnings/`.
   - Depends on: TASK-014.
@@ -204,3 +204,10 @@ Branch `feat/milestone-5`. Device tests run on the 3 test phones only (Xperia 1 
   - Version set for the first release.
   - Step-by-step guide for the user: create the upload key, create the app in Play Console, upload to internal testing, then promote to production.
   - Depends on: TASK-031, TASK-032.
+- [x] TASK-034: Add an empty bar in the loop editor
+  - New "Add bar" button beside Double loop in the editor's top row. Each tap appends one empty bar to the project loop, up to 8 bars; existing notes are untouched.
+  - Disabled at 8 bars. Double loop stays as it is and keeps repeating the notes.
+  - Works on a blank track: the one-bar loop made when the editor opens can be extended without recording.
+  - The loop length change is saved and sent to the engine the same way Double loop does it, so a playing loop picks it up.
+  - Tests: unit test for the session action (length, notes unchanged, limit at 8); editor screen test for the button and its disabled state.
+  - Depends on: TASK-015.

@@ -329,13 +329,25 @@ class LooperSession(
         val bars = project.loopBars
         if (bars == 0 || bars * 2 > Project.MAX_LOOP_BARS) return
         val shift = bars * TICKS_PER_BAR
-        val doubled = project.copy(
-            loopBars = bars * 2,
-            tracks = project.tracks.map { track ->
-                track.copy(takes = track.takes.map { take -> Take(take.notes + take.notes.map { it.copy(tick = it.tick + shift) }) })
-            },
+        changeLoopLength(
+            project.copy(
+                loopBars = bars * 2,
+                tracks = project.tracks.map { track ->
+                    track.copy(takes = track.takes.map { take -> Take(take.notes + take.notes.map { it.copy(tick = it.tick + shift) }) })
+                },
+            ),
         )
-        change(doubled)
+    }
+
+    /** Appends one empty bar to the loop, up to 8 bars; every note stays where it is. */
+    fun addBar() {
+        val bars = project.loopBars
+        if (bars == 0 || bars >= Project.MAX_LOOP_BARS) return
+        changeLoopLength(project.copy(loopBars = bars + 1))
+    }
+
+    private fun changeLoopLength(longer: Project) {
+        change(longer)
         if (mutableState.value.phase == Phase.PLAYING || mutableState.value.phase == Phase.OVERDUBBING) {
             transport.setLoop(loopOrigin, project.loopTicks, playing = true)
         }

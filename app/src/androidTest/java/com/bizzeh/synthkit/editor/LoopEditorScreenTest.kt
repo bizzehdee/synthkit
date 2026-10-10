@@ -48,6 +48,7 @@ class LoopEditorScreenTest {
     private var quantise by mutableStateOf(Quantise.OFF)
     private var bars by mutableStateOf(1)
     private var doubled = 0
+    private var barsAdded = 0
     private val auditioned = mutableListOf<Note>()
     private var playhead: (() -> Int?)? = null
     private var bank = 128
@@ -67,6 +68,7 @@ class LoopEditorScreenTest {
                     onQuantise = { quantise = it },
                     onNotes = { notes = it },
                     onDoubleLoop = { doubled++ },
+                    onAddBar = { barsAdded++ },
                     onAudition = { auditioned += it },
                     playhead = playhead,
                 )
@@ -186,6 +188,17 @@ class LoopEditorScreenTest {
         show()
 
         composeRule.onNodeWithText(string(R.string.double_loop)).assertIsNotEnabled()
+    }
+
+    @Test
+    fun addBarCallsItsActionAndIsDisabledAtEightBars() {
+        show()
+
+        composeRule.onNodeWithText(string(R.string.add_bar)).performClick()
+        assertEquals(1, barsAdded)
+
+        bars = 8
+        composeRule.onNodeWithText(string(R.string.add_bar)).assertIsNotEnabled()
     }
 
     @Test
