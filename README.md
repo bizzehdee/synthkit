@@ -17,6 +17,7 @@ instrument in the bundled SoundFont:
 - **Guitar and bass**: seven chord pads for a key and mode. Tap a pad to strum,
   or hold it and swipe the strum strip to play string by string.
 - **Drums**: every General MIDI drum sound on pages of pads, with a kit picker.
+  Use the arrows beside the page dots to change page.
 - **Pitched percussion and effects**: pads that play one note each.
 
 You can use several fingers at the same time on every instrument. A browser
@@ -33,13 +34,20 @@ itself after every change. Inside a project:
 4. Add more tracks and record over the loop. Each track can be muted, soloed,
    set louder or quieter, undone take by take, or cleared.
 5. Use **Edit loop** to tidy a track: quantise it, add, move or delete notes on
-   a grid, change how hard a note is played, or double the loop.
+   a grid, change how hard a note is played, stretch a note so it rings for
+   longer, or double the loop. Tap **Play** to hear the track alone, with a line
+   that shows where playback is. Tap a row name to hear that sound.
 
 A project holds up to 8 tracks.
 
 **Export.** Tap **Export** in a project to save or share it as MIDI, WAV, MP3,
 FLAC or MP4 audio. Choose how many times the loop plays (1 to 16). Save uses the
 system file picker, so the app never asks for storage permission.
+**Settings.** Tap the gear on the project list to choose the theme (System,
+Light or Dark), turn haptic feedback on or off, and set the click and quantise
+that new projects and tracks start with. Haptic feedback also needs touch
+feedback to be on in your phone's settings.
+
 See [plan.md](plan.md) for the full plan.
 
 ## Requirements

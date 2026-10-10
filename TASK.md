@@ -156,4 +156,51 @@ Branch `feat/redesign`. Reference: the local mockups the user approved on 2026-1
 - [x] TASK-025: Project list and remaining screens
   - Project list: brand mark, amber New project, cards with a preview of each project's tracks.
   - Add track, browser, loop editor, export screen and dialogs in the same look.
-  - Depends on: TASK-022.
+  - Depends on: TASK-022. Required by: TASK-026.
+
+## Milestone 5: release
+
+Branch `feat/milestone-5`. Device tests run on the 3 test phones only (Xperia 1 II, Xperia XZ Premium, Galaxy A03), not the Pixel 11 (user, 2026-10-09).
+
+- [x] TASK-026: Settings screen
+  - Gear button on the project list opens Settings.
+  - Theme: System (default), Light or Dark, applied at once and kept after restart.
+  - Haptic feedback on taps, on by default.
+  - Metronome during playback and quantise, with the meaning the user chooses before work starts.
+  - Settings stored on the device only. TASK-027 and TASK-028 add the links to the licence screen and the privacy policy.
+  - Depends on: TASK-025. Required by: TASK-027, TASK-028.
+- [ ] TASK-027: Licence screen
+  - Opened from Settings. Lists every third-party part with its licence text: Oboe, TinySoundFont, LAME, libFLAC, GeneralUser GS, Material icons, Archivo, JetBrains Mono, the AndroidX, Jetpack Compose, DataStore, Okio and Kotlin libraries (Apache-2.0), and the app's own GPL-3.0.
+  - Texts are bundled in the app; no network.
+  - Device test: every listed part opens its full text.
+  - Depends on: TASK-026.
+- [ ] TASK-028: Privacy policy
+  - Draft the full policy text in `docs/privacy-policy.md`: no data collected, no network, no ads, no accounts, files stay on the device unless the user shares them, microphone not used, publisher contact.
+  - The same text shown in the app from Settings.
+  - The user approves the text, then publishes it on their website.
+  - Depends on: TASK-026. Required by: TASK-032.
+- [ ] TASK-029: App icon
+  - SVG source in the repository: abstract keys or pad-grid mark, flat, indigo/violet with amber.
+  - Adaptive launcher icon (foreground, background and monochrome layers) replaces the placeholder.
+  - 512 x 512 32-bit PNG with alpha for Play, at most 1024 KB.
+  - The user approves the design from local previews before it goes in.
+  - Required by: TASK-030, TASK-032.
+- [ ] TASK-030: Header image
+  - 1024 x 500 feature graphic, JPEG or 24-bit PNG without alpha, from an SVG source, matching the icon.
+  - The user approves it from a local preview.
+  - Depends on: TASK-029. Required by: TASK-032.
+- [ ] TASK-031: GitHub Actions CI
+  - On push and pull request: build, JVM tests, native host tests, lint. Device tests stay local.
+  - No secrets needed for this workflow.
+  - Required by: TASK-033.
+- [ ] TASK-032: Play listing guide
+  - `docs/play-listing.md`: title, short and full description, category, content rating answers, data-safety answers, target age groups (13-15, 16-17, 18+), privacy policy URL, asset list.
+  - Phone screenshots taken from the app in the studio look.
+  - The user approves the text in conversation.
+  - Depends on: TASK-028, TASK-029, TASK-030.
+- [ ] TASK-033: Release build and internal testing
+  - Release signing read from properties or environment variables outside the repository; never committed.
+  - Signed Android App Bundle built and checked: minified build runs on the 3 test phones.
+  - Version set for the first release.
+  - Step-by-step guide for the user: create the upload key, create the app in Play Console, upload to internal testing, then promote to production.
+  - Depends on: TASK-031, TASK-032.

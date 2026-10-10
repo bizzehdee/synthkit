@@ -245,9 +245,9 @@ class LooperSession(
     val canAddTrack: Boolean get() = project.tracks.size < ProjectValidation.MAX_TRACKS
 
     /** Adds a track and returns its id, or null at the track limit. */
-    fun addTrack(bank: Int, program: Int): String? {
+    fun addTrack(bank: Int, program: Int, quantise: Quantise = Quantise.OFF): String? {
         if (!canAddTrack) return null
-        val track = Track(id = newId(), bank = bank, program = program)
+        val track = Track(id = newId(), bank = bank, program = program, quantise = quantise)
         change(project.copy(tracks = project.tracks + track))
         applyTracks()
         return track.id

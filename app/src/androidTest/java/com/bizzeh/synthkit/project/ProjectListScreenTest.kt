@@ -37,12 +37,22 @@ class ProjectListScreenTest {
                 onRename = { id, name -> calls += "rename $id $name" },
                 onDuplicate = { calls += "duplicate $it" },
                 onDelete = { calls += "delete $it" },
+                onSettings = { calls += "settings" },
             )
         }
     }
 
     private fun openMenu() =
         composeRule.onNodeWithContentDescription(string(R.string.project_actions, "Song")).performClick()
+
+    @Test
+    fun gearOpensSettings() {
+        show(emptyList())
+
+        composeRule.onNodeWithContentDescription(string(R.string.settings)).performClick()
+
+        assertEquals(listOf("settings"), calls)
+    }
 
     @Test
     fun emptyListExplainsHowToStart() {

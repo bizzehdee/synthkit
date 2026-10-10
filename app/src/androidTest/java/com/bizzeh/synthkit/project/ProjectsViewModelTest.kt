@@ -44,23 +44,24 @@ class ProjectsViewModelTest {
     @Test
     fun changesAreSavedAndSurviveANewViewModel() {
         val model = loaded()
-        val first = model.create()
-        val second = model.create()
+        val first = model.create(metronomeOnPlayback = true)
+        val second = model.create(metronomeOnPlayback = false)
         model.rename(first.id, "Demo")
         model.duplicate(second.id)
         model.delete(second.id)
 
-        val names = reloaded().map { it.name }.sorted()
+        val reloaded = reloaded()
 
-        assertEquals(listOf("Demo", "Project 2 (copy)"), names)
+        assertEquals(listOf("Demo", "Project 2 (copy)"), reloaded.map { it.name }.sorted())
+        assertEquals(listOf(true, false), reloaded.sortedBy { it.name }.map { it.metronomeOnPlayback })
     }
 
     @Test
     fun newProjectsTakeTheNextFreeNumber() {
         val model = loaded()
 
-        assertEquals("Project 1", model.create().name)
-        assertEquals("Project 2", model.create().name)
-        assertTrue(model.project(model.create().id) != null)
+        assertEquals("Project 1", model.create(false).name)
+        assertEquals("Project 2", model.create(false).name)
+        assertTrue(model.project(model.create(false).id) != null)
     }
 }

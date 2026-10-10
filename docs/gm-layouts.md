@@ -11,7 +11,7 @@ available in GeneralUser GS have not been checked against the SoundFont file yet
 |---|---|---|
 | **Keys** | A piano keyboard with octave shift buttons and a scroll strip above the keys for finer movement, plus a hold toggle | White keys at least 48 dp wide and 72 dp tall. Black keys sit on top at about 30 dp wide: an agreed exception to the 48 dp touch minimum so that nearly two octaves fit on a 5-inch phone. Hold is sustain-pedal behaviour: released notes keep ringing until hold is turned off or the note is replayed |
 | **Chords** | Seven chord pads for a chosen key and mode (major or minor), showing the diatonic triads I to vii, plus a strum strip | Tapping a pad plays the chord with a short automatic strum. Swiping the strip while a pad is held plays the chord string by string at the swipe speed. Pads are at least 48 dp wide and 72 dp tall. Bass programs show the same seven pads but play the chord root in a low octave, with octave shift |
-| **Pads** | A grid of pads, 4 x 2 minimum on a 5-inch phone, 4 x 4 where space allows, further pages swiped sideways | Each pad plays one note or sound; pads are at least 48 dp wide and 72 dp tall. Melodic pad instruments are chromatic: consecutive semitones from a root, with octave shift |
+| **Pads** | A grid of pads, 4 x 2 minimum on a 5-inch phone, 4 x 4 where space allows, further pages reached with previous and next arrows beside the page dots; swiping across the pads does not change the page, so a sliding tap never moves them (decided 2026-10-09) | Each pad plays one note or sound; pads are at least 48 dp wide and 72 dp tall. Melodic pad instruments are chromatic: consecutive semitones from a root, with octave shift |
 
 The fretboard grid (strings as lanes, frets as columns) from the first proposal is
 dropped: 6 x N cells cannot meet the touch minimum on a 5-inch phone.
@@ -54,7 +54,7 @@ effects, including Gunshot, are kept under their standard GM names.
 - First page, in order: kick, snare, closed hat, open hat, low tom, high tom, crash,
   ride. On a 4 x 4 grid the same page continues with clap, cowbell, tambourine,
   rimshot, side stick, floor tom and two spare pads.
-- Further pages hold the remaining GM percussion notes, swiped sideways.
+- Further pages hold the remaining GM percussion notes, reached with the previous and next arrows.
 - Kits to list: whichever GM-compatible kits the bundled SoundFont provides. The list is
   built from the file at start-up, not hard-coded.
 - GeneralUser GS v2.0.3 has 13 kits in bank 128. The GS standard SFX kit (program 56)

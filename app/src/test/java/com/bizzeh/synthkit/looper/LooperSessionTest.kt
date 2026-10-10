@@ -300,4 +300,11 @@ class LooperSessionTest {
         session.playStop()
         assertNull(session.playheadTick())
     }
+
+    @Test
+    fun aNewTrackStartsWithTheGivenQuantise() {
+        val track = session.addTrack(0, 0, Quantise.EIGHTH)!!
+
+        assertEquals(Quantise.EIGHTH, project.tracks.single { it.id == track }.quantise)
+    }
 }
